@@ -26,7 +26,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-grad
 .nav .sec{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:#49525f;padding:18px 13px 6px;font-weight:600}
 .foot{margin-top:auto;font-size:11px;color:#49525f;padding:14px 12px;line-height:1.6;border-top:1px solid var(--line)}
 .content{flex:1;min-width:0;padding:34px 46px 80px;max-width:1340px;width:100%;margin:0 auto}
-@media(max-width:1100px){.content{padding:26px 28px}}@media(max-width:760px){.side{display:none}.content{padding:18px}}
+@media(max-width:1100px){.content{padding:26px 28px}}.menubtn{display:none;position:fixed;top:12px;left:12px;z-index:1001;width:44px;height:44px;align-items:center;justify-content:center;background:#11161f;border:1px solid var(--line2);border-radius:12px;color:#e9edf4;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.55)}
+.sidebackdrop{display:none;position:fixed;inset:0;background:rgba(2,4,8,.55);z-index:1000}
+@media(max-width:760px){.menubtn{display:flex}.side{position:fixed;left:0;top:0;z-index:1002;transform:translateX(-100%);transition:transform .26s cubic-bezier(.4,0,.2,1);box-shadow:0 0 50px rgba(0,0,0,.7)}.side.open{transform:none}.sidebackdrop.show{display:block}.content{padding:64px 18px 44px}}
 h1.t{font-size:30px;font-weight:800;color:#f4f7fc;letter-spacing:-.025em;line-height:1.1}
 .lead{color:var(--tx2);font-size:15.5px;margin:9px 0 24px;max-width:800px;font-weight:450}
 h2.s{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--tx2);font-weight:700;margin:0 0 14px}
@@ -148,6 +150,7 @@ ul.cl{color:var(--tx);line-height:1.85;padding-left:19px}ul.cl b{color:#f1f5fa}
 .warrow{color:var(--tx3);font-size:13px}
 .wpayers{display:flex;flex-wrap:wrap;gap:8px 16px}.wp{font-size:13px;color:var(--tx2)}.wp b{color:#eafdf8;font-size:15px}
 </style></head><body>
+<button class="menubtn" onclick="toggleSide()" aria-label="Menu">☰</button><div class="sidebackdrop" onclick="closeSide()"></div>
 <div class="app">
 <nav class="side">
 <div class="brand"><b class="wm"><span class="mo">M</span>era</b></div>
@@ -483,8 +486,11 @@ function phScatter(){
   plugins:{legend:{onClick:(e,item,lg)=>{const ci=lg.chart,i=item.datasetIndex,lbl=ci.data.datasets[i].label,vis=ci.isDatasetVisible(i);ci.setDatasetVisibility(i,!vis);ci.data.datasets.forEach((d,j)=>{if(d.label===lbl+'·dial')ci.setDatasetVisibility(j,!vis);});ci.update();},labels:{usePointStyle:true,pointStyle:'circle',color:'#c9d1d9',filter:(it)=>it.text.indexOf('·dial')<0&&it.text.indexOf('·ref')<0}},
    tooltip:{callbacks:{label:c=>c.dataset.label+':  '+(c.raw.y!=null?c.raw.y.toFixed(2):'')+'× phantom'+(c.raw.r0?'  ($'+c.raw.r0.toLocaleString()+')':'')}}}}});
 }
+function toggleSide(){var s=document.querySelector('.side'),b=document.querySelector('.sidebackdrop');var o=s.classList.toggle('open');if(b)b.classList.toggle('show',o);}
+function closeSide(){var s=document.querySelector('.side');if(s)s.classList.remove('open');var b=document.querySelector('.sidebackdrop');if(b)b.classList.remove('show');}
 function route(){
  const hash=location.hash.slice(1)||'overview',[v,arg]=hash.split('/');
+ closeSide();
  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.dataset.route==v));
  Object.keys(CH).forEach(kill);if(MAP&&v!='hospitals'){MAP.remove();MAP=null;}
  const c=document.getElementById('content');
