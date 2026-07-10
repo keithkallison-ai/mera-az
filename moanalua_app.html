@@ -264,4 +264,13 @@ Weighted, <b>${wfit.toFixed(1)}%</b> of all dollar prices sit within $2 of their
 foot.innerHTML=`${D.hospital} · NPI ${D.npi} · license ${D.license} · attester ${D.attester} · published ${D.updated} · CMS v${D.version}<br>
 byte-exact capture (SHA-256 ${D.pin_sha8}…, ${fmtI(D.cells)} cells) · hostile-sealed · every number recomputed at build and cross-checked by a second engine — full method in the fine print.`;
 fpick('all');
+// THE MAP — legacy console treatment (kept OUTSIDE the chart block so chart patches can't delete it)
+(function(){
+  const el=document.getElementById('lmap'); if(!el||!window.L) return;
+  const LF=window.L;
+  const m=LF.map('lmap',{zoomControl:true,scrollWheelZoom:false}).setView([21.3728,-157.8926],13);
+  LF.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(m);
+  LF.marker([21.3728,-157.8926],{icon:LF.divIcon({className:'',html:'<span class="hpin"><span class="p"></span><span class="d"></span></span>',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(m)
+    .bindPopup('<b>Kaiser Foundation Hospital — Moanalua</b><br>3288 Moanalua Road, Honolulu, HI 96819',{autoClose:false}).openPopup();
+})();
 </script></body></html>
