@@ -183,7 +183,7 @@ function ladderHtml(groups, Y0, Y1, TOP, BOT, grids, refY, refLabel, xr){
   const srt=[...bs].sort((a,b)=>a.cy-b.cy);
   for(let i=1;i<srt.length;i++){const need=TH+8-(srt[i].cy-srt[i-1].cy); if(need>0){srt[i-1].cy-=need/2;srt[i].cy+=need/2;}}
   let h='';
-  for(const t of grids) h+='<div style="position:absolute;left:'+LPAD+'px;right:'+RPAD+'px;top:'+yof(t)+'px;border-top:1px '+(t===refY?'dashed rgba(233,237,244,.4)':'solid #141a25')+'"></div><div style="position:absolute;left:8px;top:'+(yof(t)-7)+'px;font-size:10.5px;color:var(--tx3);font-family:JetBrains Mono,monospace">×'+t.toFixed(2)+'</div>';
+  h+='<div style="position:absolute;left:'+LPAD+'px;right:'+RPAD+'px;top:'+yof(refY)+'px;border-top:1px dashed rgba(233,237,244,.4)"></div><div style="position:absolute;left:8px;top:'+(yof(refY)-7)+'px;font-size:10.5px;color:var(--tx3);font-family:JetBrains Mono,monospace">×1.00</div>';
   h+='<div style="position:absolute;left:'+(LPAD+12)+'px;top:'+(yof(refY)-16)+'px;font-size:10px;color:rgba(233,237,244,.5);font-weight:600">'+refLabel+'</div>';
   const lg0=Math.log10(xr[0]), lg1=Math.log10(xr[1]);
   for(let e=Math.ceil(lg0);e<=Math.floor(lg1);e++){
@@ -202,8 +202,9 @@ function ladderHtml(groups, Y0, Y1, TOP, BOT, grids, refY, refLabel, xr){
       labelHtml=b.sub.map(x=>'<span class=pstog data-ps="'+x.id+'" style="cursor:pointer;color:'+(x.id===act.id?'#c6cedb':'#4b5563')+'">'+x.label+'</span>').join('<span style="color:#4b5563"> &#92; </span>');
     }
     h+='<div style="position:absolute;left:'+LPAD+'px;right:'+RPAD+'px;top:'+top+'px;height:'+TH+'px;border-radius:2px;background:'+densGrad(hist,b.color)+';outline:1px solid rgba(255,255,255,.05)"></div>'
+     +'<div style="position:absolute;left:6px;top:'+(b.cy-8)+'px;width:'+(LPAD-12)+'px;text-align:right;font-family:JetBrains Mono,monospace;font-size:12.5px;font-weight:700;color:#e9edf4">'+(b.pct?(b.k*100).toFixed(0)+'%':'×'+k.toFixed(2))+'</div>'
      +'<div style="position:absolute;left:'+(LPAD+12)+'px;top:'+ly+'px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#c6cedb">'+labelHtml+' <span style="color:var(--tx3);font-weight:500;text-transform:none;letter-spacing:0">· '+unit+'</span></div>'
-     +'<div style="position:absolute;right:'+(RPAD+4)+'px;top:'+ly+'px;text-align:right;font-family:JetBrains Mono,monospace;font-size:12.5px;font-weight:700;color:#e9edf4">'+(b.pct?(b.k*100).toFixed(0)+'%':'×'+k.toFixed(2))+' <span style="font-size:9.5px;color:var(--tx3);font-weight:500">· '+fmtI(n)+' codes</span></div>';
+     +'<div style="position:absolute;right:'+(RPAD+4)+'px;top:'+ly+'px;text-align:right;font-family:JetBrains Mono,monospace;font-size:9.5px;font-weight:500;color:var(--tx3)">'+fmtI(n)+' codes</div>';
   }
   return h;}
 let VIEW='usd', PROCSEL='proc';
