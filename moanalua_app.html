@@ -135,7 +135,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 
 <div class=card>
   <h2><span style="font-family:'JetBrains Mono',monospace">44406</span> · <span id=cpd></span></h2>
-  <div style="position:relative;height:168px;margin-top:14px" id=cbars></div>
+  <div style="position:relative;height:184px;margin-top:14px" id=cbars></div>
 </div>
 
 <details class=card>
@@ -277,20 +277,31 @@ Weighted, <b>${wfit.toFixed(1)}%</b> of all dollar prices sit within $2 of their
 foot.innerHTML=`${D.hospital} · NPI ${D.npi} · license ${D.license} · attester ${D.attester} · published ${D.updated} · CMS v${D.version}<br>
 byte-exact capture (SHA-256 ${D.pin_sha8}…, ${fmtI(D.cells)} cells) · hostile-sealed · every number recomputed at build and cross-checked by a second engine — full method in the fine print.`;
 fpick('all');
-// ONE CODE, EVERY PLAN — per-code price card (prototype: 44406). Bar length = PRICE; left gutter = its dial.
+// ONE CODE, EVERY PLAN — price axis: each plan is a vertical line AT its price, price on top.
+// Same-price plans stack on one shared line. Medicare = faded crimson base line. No multipliers here — prices only.
 (function(){
-  const cp=D.codepage, mcrp=cp.plans.find(p=>p.base).price, mx=Math.max(...cp.plans.map(p=>p.price));
+  const cp=D.codepage;
   cpd.innerHTML = cp.desc+' <span style="color:var(--tx3);font-weight:500;font-size:13px">· '+cp.unit+'</span>';
-  const GUT=56, PRC=110, TH=14;
-  let h='<div style="position:absolute;top:4px;bottom:24px;left:calc('+GUT+'px + (100% - '+(GUT+PRC)+'px)*'+(mcrp/mx).toFixed(5)+');border-left:1px dashed rgba(233,237,244,.35)"></div>';
-  cp.plans.forEach((p,i)=>{
-    const y=20+i*52;
-    h+='<div style="position:absolute;left:6px;top:'+(y+TH/2-8)+'px;width:'+(GUT-12)+'px;text-align:right;font-family:JetBrains Mono,monospace;font-size:12.5px;font-weight:700;color:'+(p.base?'var(--tx3)':'#e9edf4')+'">×'+(p.price/mcrp).toFixed(2)+'</div>'
-     +'<div style="position:absolute;left:'+(GUT+12)+'px;top:'+(y-16)+'px;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:#c6cedb">'+p.label+'</div>'
-     +'<div style="position:absolute;left:'+GUT+'px;top:'+y+'px;height:'+TH+'px;width:calc((100% - '+(GUT+PRC)+'px)*'+(p.price/mx).toFixed(5)+');border-radius:2px;background:var(--'+p.var+');opacity:.82;outline:1px solid rgba(255,255,255,.05)"></div>'
-     +'<div style="position:absolute;right:8px;top:'+(y+TH/2-11)+'px;font-family:JetBrains Mono,monospace;font-size:15px;font-weight:800;color:#e9edf4">'+fmt0(p.price)+'</div>';
-  });
-  cbars.innerHTML=h;
+  const by={};
+  cp.plans.forEach(p=>{ (by[p.price]=by[p.price]||[]).push(p); });
+  const pts=Object.keys(by).map(Number).sort((a,b)=>a-b).map(pr=>({price:pr, ps:by[pr], base:by[pr].every(p=>p.base)}));
+  function render(){
+    const W=cbars.clientWidth||1000, TOPH=46, mx=Math.max(...pts.map(t=>t.price))*1.10;
+    const cx=pts.map(t=>Math.max(44, Math.min(W-48, t.price/mx*W)));
+    for(let i=1;i<cx.length;i++) if(cx[i]-cx[i-1]<84) cx[i]=cx[i-1]+84;
+    for(let i=cx.length-1;i>0;i--) if(cx[i]>W-48){cx[i]=W-48; if(cx[i]-cx[i-1]<84) cx[i-1]=cx[i]-84;}
+    let h='<div style="position:absolute;left:0;right:0;bottom:18px;border-bottom:1px solid var(--line)"></div>'
+         +'<div style="position:absolute;left:0;bottom:0;font-size:9.5px;color:var(--tx3);font-family:JetBrains Mono,monospace">$0</div>';
+    pts.forEach((t,i)=>{
+      const lx=t.price/mx*W;
+      h+='<div style="position:absolute;top:'+TOPH+'px;bottom:18px;left:'+(lx-1).toFixed(1)+'px;width:'+(t.base?2:3)+'px;border-radius:1px;background:'+(t.base?'rgba(220,20,60,.5)':'var(--'+t.ps[0].var+')')+'"></div>';
+      const lbls=t.ps.map(p=>'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:'+(p.base?'rgba(220,20,60,.65)':'#c6cedb')+'">'+p.label+'</div>').join('');
+      h+='<div style="position:absolute;top:2px;left:'+(cx[i]-80).toFixed(1)+'px;width:160px;text-align:center;line-height:1.25">'
+        +'<div style="font-family:JetBrains Mono,monospace;font-size:15px;font-weight:800;color:'+(t.base?'#ef5871':'#e9edf4')+'">'+fmt0(t.price)+'</div>'+lbls+'</div>';
+    });
+    cbars.innerHTML=h;
+  }
+  render(); window.addEventListener('resize', render);
 })();
 // THE MAP — legacy console treatment (kept OUTSIDE the chart block so chart patches can't delete it)
 (function(){
