@@ -36,10 +36,14 @@ body{margin:0;background:radial-gradient(130% 90% at 0% 0%,#0d1421,#07090d 55%);
 .rw .bar{flex:1;height:17px;border-radius:5px;background:#131926;overflow:hidden;position:relative}
 .rw .bar i{position:absolute;inset:0 auto 0 0;border-radius:5px}
 .rw .amt{font-family:JetBrains Mono,monospace;font-size:12px;color:#e7edf5;width:86px;text-align:right}
-.hund{position:relative;height:64px;border-radius:13px;background:linear-gradient(90deg,#131926,#0f141d);border:1px solid var(--line);overflow:hidden;margin-top:6px}
-.hund .fill{position:absolute;top:0;bottom:0;left:0;border-right:2px solid rgba(255,255,255,.35)}
-.hund .lab{position:absolute;top:50%;transform:translateY(-50%);font-size:12px;font-weight:800;white-space:nowrap}
-.hticks{display:flex;justify-content:space-between;color:var(--tx3);font-size:10.5px;margin-top:6px;font-family:JetBrains Mono,monospace}
+.h100 .hrow{display:flex;align-items:center;gap:12px;margin-top:9px}
+.h100 .who{width:96px;font-size:11px;color:var(--tx3);font-weight:800;text-transform:uppercase;letter-spacing:.04em;text-align:right;flex:none}
+.h100 .trk{flex:1;height:27px;border-radius:8px;background:#10151f;border:1px solid var(--line);position:relative}
+.h100 .trk i{position:absolute;top:0;bottom:0;left:0;border-radius:7px 0 0 7px}
+.h100 .trk b{position:absolute;top:50%;transform:translateY(-50%);font-family:JetBrains Mono,monospace;font-size:12.5px;font-weight:700;white-space:nowrap}
+.hticks{display:flex;color:var(--tx3);font-size:10.5px;margin-top:7px;font-family:JetBrains Mono,monospace}
+.hticks .sp{width:96px;flex:none;margin-right:12px}
+.hticks .tt{flex:1;display:flex;justify-content:space-between}
 .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
 .chip{background:#0f141d;border:1px solid var(--line);color:var(--tx2);border-radius:20px;padding:7px 14px;font-size:12px;cursor:pointer;font-weight:700;transition:.15s;white-space:nowrap;display:flex;gap:7px;align-items:center}
 .chip i{width:9px;height:9px;border-radius:3px;display:inline-block}
@@ -90,8 +94,8 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
   <h2>Put <em>$100 of list price</em> on the counter.</h2>
   <div class=sub>For <span id=pctn></span> items with no fee schedule, the plans pay a flat share of the hospital's own list price
   (the chargemaster) — declared right in the file. Nobody pays the sticker.</div>
-  <div class=hund id=hund></div>
-  <div class=hticks><span>$0</span><span>$25</span><span>$50</span><span>$75</span><span>list price: $100</span></div>
+  <div class=h100 id=hund></div>
+  <div class=hticks><span class=sp></span><span class=tt><span>$0</span><span>$25</span><span>$50</span><span>$75</span><span>$100</span></span></div>
 </div>
 
 <div class=card>
@@ -153,9 +157,12 @@ if(D.birth.length){
 }
 
 // $100 OF LIST
-const H=[["com","Commercial",D.pcts.com,"var(--com)"],["mcr","Medicare",D.pcts.mcr,"var(--mcr)"],["mcd","Medicaid",D.pcts.mcd,"var(--mcd)"]];
-hund.innerHTML = H.map((h,i)=>`<div class=fill style="width:${h[2]}%;background:linear-gradient(90deg,${h[3]}18,${h[3]}55);z-index:${i+1}"></div>
-  <div class=lab style="left:calc(${h[2]}% + 8px);color:${h[3]}">${h[1]} pays $${h[2]}</div>`).join('');
+const H=[["List price","100","rgba(233,237,244,.28)",true],["Commercial",D.pcts.com,"#fb7185",false],["Medicare",D.pcts.mcr,"#818cf8",false],["Medicaid",D.pcts.mcd,"#34d399",false]];
+hund.innerHTML = H.map(h=>{
+  const amt = h[3] ? `<b style="right:10px;color:var(--tx2)">the sticker — $100</b>`
+                   : `<b style="left:calc(${h[1]}% + 10px);color:${h[2]}">pays $${h[1]}</b>`;
+  const fill = `<i style="width:${h[1]}%;background:${h[3]?'linear-gradient(90deg,#161c28,#1b2230)':'linear-gradient(90deg,'+h[2]+'33,'+h[2]+'88)'};border-right:2px solid ${h[3]?'rgba(233,237,244,.25)':h[2]}"></i>`;
+  return `<div class=hrow><span class=who>${h[0]}</span><span class=trk>${fill}${amt}</span></div>`;}).join('');
 
 // SCATTER
 ptn.textContent=fmtI(D.pts.length);
