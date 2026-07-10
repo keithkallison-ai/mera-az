@@ -114,14 +114,13 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 </div>
 
 <div class=card>
-  <h2><span id=pbt></span> — <em>the price book</em>.</h2>
+  <h2><span id=pbt></span></h2>
   <div class=chips style="margin:10px 0 2px">
     <div class="chip on" id=view_usd onclick="view('usd')">× Medicare</div>
     <div class=chip id=view_pct onclick="view('pct')">% of list</div>
   </div>
   <div style="position:relative;height:400px;margin-top:6px" id=ladder></div>
   <div class=chips id=seglegend style="margin-top:10px;display:none"></div>
-  <div style="color:var(--tx3);font-size:11.5px;margin-top:8px" id=lfoot></div>
 </div>
 
 <div class=card>
@@ -206,11 +205,9 @@ function draw(){
   if(VIEW==='usd'){
     ladder.innerHTML = ladderHtml(D.groups_usd, 0.95, 3.25, 26, 40, [1,1.5,2,2.5,3], 1, 'Medicare rate (1×)', D.xg_usd);
     seglegend.style.display='none';
-    lfoot.innerHTML = 'uniform bar height · brightness = where codes cluster on the Medicare-price axis · <b style="color:var(--tx2)">'+wfit.toFixed(1)+'% within ±$2</b> · 119 exceptions in the lookup';
   } else {
     ladder.innerHTML = ladderHtml([Object.assign({},D.group_pct,{pct:true})], 0.30, 1.06, 28, 40, [0.25,0.5,0.75,1], 1, 'list price (1×)', D.xg_pct);
     seglegend.style.display='flex';
-    lfoot.innerHTML = '<b style="color:var(--tx2)">'+D.pcts.com+'% of list</b> · exact by construction · brightness = where codes cluster on the list-price axis';
   }}
 function view(k){ if(VIEW===k) return; VIEW=k;
   view_usd.classList.toggle('on',k==='usd'); view_pct.classList.toggle('on',k==='pct');
