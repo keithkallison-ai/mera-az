@@ -1,7 +1,6 @@
 <!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>Mera — Five numbers price this hospital</title>
 <link rel=preconnect href=https://fonts.googleapis.com><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel=stylesheet>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{--bg:#07090d;--line:#1a2130;--line2:#28313f;--tx:#e9edf4;--tx2:#9aa6b7;--tx3:#5c6675;--ac:#5eead4;--ac2:#818cf8;--gold:#fbbf24;--mcd:#34d399;--mcr:#818cf8;--com:#fb7185}
 *{box-sizing:border-box}
@@ -107,12 +106,9 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 </div>
 
 <div class=card>
-  <h2><span id=pp></span> — <span id=hn2></span> prices. <em>Five lines.</em></h2>
-  <div class=sub>One line per service. Every commercial price is its line × the hospital's Medicare-plan rate.</div>
-  <div class=chips style="margin-bottom:9px"><div class="chip on" id=set_out onclick="setting('out')">Outpatient · per service</div><div class=chip id=set_inp onclick="setting('inp')">Inpatient · per day</div></div>
-  <div class=chips id=lchips></div>
-  <div style="position:relative;height:380px;margin-top:4px"><canvas id=sc></canvas></div>
-  <div style="color:var(--tx3);font-size:11.5px;margin-top:10px">Whole-dollar rounding: <b style="color:var(--tx2)">99.0% of all <span id=hn3></span> prices are within ±$2 of their line</b> · the 119 exceptions are under “Off-dial rows” below · dots shown for services ≥ $100 (cheaper rows in the lookup — rounding magnifies visually below that).</div>
+  <h2><span id=pp></span> — <em>the whole price book, one picture.</em></h2>
+  <div style="position:relative;height:400px;margin-top:12px" id=ladder></div>
+  <div style="color:var(--tx3);font-size:11.5px;margin-top:8px">Bar thickness = number of priced codes. Dollar bars: <b style="color:var(--tx2)"><span id=wf></span> of prices within ±$2 of their dial</b> · 119 exceptions under “Off-dial rows” below · the amber bar prices against the hospital's <b style="color:var(--tx2)">list price</b>; all others against the <b style="color:var(--tx2)">Medicare plan</b>.</div>
 </div>
 
 <div class=card>
@@ -140,7 +136,7 @@ const L = Object.fromEntries(D.lanes.map(l=>[l.id,l]));
 const fmt$ = v => v==null?'—':'$'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmt0 = v => v==null?'—':'$'+Math.round(v).toLocaleString();
 const fmtI = v => v.toLocaleString();
-hn.textContent = fmtI(D.funnel.dollar + D.funnel.pct); hn2.textContent = fmtI(D.funnel.dollar_with_base);
+hn.textContent = fmtI(D.funnel.dollar + D.funnel.pct);
 nrows.textContent = fmtI(D.rows.length); pctn.textContent = fmtI(D.funnel.pct);
 
 // THE DIALS (hero) — five storyline dials from the lanes
@@ -174,64 +170,38 @@ hund.innerHTML = H.map(h=>{
   const fill = `<i style="width:${h[1]}%;background:${h[3]?'linear-gradient(90deg,#161c28,#1b2230)':'linear-gradient(90deg,'+h[2]+'33,'+h[2]+'88)'};border-right:2px solid ${h[3]?'rgba(233,237,244,.25)':h[2]}"></i>`;
   return `<div class=hrow><span class=who>${h[0]}</span><span class=trk>${fill}${amt}</span></div>`;}).join('');
 
-// FIVE LINES, faceted by SETTING (legacy law: setting is a toggle, service lines are the lines)
-pp.textContent=D.payer_plan; hn2.textContent=fmtI(D.funnel.dollar_with_base); hn3.textContent=fmtI(D.funnel.dollar_with_base);
+// THE SIX-DIAL LADDER — pure bands, thickness = codes; no dots, no chart lib
+pp.textContent = D.payer_plan;
 const wfit = D.lanes.reduce((a,l)=>a+l.fit2*l.n,0)/D.lanes.reduce((a,l)=>a+l.n,0);
+wf.textContent = wfit.toFixed(1)+'%';
 const LBY = Object.fromEntries(D.lanes.map(l=>[l.id,l]));
-const SETTINGS = {
-  out: [
-    {id:'labs', label:'Lab work & misc fees', unit:'per test', ids:['fee_lab','fee_misc'], color:'#818cf8'},
-    {id:'surg', label:'Surgeries & procedures', unit:'per case', ids:['case'], color:'#5eead4'},
-    {id:'img',  label:'Imaging', unit:'per scan', ids:['fee_imaging'], color:'#fbbf24'},
-    {id:'drugs',label:'Drugs & supplies', unit:'per unit', ids:['fee_drugs','other'], color:'#fb7185'},
-  ],
-  inp: [
-    {id:'stay', label:'All inpatient care', unit:'per day', ids:['perdiem'], color:'#c084fc'},
-  ]};
-for(const k in SETTINGS) SETTINGS[k] = SETTINGS[k].filter(r=>r.ids.some(id=>LBY[id]));
-for(const k in SETTINGS) for(const r of SETTINGS[k]){ r.k=LBY[r.ids[0]].k; r.n=r.ids.reduce((a,id)=>a+(LBY[id]?LBY[id].n:0),0); }
-let SET='out'; const hidden=new Set();
-const XMIN=100, XMAX=D.xr[1];
-function chipRow(){
-  lchips.innerHTML = SETTINGS[SET].map(r=>`<div class="chip ${hidden.has(r.id)?'':'on'}" id="lc_${r.id}" onclick="tog('${r.id}')"><i style="background:${r.color}"></i>${r.label} <span style="color:var(--tx3);font-weight:500">· ${r.unit} · ×${r.k.toFixed(2)}</span></div>`).join('');}
-function mkDatasets(){
-  const dsets=[];
-  for(const r of SETTINGS[SET]){
-    dsets.push({type:'line',data:[{x:XMIN,y:r.k},{x:XMAX,y:r.k}],borderColor:r.color+'2e',borderWidth:9,pointRadius:0,railId:r.id,order:1});
-    dsets.push({type:'line',data:[{x:XMIN,y:r.k},{x:XMAX,y:r.k}],borderColor:r.color,borderWidth:2.4,pointRadius:0,railId:r.id,order:2});
-    dsets.push({type:'scatter',data:D.pts.filter(p=>r.ids.includes(p[0]) && p[1]>=XMIN).map(p=>({x:p[1],y:p[2]/p[1],c:p[3],com:p[2]})),
-      backgroundColor:r.color+'b0',borderWidth:0,pointRadius:1.7,pointHoverRadius:4,railId:r.id,order:3});}
-  dsets.forEach(ds=>{ds.hidden=hidden.has(ds.railId);});
-  return dsets;}
-const railLabels={id:'railLabels',afterDatasetsDraw(c){
-  const {ctx,chartArea,scales}=c; ctx.save();
-  let labs=[];
-  for(const r of SETTINGS[SET]){ if(hidden.has(r.id)) continue;
-    labs.push({name:r.label,unit:r.unit,k:'×'+r.k.toFixed(2),color:r.color,y:scales.y.getPixelForValue(r.k)});}
-  labs.sort((a,b)=>a.y-b.y);
-  for(let i=1;i<labs.length;i++) if(labs[i].y-labs[i-1].y<18) labs[i].y=labs[i-1].y+30;
-  for(const L of labs){
-    ctx.font='800 12.5px Inter,sans-serif'; ctx.fillStyle=L.color; ctx.fillText(L.name,chartArea.left+12,L.y-8);
-    const w=ctx.measureText(L.name).width;
-    ctx.font='600 10.5px Inter,sans-serif'; ctx.fillStyle='rgba(154,166,183,.85)'; ctx.fillText(L.unit,chartArea.left+20+w,L.y-8);
-    ctx.font='700 13px JetBrains Mono,monospace'; ctx.fillStyle=L.color; ctx.fillText(L.k,chartArea.right-52,L.y-8);}
-  ctx.restore();}};
-const ch = new Chart(sc.getContext('2d'),{data:{datasets:mkDatasets()},plugins:[railLabels],options:{
-  responsive:true,maintainAspectRatio:false,animation:{duration:600},
-  scales:{x:{type:'logarithmic',min:XMIN,max:XMAX,title:{display:true,text:'what the Medicare plan pays for the service ($, log scale)',color:'#5c6675',font:{size:11}},grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10},maxTicksLimit:7,maxRotation:0,autoSkip:true,callback:v=>'$'+Number(v).toLocaleString()}},
-          y:{min:1.4,max:3.15,title:{display:false},grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10.5},stepSize:.25,callback:v=>'×'+v.toFixed(2)}}},
-  plugins:{legend:{display:false},tooltip:{filter:i=>i.dataset.type=='scatter',backgroundColor:'#0d1119',borderColor:'#28313f',borderWidth:1,titleColor:'#e9edf4',bodyColor:'#9aa6b7',
-    callbacks:{title:i=>i.length?(i[0].raw.c||''):'',label:i=>` Medicare ${fmt$(i.raw.x)} → Commercial ${fmt$(i.raw.com)}  (×${i.raw.y.toFixed(2)})`}}}}});
-function setting(k){
-  if(SET===k) return; SET=k; hidden.clear();
-  set_out.classList.toggle('on',k==='out'); set_inp.classList.toggle('on',k==='inp');
-  ch.data.datasets = mkDatasets(); chipRow(); ch.update();}
-function tog(id){
-  if(hidden.has(id)) hidden.delete(id); else hidden.add(id);
-  document.getElementById('lc_'+id).classList.toggle('on', !hidden.has(id));
-  ch.data.datasets.forEach(ds=>{ds.hidden=hidden.has(ds.railId);});
-  ch.update();}
-chipRow();
+const nof=(...ids)=>ids.reduce((a,id)=>a+((LBY[id]||{n:0}).n),0);
+const BARS=[
+ {k:(LBY.fee_lab||{k:2.957}).k, name:'Lab work & misc fees', unit:'per test', base:'of the Medicare rate', color:'#818cf8', n:nof('fee_lab','fee_misc')},
+ {k:(LBY.case||{k:2.4256}).k, name:'Surgeries, procedures & imaging', unit:'per case / scan', base:'of the Medicare rate', color:'#5eead4', n:nof('case','fee_imaging')},
+ {k:(LBY.perdiem||{k:1.7709}).k, name:'Inpatient stays', unit:'per day', base:'of the Medicare rate', color:'#c084fc', n:nof('perdiem')},
+ {k:(LBY.fee_drugs||{k:1.6857}).k, name:'Drugs & supplies', unit:'per unit', base:'of the Medicare rate', color:'#fb7185', n:nof('fee_drugs','other')},
+ {k:D.pcts.com/100, name:'No-schedule items', unit:'flat share', base:"of the hospital's LIST price", color:'#f59e0b', n:D.funnel.pct, list:true},
+];
+const HGT=400,TOP=26,BOT=36,PLOT=HGT-TOP-BOT,Y0=0.35,Y1=3.25;
+const yof=v=>TOP+(Y1-v)/(Y1-Y0)*PLOT;
+const MAXN=Math.max(...BARS.map(b=>b.n));
+BARS.forEach(b=>{b.th=Math.max(8,b.n/MAXN*30); b.cy=yof(b.k);});
+const srt=[...BARS].sort((a,b)=>a.cy-b.cy);
+for(let i=1;i<srt.length;i++){const need=(srt[i-1].th+srt[i].th)/2+11-(srt[i].cy-srt[i-1].cy); if(need>0){srt[i-1].cy-=need/2;srt[i].cy+=need/2;}}
+let html='';
+for(const t of [0.5,1,1.5,2,2.5,3]) html+=`<div style="position:absolute;left:56px;right:12px;top:${yof(t)}px;border-top:1px ${t===1?'dashed rgba(233,237,244,.45)':'solid #141a25'}"></div><div style="position:absolute;left:8px;top:${yof(t)-7}px;font-size:10.5px;color:var(--tx3);font-family:JetBrains Mono,monospace">×${t.toFixed(1)}</div>`;
+html+=`<div style="position:absolute;left:70px;top:${yof(1)-17}px;font-size:10.5px;color:rgba(233,237,244,.55);font-weight:600">its reference price (1×)</div>`;
+for(let bi=0;bi<BARS.length;bi++){
+  const b=BARS[bi], top=b.cy-b.th/2;
+  const prev=BARS[bi-1];
+  const below = prev && (b.cy-prev.cy)<46;   // close pair: labels go UNDER this band
+  const ly = below? top+b.th+7 : top-19;
+  html+=`<div style="position:absolute;left:56px;right:12px;top:${top}px;height:${b.th}px;border-radius:${Math.min(9,b.th/2)}px;background:linear-gradient(90deg,${b.color}e6,${b.color}77);box-shadow:0 0 20px ${b.color}40"></div>
+  <div style="position:absolute;left:68px;top:${ly}px;font-size:12.5px;font-weight:800;color:${b.color}">${b.name} <span style="color:var(--tx3);font-weight:600;font-size:10.5px">· ${b.unit}</span></div>
+  <div style="position:absolute;right:16px;top:${ly}px;text-align:right"><span style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:14px;color:${b.color}">${b.list?D.pcts.com+'%':'×'+b.k.toFixed(2)}</span> <span style="font-size:10px;color:var(--tx3)">${b.base} · ${fmtI(b.n)} codes</span></div>`;
+}
+ladder.innerHTML=html;
 // TABLE
 const LANE_LBL = Object.assign({pct:'% of list'},Object.fromEntries(D.lanes.map(l=>[l.id,l.label])));
 const LANE_COL = Object.assign({pct:'#fbbf24'},Object.fromEntries(D.lanes.map(l=>[l.id,l.color])));
