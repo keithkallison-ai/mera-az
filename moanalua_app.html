@@ -106,9 +106,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 </div>
 
 <div class=card>
-  <h2><span id=pp></span> — <em>the whole price book, one picture.</em></h2>
-  <div style="position:relative;height:400px;margin-top:12px" id=ladder></div>
-  <div style="color:var(--tx3);font-size:11.5px;margin-top:8px">Bar thickness = number of priced codes. Dollar bars: <b style="color:var(--tx2)"><span id=wf></span> of prices within ±$2 of their dial</b> · 119 exceptions under “Off-dial rows” below · the amber bar prices against the hospital's <b style="color:var(--tx2)">list price</b>; all others against the <b style="color:var(--tx2)">Medicare plan</b>.</div>
+  <h2><span id=pp></span> — <em>the dollar price book.</em></h2>
+  <div class=chips style="margin:10px 0 2px"><div class="chip on" id=set_out onclick="setting('out')">Outpatient · per service</div><div class=chip id=set_inp onclick="setting('inp')">Inpatient · per day</div></div>
+  <div style="position:relative;height:400px;margin-top:6px" id=ladder></div>
+  <div style="color:var(--tx3);font-size:11.5px;margin-top:8px">Bar thickness = number of priced codes. Dollar bars: <b style="color:var(--tx2)"><span id=wf></span> of prices within ±$2 of their dial</b> · 119 exceptions under “Off-dial rows” below · all bars price against the <b style="color:var(--tx2)">Medicare plan's rate</b> — the 7,971 no-schedule items (66% of list) live in the next panel.</div>
 </div>
 
 <div class=card>
@@ -170,38 +171,48 @@ hund.innerHTML = H.map(h=>{
   const fill = `<i style="width:${h[1]}%;background:${h[3]?'linear-gradient(90deg,#161c28,#1b2230)':'linear-gradient(90deg,'+h[2]+'33,'+h[2]+'88)'};border-right:2px solid ${h[3]?'rgba(233,237,244,.25)':h[2]}"></i>`;
   return `<div class=hrow><span class=who>${h[0]}</span><span class=trk>${fill}${amt}</span></div>`;}).join('');
 
-// THE SIX-DIAL LADDER — pure bands, thickness = codes; no dots, no chart lib
+// THE DIAL LADDER — setting is a TOGGLE; bars are service lines; thickness = codes; no dots
 pp.textContent = D.payer_plan;
 const wfit = D.lanes.reduce((a,l)=>a+l.fit2*l.n,0)/D.lanes.reduce((a,l)=>a+l.n,0);
 wf.textContent = wfit.toFixed(1)+'%';
 const LBY = Object.fromEntries(D.lanes.map(l=>[l.id,l]));
 const nof=(...ids)=>ids.reduce((a,id)=>a+((LBY[id]||{n:0}).n),0);
-const BARS=[
- {k:(LBY.fee_lab||{k:2.957}).k, name:'Lab work & misc fees', unit:'per test', base:'of the Medicare rate', color:'#818cf8', n:nof('fee_lab','fee_misc')},
- {k:(LBY.case||{k:2.4256}).k, name:'Surgeries, procedures & imaging', unit:'per case / scan', base:'of the Medicare rate', color:'#5eead4', n:nof('case','fee_imaging')},
- {k:(LBY.perdiem||{k:1.7709}).k, name:'Inpatient stays', unit:'per day', base:'of the Medicare rate', color:'#c084fc', n:nof('perdiem')},
- {k:(LBY.fee_drugs||{k:1.6857}).k, name:'Drugs & supplies', unit:'per unit', base:'of the Medicare rate', color:'#fb7185', n:nof('fee_drugs','other')},
- {k:D.pcts.com/100, name:'No-schedule items', unit:'flat share', base:"of the hospital's LIST price", color:'#f59e0b', n:D.funnel.pct, list:true},
-];
-const HGT=400,TOP=26,BOT=36,PLOT=HGT-TOP-BOT,Y0=0.35,Y1=3.25;
+const VIEWS = {
+ out: [
+  {k:(LBY.fee_lab||{k:2.957}).k, name:'Lab work & misc fees', unit:'per test', color:'#818cf8', n:nof('fee_lab','fee_misc')},
+  {k:(LBY.case||{k:2.4256}).k, name:'Surgeries, procedures & imaging', unit:'per case / scan', color:'#5eead4', n:nof('case','fee_imaging')},
+  {k:(LBY.fee_drugs||{k:1.6857}).k, name:'Drugs & supplies', unit:'per unit', color:'#fb7185', n:nof('fee_drugs','other')},
+ ],
+ inp: [
+  {k:(LBY.perdiem||{k:1.7709}).k, name:'All inpatient care', unit:'per day', color:'#c084fc', n:nof('perdiem')},
+ ]};
+const HGT=400,TOP=26,BOT=36,PLOT=HGT-TOP-BOT,Y0=0.95,Y1=3.25;
 const yof=v=>TOP+(Y1-v)/(Y1-Y0)*PLOT;
-const MAXN=Math.max(...BARS.map(b=>b.n));
-BARS.forEach(b=>{b.th=Math.max(8,b.n/MAXN*30); b.cy=yof(b.k);});
-const srt=[...BARS].sort((a,b)=>a.cy-b.cy);
-for(let i=1;i<srt.length;i++){const need=(srt[i-1].th+srt[i].th)/2+11-(srt[i].cy-srt[i-1].cy); if(need>0){srt[i-1].cy-=need/2;srt[i].cy+=need/2;}}
-let html='';
-for(const t of [0.5,1,1.5,2,2.5,3]) html+=`<div style="position:absolute;left:56px;right:12px;top:${yof(t)}px;border-top:1px ${t===1?'dashed rgba(233,237,244,.45)':'solid #141a25'}"></div><div style="position:absolute;left:8px;top:${yof(t)-7}px;font-size:10.5px;color:var(--tx3);font-family:JetBrains Mono,monospace">×${t.toFixed(1)}</div>`;
-html+=`<div style="position:absolute;left:70px;top:${yof(1)-17}px;font-size:10.5px;color:rgba(233,237,244,.55);font-weight:600">its reference price (1×)</div>`;
-for(let bi=0;bi<BARS.length;bi++){
-  const b=BARS[bi], top=b.cy-b.th/2;
-  const prev=BARS[bi-1];
-  const below = prev && (b.cy-prev.cy)<46;   // close pair: labels go UNDER this band
-  const ly = below? top+b.th+7 : top-19;
-  html+=`<div style="position:absolute;left:56px;right:12px;top:${top}px;height:${b.th}px;border-radius:${Math.min(9,b.th/2)}px;background:linear-gradient(90deg,${b.color}e6,${b.color}77);box-shadow:0 0 20px ${b.color}40"></div>
-  <div style="position:absolute;left:68px;top:${ly}px;font-size:12.5px;font-weight:800;color:${b.color}">${b.name} <span style="color:var(--tx3);font-weight:600;font-size:10.5px">· ${b.unit}</span></div>
-  <div style="position:absolute;right:16px;top:${ly}px;text-align:right"><span style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:14px;color:${b.color}">${b.list?D.pcts.com+'%':'×'+b.k.toFixed(2)}</span> <span style="font-size:10px;color:var(--tx3)">${b.base} · ${fmtI(b.n)} codes</span></div>`;
-}
-ladder.innerHTML=html;
+const MAXN=Math.max(...Object.values(VIEWS).flat().map(b=>b.n));   // global scale: thickness comparable across views
+let SET='out';
+function drawLadder(){
+  const BARS=VIEWS[SET].map(b=>({...b}));
+  BARS.forEach(b=>{b.th=Math.max(8,b.n/MAXN*30); b.cy=yof(b.k);});
+  const srt=[...BARS].sort((a,b)=>a.cy-b.cy);
+  for(let i=1;i<srt.length;i++){const need=(srt[i-1].th+srt[i].th)/2+11-(srt[i].cy-srt[i-1].cy); if(need>0){srt[i-1].cy-=need/2;srt[i].cy+=need/2;}}
+  let html='';
+  for(const t of [1,1.5,2,2.5,3]) html+=`<div style="position:absolute;left:56px;right:12px;top:${yof(t)}px;border-top:1px ${t===1?'dashed rgba(233,237,244,.45)':'solid #141a25'}"></div><div style="position:absolute;left:8px;top:${yof(t)-7}px;font-size:10.5px;color:var(--tx3);font-family:JetBrains Mono,monospace">×${t.toFixed(1)}</div>`;
+  html+=`<div style="position:absolute;left:70px;top:${yof(1)-17}px;font-size:10.5px;color:rgba(233,237,244,.55);font-weight:600">what the Medicare plan pays (1×)</div>`;
+  for(let bi=0;bi<BARS.length;bi++){
+    const b=BARS[bi], top=b.cy-b.th/2;
+    const prev=BARS[bi-1];
+    const below = prev && (b.cy-prev.cy)<46;
+    const ly = below? top+b.th+7 : top-19;
+    html+=`<div style="position:absolute;left:56px;right:12px;top:${top}px;height:${b.th}px;border-radius:${Math.min(9,b.th/2)}px;background:linear-gradient(90deg,${b.color}e6,${b.color}77);box-shadow:0 0 20px ${b.color}40"></div>
+    <div style="position:absolute;left:68px;top:${ly}px;font-size:12.5px;font-weight:800;color:${b.color}">${b.name} <span style="color:var(--tx3);font-weight:600;font-size:10.5px">· ${b.unit}</span></div>
+    <div style="position:absolute;right:16px;top:${ly}px;text-align:right"><span style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:14px;color:${b.color}">×${b.k.toFixed(2)}</span> <span style="font-size:10px;color:var(--tx3)">of the Medicare rate · ${fmtI(b.n)} codes</span></div>`;
+  }
+  ladder.innerHTML=html;}
+function setting(k){ if(SET===k) return; SET=k;
+  set_out.classList.toggle('on',k==='out'); set_inp.classList.toggle('on',k==='inp');
+  drawLadder();}
+if(location.hash==='#inp'){SET='inp';set_out.classList.remove('on');set_inp.classList.add('on');}
+drawLadder();
 // TABLE
 const LANE_LBL = Object.assign({pct:'% of list'},Object.fromEntries(D.lanes.map(l=>[l.id,l.label])));
 const LANE_COL = Object.assign({pct:'#fbbf24'},Object.fromEntries(D.lanes.map(l=>[l.id,l.color])));
