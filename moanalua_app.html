@@ -102,15 +102,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 
 <div class=card>
   <h2><span id=pp></span> — <span id=hn2></span> prices. <em>Five lines.</em></h2>
-  <div class=sub>Each dot: one service, as a multiple of the Medicare-plan rate. Shaded funnels: <b>±$1 rounding</b>. Click chips to toggle.</div>
+  <div class=sub>Every commercial price is its line × the hospital's Medicare-plan rate.</div>
   <div class=chips id=lchips></div>
-  <div style="position:relative;height:400px;margin-top:4px"><canvas id=sc></canvas></div>
-  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:16px">
-    <div style="font-size:13px;font-weight:800">Proof: the same dots, as <em style="font-style:normal;background:linear-gradient(120deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent">dollars off their line</em></div>
-    <div style="font-size:11px;color:var(--tx3)"><b style="color:var(--ac)" id=wfitpct></b> of all <span id=hn4></span> prices sit within ±$2 — the file rounds to whole dollars</div>
-  </div>
-  <div style="position:relative;height:190px;margin-top:6px"><canvas id=sc2></canvas></div>
-  <div style="color:var(--tx3);font-size:10.8px;margin-top:8px"><span id=ptn></span> of <span id=hn3></span> dots drawn · <span id=outw></span> outside the top window · details in fine print below.</div>
+  <div style="position:relative;height:380px;margin-top:4px"><canvas id=sc></canvas></div>
+  <div style="color:var(--tx3);font-size:11.5px;margin-top:10px">Whole-dollar rounding: <b style="color:var(--tx2)">99.0% of all <span id=hn3></span> prices are within ±$2 of their line</b> · the 119 exceptions are under “Off-dial rows” below · dots shown for services ≥ $100 (cheaper rows in the lookup — rounding magnifies visually below that).</div>
 </div>
 
 <div class=card>
@@ -170,71 +165,49 @@ hund.innerHTML = H.map(h=>{
   const fill = `<i style="width:${h[1]}%;background:${h[3]?'linear-gradient(90deg,#161c28,#1b2230)':'linear-gradient(90deg,'+h[2]+'33,'+h[2]+'88)'};border-right:2px solid ${h[3]?'rgba(233,237,244,.25)':h[2]}"></i>`;
   return `<div class=hrow><span class=who>${h[0]}</span><span class=trk>${fill}${amt}</span></div>`;}).join('');
 
-// SCATTER — the five shelves: y = commercial / medicare (linear), x = medicare $ (log)
-ptn.textContent=fmtI(D.pts.length); outw.textContent=fmtI(D.outwin);
-pp.textContent=D.payer_plan; hn3.textContent=fmtI(D.funnel.dollar_with_base);
+// THE FIVE LINES — four visible rails (surgeries & scans share ×2.43), dots >= $100 ride them
+pp.textContent=D.payer_plan; hn2.textContent=fmtI(D.funnel.dollar_with_base); hn3.textContent=fmtI(D.funnel.dollar_with_base);
 const hidden = new Set();
 const wfit = D.lanes.reduce((a,l)=>a+l.fit2*l.n,0)/D.lanes.reduce((a,l)=>a+l.n,0);
-lchips.innerHTML = D.lanes.map(l=>`<div class="chip on" id="lc_${l.id}" onclick="tog('${l.id}')"><i style="background:${l.color}"></i>${l.label} <span style="color:var(--tx3);font-weight:500">×${l.k.toFixed(2)}</span></div>`).join('');
-const dsets=[{type:'line',label:'identity',data:[{x:D.xr[0],y:1},{x:D.xr[1],y:1}],borderColor:'rgba(233,237,244,.35)',borderWidth:1.2,borderDash:[6,5],pointRadius:0,laneId:'__id',order:0}];
-const lg0=Math.log10(D.xr[0]), lg1=Math.log10(D.xr[1]);
-const XS=Array.from({length:90},(_,i)=>Math.pow(10,lg0+i*(lg1-lg0)/89)).filter(x=>1/x<=0.5);
-for(const l of D.lanes){
-  dsets.push({type:'line',label:l.label+' band lo',data:XS.map(x=>({x,y:l.k-1/x})),
-    borderWidth:0,pointRadius:0,fill:false,laneId:l.id,order:.5});
-  dsets.push({type:'line',label:l.label+' band hi',data:XS.map(x=>({x,y:l.k+1/x})),
-    borderWidth:0,pointRadius:0,fill:'-1',backgroundColor:'rgba(233,237,244,.055)',laneId:l.id,order:.5});
+const LBY = Object.fromEntries(D.lanes.map(l=>[l.id,l]));
+const RAILS = [
+  {id:'r296',label:'Lab tests & misc fees',ids:['fee_lab','fee_misc'],color:'#818cf8'},
+  {id:'r243',label:'Surgeries & scans',ids:['case','fee_imaging'],color:'#5eead4'},
+  {id:'r177',label:'Hospital days',ids:['perdiem'],color:'#c084fc'},
+  {id:'r169',label:'Drugs & supplies',ids:['fee_drugs','other'],color:'#fb7185'},
+].filter(r=>r.ids.some(id=>LBY[id]));
+for(const r of RAILS){ r.k = LBY[r.ids[0]].k; r.n = r.ids.reduce((a,id)=>a+(LBY[id]?LBY[id].n:0),0); }
+lchips.innerHTML = RAILS.map(r=>`<div class="chip on" id="lc_${r.id}" onclick="tog('${r.id}')"><i style="background:${r.color}"></i>${r.label} <span style="color:var(--tx3);font-weight:500">×${r.k.toFixed(2)}</span></div>`).join('');
+const XMIN=100, XMAX=D.xr[1];
+const dsets=[];
+for(const r of RAILS){
+  dsets.push({type:'line',data:[{x:XMIN,y:r.k},{x:XMAX,y:r.k}],borderColor:r.color+'2e',borderWidth:9,pointRadius:0,railId:r.id,order:1});   // glow
+  dsets.push({type:'line',data:[{x:XMIN,y:r.k},{x:XMAX,y:r.k}],borderColor:r.color,borderWidth:2.4,pointRadius:0,railId:r.id,order:2});     // rail
+  dsets.push({type:'scatter',data:D.pts.filter(p=>p[0]!='__' && r.ids.includes(p[0]) && p[1]>=XMIN).map(p=>({x:p[1],y:p[2]/p[1],c:p[3],com:p[2]})),
+    backgroundColor:r.color+'b0',borderWidth:0,pointRadius:1.7,pointHoverRadius:4,railId:r.id,order:3});
 }
-for(const l of D.lanes){
-  dsets.push({type:'scatter',label:l.label,data:D.pts.filter(p=>p[0]==l.id).map(p=>({x:p[1],y:p[2]/p[1],c:p[3],com:p[2]})),
-    backgroundColor:l.color+'59',borderColor:l.color+'88',pointRadius:2.2,pointHoverRadius:4.5,laneId:l.id,order:2});
-  dsets.push({type:'line',label:l.label+' line',data:[{x:D.xr[0],y:l.k},{x:D.xr[1],y:l.k}],
-    borderColor:l.color,borderWidth:1.8,pointRadius:0,fill:false,laneId:l.id,order:1});
-}
-const lineLabels={id:'lineLabels',afterDatasetsDraw(c){
-  const {ctx,chartArea,scales}=c; ctx.save(); ctx.font='700 11.5px JetBrains Mono,monospace';
-  const groups={};
-  for(const l of D.lanes){ if(hidden.has(l.id)) continue;
-    const key=l.k.toFixed(2); (groups[key]=groups[key]||[]).push(l);}
-  let labels=Object.entries(groups).map(([key,ls])=>({txt:'×'+key,color:ls.length>1?'rgba(233,237,244,.9)':ls[0].color,
-    y:scales.y.getPixelForValue(ls[0].k)-6}));
-  labels.push({txt:'pays the same as Medicare (1×)',color:'rgba(233,237,244,.45)',y:scales.y.getPixelForValue(1)-6,wide:true});
-  labels.forEach(L=>{L.y=Math.max(chartArea.top+11,Math.min(L.y,chartArea.bottom-5));});
-  labels.sort((a,b)=>a.y-b.y);
-  for(let i=1;i<labels.length;i++) if(labels[i].y-labels[i-1].y<14) labels[i].y=labels[i-1].y+14;
-  for(const L of labels){ctx.fillStyle=L.color;ctx.fillText(L.txt,chartArea.right-(L.wide?208:48),L.y);}
-  ctx.font='600 10.5px Inter,sans-serif'; ctx.fillStyle='rgba(154,166,183,.75)';
-  ctx.fillText('shaded = ±$1 rounding',chartArea.left+10,chartArea.top+14);
+const railLabels={id:'railLabels',afterDatasetsDraw(c){
+  const {ctx,chartArea,scales}=c; ctx.save();
+  let labs=[];
+  for(const r of RAILS){ if(hidden.has(r.id)) continue;
+    labs.push({name:r.label,k:'×'+r.k.toFixed(2),color:r.color,y:scales.y.getPixelForValue(r.k)});}
+  labs.sort((a,b)=>a.y-b.y);
+  for(let i=1;i<labs.length;i++) if(labs[i].y-labs[i-1].y<18) labs[i].y=labs[i-1].y+18;
+  for(const L of labs){
+    ctx.font='800 12.5px Inter,sans-serif'; ctx.fillStyle=L.color; ctx.fillText(L.name,chartArea.left+12,L.y-8);
+    ctx.font='700 13px JetBrains Mono,monospace'; ctx.fillText(L.k,chartArea.right-52,L.y-8);}
   ctx.restore();}};
-const ch = new Chart(sc.getContext('2d'),{data:{datasets:dsets},plugins:[lineLabels],options:{
+const ch = new Chart(sc.getContext('2d'),{data:{datasets:dsets},plugins:[railLabels],options:{
   responsive:true,maintainAspectRatio:false,animation:{duration:700},
-  scales:{x:{type:'logarithmic',title:{display:true,text:'what the Medicare plan pays for the service ($, log scale)',color:'#5c6675',font:{size:11}},grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10},maxTicksLimit:8,maxRotation:0,autoSkip:true,callback:v=>'$'+Number(v).toLocaleString()}},
-          y:{min:D.ywin[0],max:D.ywin[1],title:{display:true,text:'the multiple Commercial pays (× Medicare plan)',color:'#5c6675',font:{size:11}},grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10},stepSize:.25,callback:v=>'×'+v.toFixed(2)}}},
+  scales:{x:{type:'logarithmic',min:XMIN,max:XMAX,title:{display:true,text:'what the Medicare plan pays for the service ($, log scale)',color:'#5c6675',font:{size:11}},grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10},maxTicksLimit:7,maxRotation:0,autoSkip:true,callback:v=>'$'+Number(v).toLocaleString()}},
+          y:{min:1.4,max:3.15,title:{display:false},grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10.5},stepSize:.25,callback:v=>'×'+v.toFixed(2)}}},
   plugins:{legend:{display:false},tooltip:{filter:i=>i.dataset.type=='scatter',backgroundColor:'#0d1119',borderColor:'#28313f',borderWidth:1,titleColor:'#e9edf4',bodyColor:'#9aa6b7',
     callbacks:{title:i=>i.length?(i[0].raw.c||''):'',label:i=>` Medicare ${fmt$(i.raw.x)} → Commercial ${fmt$(i.raw.com)}  (×${i.raw.y.toFixed(2)})`}}}}});
-// THE PROOF STRIP: y = com - round$(k x mcr)  (same rounding convention as the build: floor(x+0.5))
-const KOF = Object.fromEntries(D.lanes.map(l=>[l.id,l.k]));
-const band2={id:'band2',beforeDatasetsDraw(c){const{ctx,chartArea,scales}=c;ctx.save();
-  const y2=scales.y.getPixelForValue(2),ym2=scales.y.getPixelForValue(-2);
-  ctx.fillStyle='rgba(233,237,244,.045)';ctx.fillRect(chartArea.left,y2,chartArea.right-chartArea.left,ym2-y2);
-  ctx.font='600 10px Inter,sans-serif';ctx.fillStyle='rgba(154,166,183,.7)';
-  ctx.fillText('±$2',chartArea.right-26,y2+11);ctx.restore();}};
-const ds2 = D.lanes.map(l=>({type:'scatter',label:l.label,laneId:l.id,
-  data:D.pts.filter(p=>p[0]==l.id).map(p=>({x:p[1],y:p[2]-Math.floor(l.k*p[1]+0.5),c:p[3],com:p[2]})),
-  backgroundColor:l.color+'66',borderColor:l.color+'99',pointRadius:2,pointHoverRadius:4}));
-const ch2 = new Chart(sc2.getContext('2d'),{data:{datasets:ds2},plugins:[band2],options:{
-  responsive:true,maintainAspectRatio:false,animation:{duration:700},
-  scales:{x:{type:'logarithmic',grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10},maxTicksLimit:8,maxRotation:0,autoSkip:true,callback:v=>'$'+Number(v).toLocaleString()}},
-          y:{min:-5.5,max:5.5,title:{display:true,text:'$ off its line',color:'#5c6675',font:{size:11}},grid:{color:ctx=>ctx.tick&&ctx.tick.value==0?'#2b3446':'#141a25'},ticks:{color:'#5c6675',font:{size:10},stepSize:1,callback:v=>(v>0?'+$':v<0?'-$':'$')+Math.abs(v)}}},
-  plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d1119',borderColor:'#28313f',borderWidth:1,titleColor:'#e9edf4',bodyColor:'#9aa6b7',
-    callbacks:{title:i=>i.length?(i[0].raw.c||''):'',label:i=>` ${fmt$(i.raw.com)} — ${i.raw.y==0?'exactly on its line':(i.raw.y>0?'+$':'-$')+Math.abs(i.raw.y).toFixed(2)+' off its line'}`}}}}});
-wfitpct.textContent=wfit.toFixed(1)+'%'; hn4.textContent=fmtI(D.funnel.dollar_with_base);
 function tog(id){
   if(hidden.has(id)) hidden.delete(id); else hidden.add(id);
   document.getElementById('lc_'+id).classList.toggle('on', !hidden.has(id));
-  ch.data.datasets.forEach(ds=>{if(ds.laneId=='__id')return; ds.hidden=hidden.has(ds.laneId);});
-  ch2.data.datasets.forEach(ds=>{ds.hidden=hidden.has(ds.laneId);});
-  ch.update(); ch2.update();}
+  ch.data.datasets.forEach(ds=>{ds.hidden=hidden.has(ds.railId);});
+  ch.update();}
 // TABLE
 const LANE_LBL = Object.assign({pct:'% of list'},Object.fromEntries(D.lanes.map(l=>[l.id,l.label])));
 const LANE_COL = Object.assign({pct:'#fbbf24'},Object.fromEntries(D.lanes.map(l=>[l.id,l.color])));
