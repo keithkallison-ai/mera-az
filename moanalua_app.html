@@ -57,21 +57,22 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .bd .m{font-family:JetBrains Mono,monospace;font-size:11px;color:var(--mcr);margin-top:2px}
 </style></head><body><div class=wrap>
 
-<div class=card style="padding:0;overflow:hidden;position:relative;margin-bottom:0;border-radius:20px 20px 0 0">
-  <div id=lmap style="height:300px;background:#0a0d12"></div>
-  <div style="position:absolute;right:16px;top:14px;z-index:500;font-size:11px;letter-spacing:.16em;font-weight:700;color:rgba(233,237,244,.85);background:rgba(9,12,17,.7);border:1px solid var(--line);border-radius:9px;padding:6px 11px;backdrop-filter:blur(4px)">MERA</div>
-</div>
-<div class=card style="border-radius:0 0 20px 20px;border-top:none;margin-bottom:20px;padding:20px 26px 18px">
-  <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-    <div style="width:58px;height:58px;border-radius:15px;flex:none;background:linear-gradient(135deg,rgba(94,234,212,.18),rgba(129,140,248,.14));border:1px solid #2c5b54;display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:900;color:var(--ac)">K</div>
-    <div style="flex:1;min-width:260px">
-      <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:#f4f8fc">Kaiser Foundation Hospital — Moanalua</div>
-      <div style="font-size:12.5px;color:var(--tx2);margin-top:3px">3288 Moanalua Road, Honolulu, HI</div>
-      <div style="font-size:11.5px;color:var(--tx3);margin-top:5px"><span id=facts></span></div>
+<div class=card style="padding:20px 26px 16px">
+  <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+    <div style="width:56px;height:56px;border-radius:14px;flex:none;background:linear-gradient(135deg,rgba(94,234,212,.18),rgba(129,140,248,.14));border:1px solid #2c5b54;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--ac)">K</div>
+    <div style="flex:1;min-width:280px">
+      <div style="font-size:30px;font-weight:800;letter-spacing:-.025em;color:#f6f9fd;line-height:1.1">Kaiser Foundation Hospital</div>
+      <div style="font-size:13.5px;color:var(--tx2);margin-top:4px">Moanalua · Kaiser Permanente Hawaiʻi</div>
+      <div style="font-size:13px;color:var(--tx2);margin-top:9px"><span style="color:var(--ac)">📍</span> 3288 Moanalua Road, Honolulu, HI 96819</div>
+      <div style="font-size:11.5px;color:var(--tx3);margin-top:9px" id=facts></div>
     </div>
+    <div style="font-size:11px;letter-spacing:.16em;font-weight:700;color:rgba(233,237,244,.85);background:rgba(9,12,17,.7);border:1px solid var(--line);border-radius:9px;padding:6px 11px">MERA</div>
   </div>
-  <div style="font-size:11.5px;color:var(--tx3);margin-top:13px;border-top:1px solid var(--line);padding-top:11px">Not a bill or a quote — the standard charges published under federal price-transparency law.</div>
 </div>
+<div class=card style="padding:0;overflow:hidden">
+  <div id=lmap style="height:420px;background:#0a0d12"></div>
+</div>
+<div style="font-size:11.5px;color:var(--tx3);margin:-6px 4px 16px">Not a bill or a quote — the standard charges published under federal price-transparency law.</div>
 
 <div class=card>
   <h2>Same service. <em>Same building.</em> Three prices.</h2>
@@ -117,7 +118,7 @@ const fmt0 = v => v==null?'—':'$'+Math.round(v).toLocaleString();
 const fmtI = v => v.toLocaleString();
 
 // IDENTITY (profile header)
-facts.innerHTML = `${fmtI(D.funnel.dollar)} dollar rates · 1 payer · 3 plans · ${D.updated} · <span style="color:var(--ac)">✓ byte-exact</span>`;
+facts.innerHTML = `NPI ${D.npi} · License ${String(D.license).split('|')[0].trim()} (HI) · CMS v${D.version} · updated ${D.updated} · attested by ${D.attester}`;
 // EXAMPLE CARDS
 const WHO=[["mcd","Medicaid","#34d399"],["mcr","Medicare","#818cf8"],["com","Commercial","#fb7185"]];
 exgrid.innerHTML = D.ex.map(e=>{
@@ -191,11 +192,11 @@ draw();
   const st=document.createElement('div'); st.style.cssText='position:absolute;right:14px;top:12px;z-index:600;font-size:10px;color:#f66;font-family:monospace';
   el.parentElement.appendChild(st);
   try{
-    const LF=window.L;   // our lane-lookup const shadows the bare 'L' — reach the Leaflet global explicitly
-    const m=LF.map('lmap',{zoomControl:false,attributionControl:false,scrollWheelZoom:false}).setView([21.3358,-158.0186],11);   // the shared O'ahu frame (identical to West O'ahu's page); marker stays on Moanalua
+    const LF=window.L;
+    const m=LF.map('lmap',{zoomControl:true,attributionControl:true,scrollWheelZoom:false}).setView([21.3728,-157.8926],14);
     LF.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(m);
-    LF.circleMarker([21.3728,-157.8926],{radius:16,color:'#5eead4',weight:1,opacity:.35,fillColor:'#5eead4',fillOpacity:.12}).addTo(m);
-    LF.circleMarker([21.3728,-157.8926],{radius:7,color:'#5eead4',weight:2,fillColor:'#5eead4',fillOpacity:.95}).addTo(m);
+    LF.circleMarker([21.3728,-157.8926],{radius:7,color:'#34d399',weight:2,fillColor:'#34d399',fillOpacity:.95}).addTo(m)
+      .bindPopup('<b>Kaiser Foundation Hospital — Moanalua</b><br>3288 Moanalua Road, Honolulu, HI 96819',{closeButton:true,autoClose:false}).openPopup();
     st.textContent='';
   }catch(e){st.textContent='MAP ERR: '+e.message}
 })();
