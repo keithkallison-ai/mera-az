@@ -117,7 +117,7 @@ const fmt0 = v => v==null?'—':'$'+Math.round(v).toLocaleString();
 const fmtI = v => v.toLocaleString();
 
 // IDENTITY (profile header)
-facts.innerHTML = `${fmtI(D.funnel.dollar + D.funnel.pct)} prices · 1 payer — ${D.payer_plan} · ${D.updated} · <span style="color:var(--ac)">✓ byte-exact</span>`;
+facts.innerHTML = `${fmtI(D.funnel.dollar)} dollar rates · 1 payer · 3 plans · ${D.updated} · <span style="color:var(--ac)">✓ byte-exact</span>`;
 // EXAMPLE CARDS
 const WHO=[["mcd","Medicaid","#34d399"],["mcr","Medicare","#818cf8"],["com","Commercial","#fb7185"]];
 exgrid.innerHTML = D.ex.map(e=>{
