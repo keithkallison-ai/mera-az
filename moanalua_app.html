@@ -102,7 +102,8 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 
 <div class=card>
   <h2><span id=pp></span> — <span id=hn2></span> prices. <em>Five lines.</em></h2>
-  <div class=sub>One line per unit of care. Every commercial price is its line × the hospital's Medicare-plan rate.</div>
+  <div class=sub>One line per service. Every commercial price is its line × the hospital's Medicare-plan rate.</div>
+  <div class=chips style="margin-bottom:9px"><div class="chip on" id=set_out onclick="setting('out')">Outpatient · per service</div><div class=chip id=set_inp onclick="setting('inp')">Inpatient · per day</div></div>
   <div class=chips id=lchips></div>
   <div style="position:relative;height:380px;margin-top:4px"><canvas id=sc></canvas></div>
   <div style="color:var(--tx3);font-size:11.5px;margin-top:10px">Whole-dollar rounding: <b style="color:var(--tx2)">99.0% of all <span id=hn3></span> prices are within ±$2 of their line</b> · the 119 exceptions are under “Off-dial rows” below · dots shown for services ≥ $100 (cheaper rows in the lookup — rounding magnifies visually below that).</div>
@@ -165,50 +166,64 @@ hund.innerHTML = H.map(h=>{
   const fill = `<i style="width:${h[1]}%;background:${h[3]?'linear-gradient(90deg,#161c28,#1b2230)':'linear-gradient(90deg,'+h[2]+'33,'+h[2]+'88)'};border-right:2px solid ${h[3]?'rgba(233,237,244,.25)':h[2]}"></i>`;
   return `<div class=hrow><span class=who>${h[0]}</span><span class=trk>${fill}${amt}</span></div>`;}).join('');
 
-// THE FIVE LINES — four visible rails (surgeries & scans share ×2.43), dots >= $100 ride them
+// FIVE LINES, faceted by SETTING (legacy law: setting is a toggle, service lines are the lines)
 pp.textContent=D.payer_plan; hn2.textContent=fmtI(D.funnel.dollar_with_base); hn3.textContent=fmtI(D.funnel.dollar_with_base);
-const hidden = new Set();
 const wfit = D.lanes.reduce((a,l)=>a+l.fit2*l.n,0)/D.lanes.reduce((a,l)=>a+l.n,0);
 const LBY = Object.fromEntries(D.lanes.map(l=>[l.id,l]));
-const RAILS = [
-  {id:'r296',label:'Lab work & misc fees',unit:'per test / service',ids:['fee_lab','fee_misc'],color:'#818cf8'},
-  {id:'r243',label:'Surgeries & scans',unit:'per case / scan',ids:['case','fee_imaging'],color:'#5eead4'},
-  {id:'r177',label:'Inpatient stays',unit:'per day',ids:['perdiem'],color:'#c084fc'},
-  {id:'r169',label:'Drugs & supplies',unit:'per unit',ids:['fee_drugs','other'],color:'#fb7185'},
-].filter(r=>r.ids.some(id=>LBY[id]));
-for(const r of RAILS){ r.k = LBY[r.ids[0]].k; r.n = r.ids.reduce((a,id)=>a+(LBY[id]?LBY[id].n:0),0); }
-lchips.innerHTML = RAILS.map(r=>`<div class="chip on" id="lc_${r.id}" onclick="tog('${r.id}')"><i style="background:${r.color}"></i>${r.label} <span style="color:var(--tx3);font-weight:500">· ${r.unit} · ×${r.k.toFixed(2)}</span></div>`).join('');
+const SETTINGS = {
+  out: [
+    {id:'labs', label:'Lab work & misc fees', unit:'per test', ids:['fee_lab','fee_misc'], color:'#818cf8'},
+    {id:'surg', label:'Surgeries & procedures', unit:'per case', ids:['case'], color:'#5eead4'},
+    {id:'img',  label:'Imaging', unit:'per scan', ids:['fee_imaging'], color:'#fbbf24'},
+    {id:'drugs',label:'Drugs & supplies', unit:'per unit', ids:['fee_drugs','other'], color:'#fb7185'},
+  ],
+  inp: [
+    {id:'stay', label:'All inpatient care', unit:'per day', ids:['perdiem'], color:'#c084fc'},
+  ]};
+for(const k in SETTINGS) SETTINGS[k] = SETTINGS[k].filter(r=>r.ids.some(id=>LBY[id]));
+for(const k in SETTINGS) for(const r of SETTINGS[k]){ r.k=LBY[r.ids[0]].k; r.n=r.ids.reduce((a,id)=>a+(LBY[id]?LBY[id].n:0),0); }
+let SET='out'; const hidden=new Set();
 const XMIN=100, XMAX=D.xr[1];
-const dsets=[];
-for(const r of RAILS){
-  dsets.push({type:'line',data:[{x:XMIN,y:r.k},{x:XMAX,y:r.k}],borderColor:r.color+'2e',borderWidth:9,pointRadius:0,railId:r.id,order:1});   // glow
-  dsets.push({type:'line',data:[{x:XMIN,y:r.k},{x:XMAX,y:r.k}],borderColor:r.color,borderWidth:2.4,pointRadius:0,railId:r.id,order:2});     // rail
-  dsets.push({type:'scatter',data:D.pts.filter(p=>p[0]!='__' && r.ids.includes(p[0]) && p[1]>=XMIN).map(p=>({x:p[1],y:p[2]/p[1],c:p[3],com:p[2]})),
-    backgroundColor:r.color+'b0',borderWidth:0,pointRadius:1.7,pointHoverRadius:4,railId:r.id,order:3});
-}
+function chipRow(){
+  lchips.innerHTML = SETTINGS[SET].map(r=>`<div class="chip ${hidden.has(r.id)?'':'on'}" id="lc_${r.id}" onclick="tog('${r.id}')"><i style="background:${r.color}"></i>${r.label} <span style="color:var(--tx3);font-weight:500">· ${r.unit} · ×${r.k.toFixed(2)}</span></div>`).join('');}
+function mkDatasets(){
+  const dsets=[];
+  for(const r of SETTINGS[SET]){
+    dsets.push({type:'line',data:[{x:XMIN,y:r.k},{x:XMAX,y:r.k}],borderColor:r.color+'2e',borderWidth:9,pointRadius:0,railId:r.id,order:1});
+    dsets.push({type:'line',data:[{x:XMIN,y:r.k},{x:XMAX,y:r.k}],borderColor:r.color,borderWidth:2.4,pointRadius:0,railId:r.id,order:2});
+    dsets.push({type:'scatter',data:D.pts.filter(p=>r.ids.includes(p[0]) && p[1]>=XMIN).map(p=>({x:p[1],y:p[2]/p[1],c:p[3],com:p[2]})),
+      backgroundColor:r.color+'b0',borderWidth:0,pointRadius:1.7,pointHoverRadius:4,railId:r.id,order:3});}
+  dsets.forEach(ds=>{ds.hidden=hidden.has(ds.railId);});
+  return dsets;}
 const railLabels={id:'railLabels',afterDatasetsDraw(c){
   const {ctx,chartArea,scales}=c; ctx.save();
   let labs=[];
-  for(const r of RAILS){ if(hidden.has(r.id)) continue;
+  for(const r of SETTINGS[SET]){ if(hidden.has(r.id)) continue;
     labs.push({name:r.label,unit:r.unit,k:'×'+r.k.toFixed(2),color:r.color,y:scales.y.getPixelForValue(r.k)});}
   labs.sort((a,b)=>a.y-b.y);
-  for(let i=1;i<labs.length;i++) if(labs[i].y-labs[i-1].y<18) labs[i].y=labs[i-1].y+18;
+  for(let i=1;i<labs.length;i++) if(labs[i].y-labs[i-1].y<18) labs[i].y=labs[i-1].y+30;
   for(const L of labs){
     ctx.font='800 12.5px Inter,sans-serif'; ctx.fillStyle=L.color; ctx.fillText(L.name,chartArea.left+12,L.y-8);
-    ctx.font='600 10.5px Inter,sans-serif'; ctx.fillStyle='rgba(154,166,183,.85)'; ctx.fillText(L.unit,chartArea.left+14+ctx.measureText(L.name).width+L.name.length*4.6,L.y-8);
-    ctx.font='700 13px JetBrains Mono,monospace'; ctx.fillText(L.k,chartArea.right-52,L.y-8);}
+    const w=ctx.measureText(L.name).width;
+    ctx.font='600 10.5px Inter,sans-serif'; ctx.fillStyle='rgba(154,166,183,.85)'; ctx.fillText(L.unit,chartArea.left+20+w,L.y-8);
+    ctx.font='700 13px JetBrains Mono,monospace'; ctx.fillStyle=L.color; ctx.fillText(L.k,chartArea.right-52,L.y-8);}
   ctx.restore();}};
-const ch = new Chart(sc.getContext('2d'),{data:{datasets:dsets},plugins:[railLabels],options:{
-  responsive:true,maintainAspectRatio:false,animation:{duration:700},
+const ch = new Chart(sc.getContext('2d'),{data:{datasets:mkDatasets()},plugins:[railLabels],options:{
+  responsive:true,maintainAspectRatio:false,animation:{duration:600},
   scales:{x:{type:'logarithmic',min:XMIN,max:XMAX,title:{display:true,text:'what the Medicare plan pays for the service ($, log scale)',color:'#5c6675',font:{size:11}},grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10},maxTicksLimit:7,maxRotation:0,autoSkip:true,callback:v=>'$'+Number(v).toLocaleString()}},
           y:{min:1.4,max:3.15,title:{display:false},grid:{color:'#141a25'},ticks:{color:'#5c6675',font:{size:10.5},stepSize:.25,callback:v=>'×'+v.toFixed(2)}}},
   plugins:{legend:{display:false},tooltip:{filter:i=>i.dataset.type=='scatter',backgroundColor:'#0d1119',borderColor:'#28313f',borderWidth:1,titleColor:'#e9edf4',bodyColor:'#9aa6b7',
     callbacks:{title:i=>i.length?(i[0].raw.c||''):'',label:i=>` Medicare ${fmt$(i.raw.x)} → Commercial ${fmt$(i.raw.com)}  (×${i.raw.y.toFixed(2)})`}}}}});
+function setting(k){
+  if(SET===k) return; SET=k; hidden.clear();
+  set_out.classList.toggle('on',k==='out'); set_inp.classList.toggle('on',k==='inp');
+  ch.data.datasets = mkDatasets(); chipRow(); ch.update();}
 function tog(id){
   if(hidden.has(id)) hidden.delete(id); else hidden.add(id);
   document.getElementById('lc_'+id).classList.toggle('on', !hidden.has(id));
   ch.data.datasets.forEach(ds=>{ds.hidden=hidden.has(ds.railId);});
   ch.update();}
+chipRow();
 // TABLE
 const LANE_LBL = Object.assign({pct:'% of list'},Object.fromEntries(D.lanes.map(l=>[l.id,l.label])));
 const LANE_COL = Object.assign({pct:'#fbbf24'},Object.fromEntries(D.lanes.map(l=>[l.id,l.color])));
