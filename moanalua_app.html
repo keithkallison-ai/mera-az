@@ -1,6 +1,7 @@
 <!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>Mera — Five numbers price this hospital</title>
 <link rel=preconnect href=https://fonts.googleapis.com><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel=stylesheet>
+<link rel=stylesheet href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"><script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--bg:#07090d;--line:#1a2130;--line2:#28313f;--tx:#e9edf4;--tx2:#9aa6b7;--tx3:#5c6675;--ac:#5eead4;--ac2:#818cf8;--gold:#fbbf24;--mcd:#34d399;--mcr:#818cf8;--com:#fb7185}
 *{box-sizing:border-box}
@@ -80,16 +81,21 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 <div class=hero>
   <div class=ey>MERA · HOSPITAL PRICE X-RAY <span class=rule>·</span> <span class=rule>KAISER FOUNDATION HOSPITAL — MOANALUA · HONOLULU, HI</span> <span class=rule>·</span> <span class=rule>the hospital and the insurer are the same company</span></div>
   <h1>Six numbers price this <em>entire hospital</em>.</h1>
-  <p>Kaiser's hospital publishes prices for exactly one insurer — <b>itself</b>. Its entire commercial price book —
-  <b id=hn></b> prices — is one two-branch rule. Nobody negotiated twenty thousand prices. Somebody chose six numbers.</p>
   <div class=tree><span class=q>Does Medicare price the item?</span><span class=br><b class=yes>YES</b> one of five dials × the Medicare rate</span><span class=br><b class=no>NO</b> 66% × the hospital's list price</span></div>
   <div class=dials id=dials></div>
 </div>
 
+<div class=card style="padding:0;overflow:hidden;position:relative">
+  <div id=lmap style="height:275px;background:#0a0d12"></div>
+  <div style="position:absolute;left:16px;bottom:14px;z-index:500;background:rgba(9,12,17,.88);border:1px solid var(--line);border-radius:12px;padding:10px 15px;backdrop-filter:blur(4px)">
+    <div style="font-size:12.5px;font-weight:800">Kaiser Foundation Hospital — Moanalua</div>
+    <div style="font-size:11px;color:var(--tx2);margin-top:2px">3288 Moanalua Road, Honolulu · the insurer owns the building</div>
+  </div>
+</div>
+
 <div class=card>
   <h2>Same service. <em>Same building.</em> Three prices.</h2>
-  <div class=sub>Real published prices, verbatim from the hospital's file — what each of Kaiser's three plans pays for services you'd recognize.
-  Notice the pink chip on every card: <b>it's always ≈2.4×</b>. That constancy — across an MRI, an ER visit, and a gallbladder surgery — is the dial made visible.</div>
+  <div class=sub>Published prices, verbatim. The pink chip repeats — <b>that's the dial.</b></div>
   <div class=exgrid id=exgrid></div>
   <div style="margin-top:14px">
     <div style="font-size:13px;font-weight:800" id=birthh></div>
@@ -110,16 +116,14 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 
 <div class=card>
   <h2>Where Medicare has no rate: <em>one number</em> — 66% of list.</h2>
-  <div class=sub><span id=pctn></span> items — mostly supplies and internal codes Medicare doesn't price — have no fee schedule.
-  The plan pays a flat, declared share of the hospital's list price (the file publishes the percent itself — exact by construction). Sibling plans shown for contrast.</div>
+  <div class=sub><span id=pctn></span> items Medicare doesn't price: a flat, declared share of list.</div>
   <div class=h100 id=hund></div>
   <div class=hticks><span class=sp></span><span class=tt><span>$0</span><span>$25</span><span>$50</span><span>$75</span><span>$100</span></span></div>
 </div>
 
 <div class=card>
   <h2>Look up <em>any price</em>.</h2>
-  <div class=sub>All <span id=nrows></span> plan-priced rows, source-faithful. Hospital-day rates are per day; surgeries &amp; procedure episodes are per case.
-  <span style="color:var(--gold);font-weight:700">EST</span> = the hospital's own published estimate for %-of-list items.</div>
+  <div class=sub>All <span id=nrows></span> plan-priced rows, verbatim. <span style="color:var(--gold);font-weight:700">EST</span> = the hospital's own estimate for %-of-list items.</div>
   <div class=tb><input class=q id=q placeholder="Search a code or a word — try 'mri', 'birth', 'knee', '80053'…">
   <div class=chips id=fpills></div></div>
   <div class=tbox><table id=tbl><thead><tr>
@@ -128,10 +132,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
   <div class=count id=cnt></div>
 </div>
 
-<div class=card>
-  <h2 style="font-size:15px">Fine print — how we know, and what this page does not claim</h2>
-  <div class=fine id=fine></div>
-</div>
+<details class=card>
+  <summary style="cursor:pointer;font-size:14px;font-weight:800;color:var(--tx2)">Fine print — how we know, and what this page does not claim</summary>
+  <div class=fine id=fine style="margin-top:10px"></div>
+</details>
 
 <div class=foot id=foot></div>
 </div>
@@ -141,7 +145,6 @@ const L = Object.fromEntries(D.lanes.map(l=>[l.id,l]));
 const fmt$ = v => v==null?'—':'$'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmt0 = v => v==null?'—':'$'+Math.round(v).toLocaleString();
 const fmtI = v => v.toLocaleString();
-hn.textContent = fmtI(D.funnel.dollar + D.funnel.pct);
 nrows.textContent = fmtI(D.rows.length); pctn.textContent = fmtI(D.funnel.pct);
 
 // THE DIALS (hero) — five storyline dials from the lanes
@@ -229,6 +232,20 @@ function view(k){ if(VIEW===k) return; VIEW=k;
   draw();}
 if(location.hash==='#pct'){VIEW='pct';view_usd.classList.remove('on');view_pct.classList.add('on');}
 draw();
+// THE MAP — legacy pattern: carto dark tiles + a glowing marker
+(function(){
+  const el=document.getElementById('lmap'); if(!el) return;
+  const st=document.createElement('div'); st.style.cssText='position:absolute;right:14px;top:12px;z-index:600;font-size:10px;color:#f66;font-family:monospace';
+  el.parentElement.appendChild(st);
+  try{
+    const LF=window.L;   // our lane-lookup const shadows the bare 'L' — reach the Leaflet global explicitly
+    const m=LF.map('lmap',{zoomControl:false,attributionControl:false,scrollWheelZoom:false}).setView([21.3728,-157.8926],11);
+    LF.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(m);
+    LF.circleMarker([21.3728,-157.8926],{radius:16,color:'#5eead4',weight:1,opacity:.35,fillColor:'#5eead4',fillOpacity:.12}).addTo(m);
+    LF.circleMarker([21.3728,-157.8926],{radius:7,color:'#5eead4',weight:2,fillColor:'#5eead4',fillOpacity:.95}).addTo(m);
+    st.textContent='';
+  }catch(e){st.textContent='MAP ERR: '+e.message}
+})();
 // TABLE
 const LANE_LBL = Object.assign({pct:'% of list'},Object.fromEntries(D.lanes.map(l=>[l.id,l.label])));
 const LANE_COL = Object.assign({pct:'#fbbf24'},Object.fromEntries(D.lanes.map(l=>[l.id,l.color])));
