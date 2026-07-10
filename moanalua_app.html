@@ -66,16 +66,15 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
     <div style="width:58px;height:58px;border-radius:15px;flex:none;background:linear-gradient(135deg,rgba(94,234,212,.18),rgba(129,140,248,.14));border:1px solid #2c5b54;display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:900;color:var(--ac)">K</div>
     <div style="flex:1;min-width:260px">
       <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:#f4f8fc">Kaiser Foundation Hospital — Moanalua</div>
-      <div style="font-size:12.5px;color:var(--tx2);margin-top:3px">Hospital · 3288 Moanalua Road, Honolulu, HI · NPI <span id=npi2></span> · license <span id=lic2></span></div>
+      <div style="font-size:12.5px;color:var(--tx2);margin-top:3px">3288 Moanalua Road, Honolulu, HI</div>
       <div style="font-size:11.5px;color:var(--tx3);margin-top:5px"><span id=facts></span></div>
     </div>
   </div>
-  <div style="font-size:11.5px;color:var(--tx3);margin-top:13px;border-top:1px solid var(--line);padding-top:11px"><b style="color:var(--tx2)">Not a bill, a quote, or your out-of-pocket.</b> These are the standard charges the hospital publishes under federal price-transparency rules — what the plan and the hospital agreed on, not what you will pay.</div>
+  <div style="font-size:11.5px;color:var(--tx3);margin-top:13px;border-top:1px solid var(--line);padding-top:11px">Not a bill or a quote — the standard charges published under federal price-transparency law.</div>
 </div>
 
 <div class=card>
   <h2>Same service. <em>Same building.</em> Three prices.</h2>
-  <div class=sub>Published prices, verbatim. The pink chip repeats — <b>that's the dial.</b></div>
   <div class=exgrid id=exgrid></div>
   <div style="margin-top:14px">
     <div style="font-size:13px;font-weight:800" id=birthh></div>
@@ -84,10 +83,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 </div>
 
 <div class=card>
-  <h2><span id=pp></span> — <em id=vtitle>the dollar price book.</em></h2>
+  <h2>The <em>price book</em>.</h2>
   <div class=chips style="margin:10px 0 2px">
-    <div class="chip on" id=view_usd onclick="view('usd')">× Medicare · the dollar book</div>
-    <div class=chip id=view_pct onclick="view('pct')">% of list · the no-schedule book</div>
+    <div class="chip on" id=view_usd onclick="view('usd')">× Medicare</div>
+    <div class=chip id=view_pct onclick="view('pct')">% of list</div>
   </div>
   <div style="position:relative;height:400px;margin-top:6px" id=ladder></div>
   <div class=chips id=seglegend style="margin-top:10px;display:none"></div>
@@ -95,15 +94,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 </div>
 
 <div class=card>
-  <h2>Where Medicare has no rate: <em>one number</em> — 66% of list.</h2>
-  <div class=sub><span id=pctn></span> items Medicare doesn't price: a flat, declared share of list.</div>
-  <div class=h100 id=hund></div>
-  <div class=hticks><span class=sp></span><span class=tt><span>$0</span><span>$25</span><span>$50</span><span>$75</span><span>$100</span></span></div>
-</div>
-
-<div class=card>
   <h2>Look up <em>any price</em>.</h2>
-  <div class=sub>All <span id=nrows></span> plan-priced rows, verbatim. <span style="color:var(--gold);font-weight:700">EST</span> = the hospital's own estimate for %-of-list items.</div>
   <div class=tb><input class=q id=q placeholder="Search a code or a word — try 'mri', 'birth', 'knee', '80053'…">
   <div class=chips id=fpills></div></div>
   <div class=tbox><table id=tbl><thead><tr>
@@ -124,11 +115,9 @@ const D = {"payer_plan":"Kaiser Foundation Health Plan \u00b7 Commercial","hospi
 const fmt$ = v => v==null?'—':'$'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmt0 = v => v==null?'—':'$'+Math.round(v).toLocaleString();
 const fmtI = v => v.toLocaleString();
-nrows.textContent = fmtI(D.rows.length); pctn.textContent = fmtI(D.funnel.pct);
 
 // IDENTITY (profile header)
-npi2.textContent = D.npi; lic2.textContent = D.license;
-facts.innerHTML = `${fmtI(D.funnel.dollar + D.funnel.pct)} published prices · 1 payer — ${D.payer_plan.split(' ·')[0]} · updated ${D.updated} · CMS v${D.version} · <span style="color:var(--ac)">✓ byte-exact capture</span>`;
+facts.innerHTML = `${fmtI(D.funnel.dollar + D.funnel.pct)} prices · 1 payer — ${D.payer_plan} · ${D.updated} · <span style="color:var(--ac)">✓ byte-exact</span>`;
 // EXAMPLE CARDS
 const WHO=[["mcd","Medicaid","#34d399"],["mcr","Medicare","#818cf8"],["com","Commercial","#fb7185"]];
 exgrid.innerHTML = D.ex.map(e=>{
@@ -136,23 +125,16 @@ exgrid.innerHTML = D.ex.map(e=>{
   const bars = WHO.map(w=>{
     const v=e[w[0]]; if(v==null) return '';
     return `<div class=rw><div class=top><span class=who>${w[1]}</span><span class=amt>${fmt0(v)}</span></div><div class=bar><i style="width:${Math.max(3,v/mx*100)}%;background:linear-gradient(90deg,${w[2]}dd,${w[2]}77)"></i></div></div>`;}).join('');
-  return `<div class=ex><div class=nm>${e.name}<i>${e.ct} ${e.code}</i></div>${bars}<span class=x>×${e.x.toFixed(2)} vs Medicare</span></div>`;}).join('');
+  return `<div class=ex><div class=nm>${e.name}<i>${e.ct} ${e.code}</i></div>${bars}<span class=x>×${e.x.toFixed(2)}</span></div>`;}).join('');
 if(D.birth.length){
-  birthh.textContent = "One night in this hospital — childbirth (MS-DRG 807), price per day:";
+  birthh.textContent = "One night — childbirth, per day:";
   birthrow.innerHTML = D.birth.map(b=>`<div class=bd><div class=t>${b.tag}</div><div class=a>${fmt0(b.com)}<span style="font-size:10px;color:var(--tx3)">/day</span></div><div class=m>Medicare ${fmt0(b.mcr)}</div></div>`).join('')
    + `<div class=bd style="border-style:dashed"><div class=t>the dial</div><div class=a style="color:#e9edf4">×${(L.perdiem?L.perdiem.k:1.77).toFixed(2)}</div><div class=m>every day, every DRG</div></div>`;
 }
 
-// $100 OF LIST
-const H=[["List price","100","rgba(233,237,244,.28)",true],["Commercial",D.pcts.com,"#fb7185",false],["Medicare",D.pcts.mcr,"#818cf8",false],["Medicaid",D.pcts.mcd,"#34d399",false]];
-hund.innerHTML = H.map(h=>{
-  const amt = h[3] ? `<b style="right:10px;color:var(--tx2)">the sticker — $100</b>`
-                   : `<b style="left:calc(${h[1]}% + 10px);color:${h[2]}">pays $${h[1]}</b>`;
-  const fill = `<i style="width:${h[1]}%;background:${h[3]?'linear-gradient(90deg,#161c28,#1b2230)':'linear-gradient(90deg,'+h[2]+'33,'+h[2]+'88)'};border-right:2px solid ${h[3]?'rgba(233,237,244,.25)':h[2]}"></i>`;
-  return `<div class=hrow><span class=who>${h[0]}</span><span class=trk>${fill}${amt}</span></div>`;}).join('');
+
 
 // THE TWO BOOKS — one chart, two views (legacy pill pattern): x Medicare | % of list
-pp.textContent = D.payer_plan;
 const wfit = D.lanes.reduce((a,l)=>a+l.fit2*l.n,0)/D.lanes.reduce((a,l)=>a+l.n,0);
 const LBY = Object.fromEntries(D.lanes.map(l=>[l.id,l]));
 const nof=(...ids)=>ids.reduce((a,id)=>a+((LBY[id]||{n:0}).n),0);
@@ -181,23 +163,21 @@ function barsHtml(bars, Y0, Y1, TOP, BOT, grids, refY, refLabel, refAtTop){
       : '';
     h+=`<div style="position:absolute;left:56px;right:12px;top:${top}px;height:${b.th}px;border-radius:${Math.min(9,b.th/2)}px;overflow:hidden;${b.segs?'':'background:linear-gradient(90deg,'+b.color+'e6,'+b.color+'77);'}box-shadow:0 0 20px ${b.color}40">${fill}</div>
     <div style="position:absolute;left:68px;top:${ly}px;font-size:12.5px;font-weight:800;color:${b.color}">${b.name} <span style="color:var(--tx3);font-weight:600;font-size:10.5px">· ${b.unit}</span></div>
-    <div style="position:absolute;right:16px;top:${ly}px;text-align:right"><span style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:14px;color:${b.color}">${b.pctlabel||('×'+b.k.toFixed(2))}</span> <span style="font-size:10px;color:var(--tx3)">${b.base||'of the Medicare rate'} · ${fmtI(b.n)} codes</span></div>`;
+    <div style="position:absolute;right:16px;top:${ly}px;text-align:right"><span style="font-family:JetBrains Mono,monospace;font-weight:700;font-size:14px;color:${b.color}">${b.pctlabel||('×'+b.k.toFixed(2))}</span> <span style="font-size:10px;color:var(--tx3)">${fmtI(b.n)} codes</span></div>`;
   }
   return h;}
 let VIEW='usd';
 function draw(){
   if(VIEW==='usd'){
-    ladder.innerHTML = barsHtml(USD_BARS, 0.95, 3.25, 26, 36, [1,1.5,2,2.5,3], 1, 'what the Medicare plan pays (1×)', false);
+    ladder.innerHTML = barsHtml(USD_BARS, 0.95, 3.25, 26, 36, [1,1.5,2,2.5,3], 1, 'Medicare rate (1×)', false);
     seglegend.style.display='none';
-    lfoot.innerHTML = `Bar thickness = number of priced codes (one ruler across both views). <b style="color:var(--tx2)">${wfit.toFixed(1)}% of prices within ±$2 of their dial</b> · 119 exceptions under “Off-dial rows” below · all bars price against the <b style="color:var(--tx2)">Medicare plan's rate</b>; inpatient stays are MS-DRG day rates.`;
-    vtitle.textContent='the dollar price book.';
+    lfoot.innerHTML = `thickness = codes · <b style="color:var(--tx2)">${wfit.toFixed(1)}% within ±$2</b> · 119 exceptions in the lookup`;
   } else {
     ladder.innerHTML = barsHtml([{k:D.pcts.com/100, name:'No-schedule items', unit:'flat share of list', color:'#f59e0b', n:D.funnel.pct,
       segs:D.pctseg, pctlabel:D.pcts.com+'%', base:"of the hospital's LIST price"}],
-      0.30, 1.06, 28, 30, [0.25,0.5,0.75,1], 1, "the hospital's list price (1×)", true);
+      0.30, 1.06, 28, 30, [0.25,0.5,0.75,1], 1, "list price (1×)", true);
     seglegend.style.display='flex';
-    lfoot.innerHTML = `One dial: <b style="color:var(--tx2)">${D.pcts.com}% of the hospital's list price</b>, exact by construction (the file publishes the percent). Divisions = the canonical RBCS category mix of the ${fmtI(D.funnel.pct)} no-schedule codes.`;
-    vtitle.textContent='the list-price book.';
+    lfoot.innerHTML = `<b style="color:var(--tx2)">${D.pcts.com}% of list</b> · exact by construction`;
   }}
 seglegend.innerHTML=D.pctseg.map(x=>`<div class=chip style="cursor:default"><i style="background:${x.color}"></i>${x.name} <span style="color:var(--tx3);font-weight:500">· ${fmtI(x.n)} (${(x.n/D.funnel.pct*100).toFixed(x.n/D.funnel.pct>=0.02?0:1)}%)</span></div>`).join('');
 function view(k){ if(VIEW===k) return; VIEW=k;
@@ -251,7 +231,7 @@ function render(){
     }
   }
   tb.innerHTML=out.join('');
-  cnt.textContent = `${fmtI(hit)} rows match — showing ${Math.min(hit,250).toLocaleString()}. "round" = dollars off the dial line (publisher rounding). Off-dial rows (${fmtI(D.funnel.exceptions)}) are the genuine exceptions.`;
+  cnt.textContent = `${fmtI(hit)} rows · showing ${Math.min(hit,250).toLocaleString()}`;
 }
 // FINE PRINT + FOOTER
 fine.innerHTML = `<b>The dials, precisely.</b> ${D.lanes.map(l=>`${l.label} ×${l.k} (n=${fmtI(l.n)}, ${l.fit2}% within $2)`).join(' · ')}.
@@ -260,10 +240,10 @@ Weighted, <b>${wfit.toFixed(1)}%</b> of all dollar prices sit within $2 of their
 <b>Coverage, honestly.</b> The file has ${fmtI(D.funnel.rows)} rows; ${fmtI(D.funnel.chargemaster_only)} are chargemaster-only (list/cash price, no plan price); ${fmtI(D.funnel.dollar)} carry dollar prices and ${fmtI(D.funnel.pct)} carry the flat %-of-list terms per plan. % rows are typed as percentages — their $ figures are the hospital's own published estimates (EST), never our arithmetic.<br>
 <b>The whole book, accounted.</b> ${fmtI(D.funnel.dollar)} dollar prices on five dials (±$2; ${fmtI(D.funnel.exceptions)} exceptions) + ${fmtI(D.funnel.pct)} at exactly ${D.pcts.com}% of list + ${fmtI(D.funnel.chargemaster_only)} rows this plan does not price = ${fmtI(D.funnel.rows)} rows — 100% accounted.<br>
 <b>Estimates are not the contract.</b> For no-schedule items the hospital also publishes historical estimated-allowed medians (EST in the lookup): ${D.estdrift.exact_pct}% equal 66% × today's list to the cent; the rest drift (backward-looking medians vs the current list, p90 $${D.estdrift.p90}) — a data-quality observation, not a pricing rule.<br>
+<b>Lookup keys.</b> “round” = dollars off the dial line (publisher rounding); EST = the hospital's own estimated-allowed for %-of-list rows; “Off-dial rows” = the ${fmtI(D.funnel.exceptions)} genuine exceptions.<br>
 <b>Product lines are canonical.</b> Row categories use the CMS RBCS RY2025 taxonomy (refs/rbcs_taxonomy_RY2025.csv), resolved deterministically per code; unmapped codes are surfaced as “(unmapped)”, never silently relabeled. Bar names are the dominant RBCS categories on each dial.<br>
 <b>One relationship.</b> This page describes Kaiser-at-Kaiser only. The same insurer at Queen's West Oʻahu binds at the cent (2.80×/2.75×, 100.000% penny-exact); here the bond is at the dollar grain — the difference is the publisher's pipeline, not the contract's intent.`;
-foot.innerHTML=`Source: ${D.hospital} (${D.address}), license ${D.license}, attester ${D.attester}, published ${D.updated}, CMS template v${D.version}.
-Captured <b>byte-exact</b> (SHA-256 ${D.pin_sha8}…, ${(D.raw_bytes/1e6).toFixed(1)} MB, ${fmtI(D.cells)} cells) through the universal capture stack; hostile-sealed; 16/16 gate controls + 9/9 bulk/forgery adversary attacks caught.
-This page is generated only from that sealed boundary — every number recomputed at build and cross-checked by an independent second engine (DuckDB: lane census, scalars, fit shares, funnel, 400-row replay, and every example card above replayed by row).`;
+foot.innerHTML=`${D.hospital} · NPI ${D.npi} · license ${D.license} · attester ${D.attester} · published ${D.updated} · CMS v${D.version}<br>
+byte-exact capture (SHA-256 ${D.pin_sha8}…, ${fmtI(D.cells)} cells) · hostile-sealed · every number recomputed at build and cross-checked by a second engine — full method in the fine print.`;
 fpick('all');
 </script></body></html>
