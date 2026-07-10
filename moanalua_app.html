@@ -192,7 +192,7 @@ draw();
   el.parentElement.appendChild(st);
   try{
     const LF=window.L;   // our lane-lookup const shadows the bare 'L' — reach the Leaflet global explicitly
-    const m=LF.map('lmap',{zoomControl:false,attributionControl:false,scrollWheelZoom:false}).setView([21.3728,-157.8926],11);
+    const m=LF.map('lmap',{zoomControl:false,attributionControl:false,scrollWheelZoom:false}).setView([21.3358,-158.0186],11);   // the shared O'ahu frame (identical to West O'ahu's page); marker stays on Moanalua
     LF.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(m);
     LF.circleMarker([21.3728,-157.8926],{radius:16,color:'#5eead4',weight:1,opacity:.35,fillColor:'#5eead4',fillOpacity:.12}).addTo(m);
     LF.circleMarker([21.3728,-157.8926],{radius:7,color:'#5eead4',weight:2,fillColor:'#5eead4',fillOpacity:.95}).addTo(m);
