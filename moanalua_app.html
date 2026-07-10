@@ -56,8 +56,8 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .bd .a{font-family:JetBrains Mono,monospace;font-size:19px;font-weight:700;color:#fda4af;margin-top:4px}
 .bd .m{font-family:JetBrains Mono,monospace;font-size:11px;color:var(--mcr);margin-top:2px}
 /* LEGACY WEST-OAHU HEADER — transplanted verbatim from audit_app/web/style.css (values inlined) */
-#legacyhead{background:#000;border:1px solid #272727;border-radius:20px;overflow:hidden;margin-bottom:16px;font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#fff}
-#legacyhead .topbar{display:flex;align-items:center;gap:14px;padding:9px 20px;background:#000;border-bottom:1px solid #272727}
+#legacyhead{background:#000;border-bottom:1px solid #272727;margin:0 0 22px;font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#fff}
+#legacyhead .topbar{position:sticky;top:0;z-index:1200;display:flex;align-items:center;gap:14px;padding:9px 20px;background:#000;border-bottom:1px solid #272727}
 #legacyhead .brand{font-weight:800;letter-spacing:.5px;font-size:16px;white-space:nowrap;color:#fff}
 #legacyhead .brand span{color:#FF5A1F;font-weight:600;margin-left:7px;font-size:12px}
 #legacyhead .topbar-hosp{font-size:13px;color:#8E949E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
@@ -81,8 +81,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .hpin .d{position:absolute;inset:4px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px #000,0 0 7px rgba(34,197,94,.85);z-index:2}
 .hpin .p{position:absolute;inset:4px;border-radius:50%;background:#22c55e;z-index:1;animation:hpulse 2.1s cubic-bezier(.2,.6,.3,1) infinite}
 @keyframes hpulse{0%{transform:scale(1);opacity:.55}70%{transform:scale(3.4);opacity:0}100%{transform:scale(3.4);opacity:0}}
-</style></head><body><div class=wrap>
-
+</style></head><body>
 <div id=legacyhead>
   <header class=topbar>
     <div class=brand>MERA<span>· HOSPITAL PRICES</span></div>
@@ -102,6 +101,8 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
     <div class=srcfile>✓ byte-exact capture · CMS HPT v3.0.1 · not a bill or a quote — standard charges published under federal price-transparency law</div>
   </section>
 </div>
+
+<div class=wrap>
 
 <div class=card>
   <h2>Same service. <em>Same building.</em> Three prices.</h2>
