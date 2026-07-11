@@ -53,6 +53,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 [data-theme=light] #tabbar{box-shadow:0 0 10px rgba(255,90,31,.25)}
 .pane-in{animation:panein .3s cubic-bezier(.25,.7,.25,1) both}
 @keyframes panein{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.pane-in-l{animation:paneinl .32s cubic-bezier(.25,.7,.25,1) both}
+.pane-in-r{animation:paneinr .32s cubic-bezier(.25,.7,.25,1) both}
+@keyframes paneinl{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+@keyframes paneinr{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 .sugg{position:absolute;top:calc(100% + 7px);left:0;right:0;background:#0d1119;border:1px solid var(--line2);border-radius:13px;padding:6px;z-index:70;box-shadow:0 14px 40px rgba(0,0,0,.55);display:none}
 .sugg.open{display:block}
 .sgit{padding:10px 13px;border-radius:9px;cursor:pointer;font-size:13.5px;display:flex;align-items:baseline;gap:10px;transition:background .1s}
@@ -846,19 +850,50 @@ function moveBar(b, instant){
   TABBAR.style.left=(b.offsetLeft+(b.offsetWidth-w)/2)+'px';
   if(instant){ void TABBAR.offsetHeight; TABBAR.style.transition=''; }
 }
-document.getElementById('tabs').addEventListener('click', e => {
-  const b=e.target.closest('.tabb'); if(!b || b.classList.contains('on')) return;
+function switchTo(b, dir){
+  if(!b || b.classList.contains('on')) return;
   document.querySelectorAll('.tabb').forEach(x=>x.classList.toggle('on', x===b));
   moveBar(b);
   for(const k of ['browse','explore','audit']){
     const p=document.getElementById('pane_'+k), show=(b.dataset.tab===k);
     p.style.display = show?'':'none';
-    p.classList.remove('pane-in');
-    if(show){ void p.offsetWidth; p.classList.add('pane-in'); }
+    p.classList.remove('pane-in','pane-in-l','pane-in-r');
+    if(show){ void p.offsetWidth; p.classList.add(dir==='r'?'pane-in-r':dir==='l'?'pane-in-l':'pane-in'); }
   }
   if(b.dataset.tab==='explore') draw();
   if(b.dataset.tab==='browse' && CP.code) codePage(CP.code, CP.ct, CP.vi);
-});
+}
+document.getElementById('tabs').addEventListener('click', e => { switchTo(e.target.closest('.tabb')); });
+// two-finger horizontal swipe glides across the divisions (one per gesture, inertia-locked)
+(function(){
+  const ORDER=['explore','browse','audit'];
+  let accX=0, gestT=null, locked=false;
+  function scrollsX(el){
+    for(let n=el; n && n.nodeType===1 && n!==document.body; n=n.parentElement){
+      if(n.scrollWidth - n.clientWidth > 2){
+        const o=getComputedStyle(n).overflowX;
+        if(o==='auto'||o==='scroll') return true;
+      }
+    }
+    return false;
+  }
+  document.addEventListener('wheel', e => {
+    if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    if(!e.target.closest || !e.target.closest('#pane_browse,#pane_explore,#pane_audit,#tabs')) return;
+    if(scrollsX(e.target)) return;
+    e.preventDefault();
+    clearTimeout(gestT); gestT=setTimeout(()=>{ accX=0; locked=false; }, 180);
+    if(locked) return;
+    accX += e.deltaX;
+    if(Math.abs(accX) < 110) return;
+    const dir = accX>0 ? 'r' : 'l';
+    accX=0; locked=true;
+    const cur=ORDER.indexOf(document.querySelector('.tabb.on').dataset.tab);
+    const nxt=cur + (dir==='r'?1:-1);
+    if(nxt<0 || nxt>=ORDER.length) return;
+    switchTo(document.querySelector('.tabb[data-tab="'+ORDER[nxt]+'"]'), dir);
+  }, {passive:false});
+})();
 window.addEventListener('resize', () => { const b=document.querySelector('.tabb.on'); if(b) moveBar(b, true); });
 moveBar(document.querySelector('.tabb.on'), true);
 // THEME TOGGLE — sun/moon (legacy audit_app behavior), charts re-render with the theme palette
