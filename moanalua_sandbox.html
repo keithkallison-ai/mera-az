@@ -571,12 +571,15 @@ cpanel.addEventListener('mouseover', e => {
   if(e.target.closest('.cpop')) clearTimeout(POPT);
 });
 cpanel.addEventListener('mouseout', e => {
-  if(!e.target.closest('.rt, .cpop')) return;
+  const from=e.target.closest('.rt, .cpop');
+  if(!from) return;
   const to=e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.rt, .cpop') : null;
   if(to) return;
-  clearTimeout(POPT); POPT=setTimeout(hidePop, 280);
+  clearTimeout(POPT);
+  POPT=setTimeout(hidePop, e.target.closest('.cpop') ? 110 : 280);   // off the list -> gone almost immediately; rt->list travel keeps grace
 });
-cpanel.addEventListener('scroll', hidePop, true);
+cpanel.addEventListener('scroll', e => { if(e.target && e.target.closest && e.target.closest('.cpop')) return; hidePop(); }, true);
+window.addEventListener('scroll', () => hidePop(), {passive:true});
 cpanel.addEventListener('click', e => {
   if(e.target.closest('.rt') || e.target.closest('.cpop')) return;   // inspecting the code list never toggles the selector
   const ti=e.target.closest('.copt[data-ti]');
