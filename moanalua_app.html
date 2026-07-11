@@ -45,8 +45,13 @@ td .lz{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:
 td .est{color:var(--gold);font-size:10px;font-weight:700;margin-left:5px}
 .tbox{max-height:500px;overflow:auto;border:1px solid var(--line);border-radius:12px}
 input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-radius:11px;padding:10px 15px;font:inherit;font-size:13.5px;width:320px;max-width:100%}input.q:focus{outline:none;border-color:var(--ac)}
-select.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-radius:11px;padding:10px 12px;font:inherit;font-size:13px;max-width:100%;cursor:pointer}select.q:focus{outline:none;border-color:var(--ac)}
-[data-theme=light] select.q{background:#ffffff;color:#171b21}
+select.q{appearance:none;-webkit-appearance:none;background-color:#0f141d;color:var(--tx);border:1px solid var(--line2);border-radius:11px;padding:10px 36px 10px 14px;font:inherit;font-size:13px;font-weight:600;letter-spacing:-.01em;max-width:100%;cursor:pointer;transition:border-color .15s,background-color .15s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%235c6675' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center}
+select.q:hover{border-color:var(--ac);background-color:#121826}
+select.q:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(94,234,212,.12)}
+select.q option{background:#0f141d;color:var(--tx)}
+[data-theme=light] select.q{background-color:#ffffff;color:#171b21;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%237d8899' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+[data-theme=light] select.q:hover{background-color:#f6f8fb}
+[data-theme=light] select.q option{background:#ffffff;color:#171b21}
 .tb{display:flex;gap:11px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .count{font-size:11.5px;color:var(--tx3);margin:8px 2px 0}
 .fine{color:var(--tx3);font-size:11.4px;line-height:1.75}
@@ -222,15 +227,6 @@ select.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-r
 <div class=wrap>
 
 <div class=card>
-  <h2>Same service. <em>Same building.</em> Three prices.</h2>
-  <div class=exgrid id=exgrid></div>
-  <div style="margin-top:14px">
-    <div style="font-size:13px;font-weight:800" id=birthh></div>
-    <div class=birth id=birthrow></div>
-  </div>
-</div>
-
-<div class=card>
   <h2><span id=pbt></span></h2>
   <div class=chips style="margin:10px 0 2px">
     <div class="chip on" id=view_usd onclick="view('usd')">× Medicare</div>
@@ -282,22 +278,6 @@ const fmtI = v => v.toLocaleString();
 
 // IDENTITY (profile header)
 facts.innerHTML = `NPI ${D.npi} · License ${String(D.license).split('|')[0].trim()} (HI) · CMS v${D.version} · updated ${D.updated} · attested by ${D.attester}`;
-// EXAMPLE CARDS
-const WHO=[["mcd","Medicaid","#34d399"],["mcr","Medicare","#818cf8"],["com","Commercial","#fb7185"]];
-exgrid.innerHTML = D.ex.map(e=>{
-  const mx=e.com;
-  const bars = WHO.map(w=>{
-    const v=e[w[0]]; if(v==null) return '';
-    return `<div class=rw><div class=top><span class=who>${w[1]}</span><span class=amt>${fmt0(v)}</span></div><div class=bar><i style="width:${Math.max(3,v/mx*100)}%;background:linear-gradient(90deg,${w[2]}dd,${w[2]}77)"></i></div></div>`;}).join('');
-  return `<div class=ex data-c="${e.code}" data-t="${e.ct}" title="open this code's page"><div class=nm>${e.name}<i>${e.ct} ${e.code}</i></div>${bars}<span class=x>×${e.x.toFixed(2)}</span></div>`;}).join('');
-if(D.birth.length){
-  birthh.textContent = "One night — childbirth, per day:";
-  birthrow.innerHTML = D.birth.map(b=>`<div class=bd data-c="807" data-t="MS-DRG" title="open this code's page"><div class=t>${b.tag}</div><div class=a>${fmt0(b.com)}<span style="font-size:10px;color:var(--tx3)">/day</span></div><div class=m>Medicare ${fmt0(b.mcr)}</div></div>`).join('')
-   + `<div class=bd style="border-style:dashed"><div class=t>the dial</div><div class=a style="color:var(--tx)">×${(L.perdiem?L.perdiem.k:1.77).toFixed(2)}</div><div class=m>every day, every DRG</div></div>`;
-}
-
-
-
 // THE PRICE BOOK — density strips: y = the dial, uniform bar height, brightness = code density along the $ axis
 pbt.textContent = D.payer_plan;
 const wfit = D.lanes.reduce((a,l)=>a+l.fit2*l.n,0)/D.lanes.reduce((a,l)=>a+l.n,0);
@@ -512,8 +492,6 @@ function goCode(c,t){
   }
 }
 tb.addEventListener('click',e=>{ const tr=e.target.closest('tr[data-c]'); if(tr) goCode(tr.dataset.c,tr.dataset.t); });
-exgrid.addEventListener('click',e=>{ const x=e.target.closest('[data-c]'); if(x) goCode(x.dataset.c,x.dataset.t); });
-birthrow.addEventListener('click',e=>{ const x=e.target.closest('[data-c]'); if(x) goCode(x.dataset.c,x.dataset.t); });
 (function(){ const m=location.hash.match(/^#c\/([A-Z-]+):(.+)$/);
   if(!(m&&codePage(decodeURIComponent(m[2]),m[1],0))) codePage('44406','CPT',0); })();
 // THE MAP — legacy console treatment (kept OUTSIDE the chart block so chart patches can't delete it)
