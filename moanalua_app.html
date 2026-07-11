@@ -346,7 +346,7 @@ fpick('all');
    +'<div class="cms-sub medicaid"><div class="prog-hd"><span class="prog-name">Medicaid</span><span class="prog-sum">all '+m$(pd.price)+'</span><span class="prog-count">1 plan</span></div><div class="prog-sub">State Medicaid program</div><div class="prog-rows">'+prow(pd)+'</div></div>'
   +'</div>';
   const by={};
-  cp.plans.forEach(p=>{ (by[p.price]=by[p.price]||[]).push(p); });
+  cp.plans.filter(p=>p.var!=='mcd').forEach(p=>{ (by[p.price]=by[p.price]||[]).push(p); });   // Medicaid stays in the menu (lossless); the graph shows the consumer-relevant pair
   const pts=Object.keys(by).map(Number).sort((a,b)=>a-b).map(pr=>({price:pr, ps:by[pr], base:by[pr].every(p=>p.base)}));
   function render(){
     const W=cbars.clientWidth||1000, TOPH=46, mx=Math.max(...pts.map(t=>t.price))*1.10;
