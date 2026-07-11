@@ -83,14 +83,13 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .divsel .copt.on{cursor:pointer}
 .divsel .dvchev{margin-left:4px;color:var(--tx3);display:inline-flex;flex:0 0 auto;transition:transform .18s}
 .divsel.open .dvchev{transform:rotate(180deg)}
-.dvpanel{display:none;position:absolute;top:calc(100% - 6px);left:8px;right:8px;z-index:90;background:#0d1119;border:1px solid var(--line2);border-radius:13px;padding:6px;box-shadow:0 18px 48px rgba(0,0,0,.62)}
+.dvpanel{display:none;position:absolute;top:calc(100% - 6px);left:8px;right:8px;z-index:90;background:#0d1119;border:1px solid var(--line2);border-radius:13px;padding:6px;box-shadow:0 18px 48px rgba(0,0,0,.62);max-height:min(46vh,430px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .divsel.open .dvpanel{display:block;animation:dvin .15s ease both}
 [data-theme=light] .dvpanel{background:#ffffff;box-shadow:0 18px 48px rgba(16,24,40,.18)}
 @keyframes dvin{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
-.cpop{display:none;position:absolute;left:100%;top:-6px;z-index:95;padding-left:12px}
+.cpop{display:none;position:fixed;left:0;top:0;z-index:120}
 .cpopin{background:#0d1119;border:1px solid var(--line2);border-radius:12px;padding:10px 13px;box-shadow:0 16px 44px rgba(0,0,0,.6);width:max-content;max-width:540px;max-height:340px;overflow-y:auto;scrollbar-width:thin}
-.copt .rt:hover ~ .cpop{display:block}
-.copt .cpop:hover{display:block}
+
 .cpop .cr{display:flex;gap:11px;font-size:11.5px;padding:3px 0;align-items:baseline}
 .cpop .cc{font-family:JetBrains Mono,monospace;color:#FF5A1F;min-width:50px;font-weight:600}
 .cpop .ct2{color:var(--tx2)}
@@ -551,6 +550,33 @@ function renderPanel(){
       return '<div class="copt'+(pp[0]===PLAN?' on':'')+'" data-plan="'+pp[0]+'"><span class=pl><span style="font-size:13px;font-weight:700">'+pp[1]+'</span></span><span class=rp>'+(v==null?'not published':fmt0(v))+'</span></div>';
     }).join('');
 }
+let POPT=null, POPEL=null;
+function hidePop(){ clearTimeout(POPT); if(POPEL){ POPEL.style.display='none'; POPEL=null; } }
+cpanel.addEventListener('mouseover', e => {
+  const rt=e.target.closest('.rt');
+  if(rt){
+    const row=rt.closest('.copt'); const p=row && row.querySelector('.cpop');
+    if(p){
+      clearTimeout(POPT);
+      if(POPEL && POPEL!==p) hidePop();
+      p.style.display='block';
+      const r=rt.getBoundingClientRect(), ph=p.offsetHeight, pw=p.offsetWidth;
+      let top=Math.max(8, Math.min(r.top-6, window.innerHeight-ph-8));
+      let left=r.right+10; if(left+pw>window.innerWidth-8) left=Math.max(8, r.left-pw-10);
+      p.style.top=top+'px'; p.style.left=left+'px';
+      POPEL=p;
+    }
+    return;
+  }
+  if(e.target.closest('.cpop')) clearTimeout(POPT);
+});
+cpanel.addEventListener('mouseout', e => {
+  if(!e.target.closest('.rt, .cpop')) return;
+  const to=e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.rt, .cpop') : null;
+  if(to) return;
+  clearTimeout(POPT); POPT=setTimeout(hidePop, 280);
+});
+cpanel.addEventListener('scroll', hidePop, true);
 cpanel.addEventListener('click', e => {
   if(e.target.closest('.rt') || e.target.closest('.cpop')) return;   // inspecting the code list never toggles the selector
   const ti=e.target.closest('.copt[data-ti]');
