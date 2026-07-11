@@ -412,18 +412,18 @@ function ddSync(){
   ddRender(dd_plan, 'Plan', INSURERS[INS].plans, PLAN, v=>{ PLAN=v; ddSync(); render(); });
 }
 ddSync();
-q.addEventListener('input',()=>{flt.q=q.value.trim().toLowerCase();CONCEPT=null;buildSugg();});
-// CONCEPT SEARCH v2 — type a procedure, pick the concept, LAND on the anchor code's page.
-// Anchor = the CMS-shoppable member of the concept when one exists (deterministic), else the
-// lowest-priced version. Exploration = exact price-vector tiers as pills ON the per-code card.
+q.addEventListener('input',()=>{flt.q=q.value.trim().toLowerCase();buildSugg();});   // typing feeds SUGGESTIONS ONLY — the boxes hold the last COMMITTED concept
+// CONCEPT SEARCH — type a procedure, COMMIT a suggested concept (Enter/click), LAND on the anchor code's page.
+// Committing adopts the COMPLETED concept word as the query (the search bar autocompletes). The two boxes are
+// specifications of the committed concept only — typing never touches them; the next commit replaces them.
 const SHOPPABLE=new Set(Object.keys(D.shoppable));   // the CMS-70 shoppable services (refs/cms70_shoppable_services.csv, Table 3 / 84 FR 65571)
 let CONCEPT=null;
 const tcase=t=>t.replace(/\b\w/g,c=>c.toUpperCase());
 const escRe=t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-// the concept NAME is the autocomplete CONCLUSION of the query: each typed term completes to the most
-// frequent full word containing it across the matched MRF titles ('colonosco' -> 'Colonoscopy').
-function conceptLabel(rows){
-  const terms=flt.q.split(/\s+/).filter(Boolean);
+// each typed term completes to the most frequent full word containing it across the matched MRF titles
+// ('colon'/'colonosco' -> 'Colonoscopy'); the completed phrase IS the committable concept.
+function conceptLabel(rows, qstr){
+  const terms=qstr.split(/\s+/).filter(Boolean);
   return terms.map(term=>{
     const re=new RegExp('[A-Za-z0-9/&-]*'+escRe(term)+'[A-Za-z0-9/&-]*','gi');
     const counts={};
@@ -433,8 +433,8 @@ function conceptLabel(rows){
     return (best===best.toUpperCase()&&best.length>4)?tcase(best.toLowerCase()):(best[0].toUpperCase()+best.slice(1));
   }).join(' ');
 }
-function conceptHits(){
-  const terms=flt.q.split(/\s+/).filter(Boolean);
+function conceptHits(qstr){
+  const terms=String(qstr||'').split(/\s+/).filter(Boolean);
   if(!terms.length) return [];
   return D.rows.filter(r=>{ const hay=(r[0]+' '+r[2]).toLowerCase(); return terms.every(t=>hay.includes(t)); });
 }
@@ -445,12 +445,13 @@ function tierAnchor(t){
 }
 function pickConcept(cat, opts){
   opts=opts||{};
-  const hits=conceptHits().filter(r=>(r[10]||'(unmapped)')===cat);
-  if(!hits.length){ CONCEPT=null; return; }
+  const committedQ = opts.keep && CONCEPT ? CONCEPT.query : String(opts.q||flt.q);   // keep-path re-renders the COMMITTED query, never the input box
+  const hits=conceptHits(committedQ).filter(r=>(r[10]||'(unmapped)')===cat);
+  if(!hits.length){ return; }
   const tiers={};
   hits.forEach(r=>{ const tk=[r[5],r[6],r[7]].join('|'); (tiers[tk]=tiers[tk]||[]).push(r); });
   const tl=Object.values(tiers).sort((a,b)=>(a[0][PIDX[PLAN]]??1/0)-(b[0][PIDX[PLAN]]??1/0));
-  CONCEPT={q:conceptLabel(hits), cat, tiers:tl};
+  CONCEPT={q:conceptLabel(hits, committedQ), query:committedQ, cat, tiers:tl};
   let anchor=null, viaShop=false;
   for(const t of tl){ const sh=t.filter(r=>SHOPPABLE.has(String(r[0]))); if(sh.length){ anchor=sh.sort((a,b)=>String(a[0])<String(b[0])?-1:1)[0]; viaShop=true; break; } }
   if(!anchor) anchor=tierAnchor(tl[0]);
@@ -492,29 +493,37 @@ cpanel.addEventListener('click', e => {
   if(pl){ PLAN=pl.dataset.plan; ddSync(); if(CONCEPT) pickConcept(CONCEPT.cat,{keep:true}); }
 });
 function buildSugg(){
-  const hits=conceptHits();
+  const hits=conceptHits(flt.q);
   if(!hits.length){ sugg.classList.remove('open'); sugg.innerHTML=''; return; }
   const cats={};
   hits.forEach(r=>{ const k=r[10]||'(unmapped)'; (cats[k]=cats[k]||[]).push(r); });
   const entries=Object.keys(cats).sort((a,b)=>cats[b].length-cats[a].length).slice(0,6);
   sugg.innerHTML=entries.map((ck,i)=>{
-    const rows=cats[ck], prices=rows.map(r=>r[PIDX[PLAN]]).filter(v=>v!=null);
+    // the suggestion IS the completed concept: complete the words, then re-count against the COMPLETED query
+    const label=conceptLabel(cats[ck], flt.q), cq=label.toLowerCase();
+    const rows=conceptHits(cq).filter(r=>(r[10]||'(unmapped)')===ck);
+    if(!rows.length) return '';
+    const prices=rows.map(r=>r[PIDX[PLAN]]).filter(v=>v!=null);
     const from=prices.length?fmt0(Math.min(...prices)):'—';
-    return '<div class="sgit'+(i===0?' hot':'')+'" data-cat="'+ck+'"><b>'+conceptLabel(rows)+'</b><span>'+ck+' · '+rows.length+' code'+(rows.length>1?'s':'')+' · from '+from+'</span></div>';
+    return '<div class="sgit'+(i===0?' hot':'')+'" data-cat="'+ck+'" data-q="'+cq.replace(/"/g,'&quot;')+'"><b>'+label+'</b><span>'+ck+' · '+rows.length+' code'+(rows.length>1?'s':'')+' · from '+from+'</span></div>';
   }).join('');
-  if(document.activeElement===q) sugg.classList.add('open'); else sugg.classList.remove('open');
+  if(document.activeElement===q && sugg.innerHTML) sugg.classList.add('open'); else sugg.classList.remove('open');
 }
 function render(){
   buildSugg();
   if(CONCEPT) pickConcept(CONCEPT.cat, {keep:true});
 }
+function commitConcept(it){
+  sugg.classList.remove('open');
+  q.value = it.dataset.q; flt.q = it.dataset.q;   // the bar autocompletes to the committed concept
+  pickConcept(it.dataset.cat, {scroll:true, q: it.dataset.q});
+}
 sugg.addEventListener('mousedown', e => {
   const it=e.target.closest('.sgit'); if(!it) return;
-  e.preventDefault(); sugg.classList.remove('open');
-  pickConcept(it.dataset.cat, {scroll:true});
+  e.preventDefault(); commitConcept(it);
 });
 q.addEventListener('keydown', e => {
-  if(e.key==='Enter'){ const first=sugg.querySelector('.sgit'); if(first){ sugg.classList.remove('open'); pickConcept(first.dataset.cat, {scroll:true}); } }
+  if(e.key==='Enter'){ const first=sugg.querySelector('.sgit'); if(first) commitConcept(first); }
   if(e.key==='Escape') sugg.classList.remove('open');
 });
 q.addEventListener('blur', ()=>setTimeout(()=>sugg.classList.remove('open'), 150));
