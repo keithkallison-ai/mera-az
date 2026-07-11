@@ -45,23 +45,18 @@ td .lz{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:
 td .est{color:var(--gold);font-size:10px;font-weight:700;margin-left:5px}
 .tbox{max-height:500px;overflow:auto;border:1px solid var(--line);border-radius:12px}
 input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-radius:11px;padding:10px 15px;font:inherit;font-size:13.5px;width:320px;max-width:100%}input.q:focus{outline:none;border-color:var(--ac)}
-.ccat{padding:14px 16px 6px;border-bottom:1px solid var(--line)}
-.ccat:last-child{border-bottom:0}
-.ccat .ch{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.ccat .cn{font-size:14.5px;font-weight:800;letter-spacing:-.015em}
-.ccat .cm{color:var(--tx3);font-size:11.5px}
-.ctier{display:flex;align-items:baseline;gap:14px;padding:9px 2px;border-top:1px solid #12171f;flex-wrap:wrap}
-.ctier:first-of-type{border-top:0}
-.ctier .tp{font-family:JetBrains Mono,monospace;font-size:15px;font-weight:800;color:var(--tx);min-width:96px;text-align:right}
-.ctier .tx{flex:1;min-width:220px;font-size:13px;color:var(--tx2)}
-.ctier .tn{color:var(--tx3);font-size:11px;white-space:nowrap;cursor:pointer}
-.ctier .tn:hover{color:var(--tx)}
-.cchips{display:none;width:100%;padding:4px 0 2px 110px;gap:6px;flex-wrap:wrap}
-.ctier.open .cchips{display:flex}
-.cchip{font-family:JetBrains Mono,monospace;font-size:11px;color:var(--tx2);background:#0f141d;border:1px solid var(--line);border-radius:7px;padding:3px 8px;cursor:pointer;transition:.12s}
-.cchip:hover{border-color:var(--ac);color:var(--tx)}
-[data-theme=light] .ctier{border-top-color:#eaeef4}
-[data-theme=light] .cchip{background:#f2f5f9}
+.sugg{position:absolute;top:calc(100% + 7px);left:0;right:0;background:#0d1119;border:1px solid var(--line2);border-radius:13px;padding:6px;z-index:70;box-shadow:0 14px 40px rgba(0,0,0,.55);display:none}
+.sugg.open{display:block}
+.sgit{padding:10px 13px;border-radius:9px;cursor:pointer;font-size:13.5px;display:flex;align-items:baseline;gap:10px;transition:background .1s}
+.sgit b{font-weight:800;letter-spacing:-.01em}
+.sgit span{color:var(--tx3);font-size:11.5px}
+.sgit:hover,.sgit.hot{background:#141b28}
+[data-theme=light] .sugg{background:#ffffff;box-shadow:0 14px 40px rgba(16,24,40,.14)}
+[data-theme=light] .sgit:hover,[data-theme=light] .sgit.hot{background:#eef2f7}
+.vtier{cursor:pointer;font-family:JetBrains Mono,monospace;font-size:11.5px;font-weight:700;border:1px solid var(--line2);border-radius:8px;padding:3px 9px;color:var(--tx2);transition:.12s;white-space:nowrap}
+.vtier:hover{border-color:var(--ac);color:var(--tx)}
+.vtier.on{color:#FF5A1F;border-color:#FF5A1F}
+.vtier .n{color:var(--tx3);font-weight:500;font-size:10px}
 .dd{position:relative;flex:0 0 auto}
 .ddbtn{display:flex;align-items:center;gap:10px;background:#0f141d;border:1px solid var(--line2);border-radius:11px;padding:6px 14px;color:var(--tx);font:inherit;cursor:pointer;transition:border-color .15s,background .15s;min-height:41px}
 .ddbtn:hover{border-color:var(--ac);background:#121826}
@@ -269,12 +264,14 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 <div class=card>
   <h2>Look up <em>any price</em>.</h2>
   <div class=tb>
-    <input class=q id=q style="flex:1;min-width:240px" placeholder="Search a procedure or a code — try 'mri', 'birth', 'knee', '80053'…">
+    <div style="position:relative;flex:1;min-width:260px">
+      <input class=q id=q style="width:100%" placeholder="Search a procedure — try 'colonoscopy', 'mri', 'birth'…" autocomplete=off>
+      <div class=sugg id=sugg></div>
+    </div>
     <div class=dd id=dd_ins></div>
     <div class=dd id=dd_plan></div>
   </div>
-  <div class=tbox style="max-height:640px" id=tb></div>
-  <div class=count id=cnt></div>
+  <div class=count id=cnt style="margin-top:9px"></div>
 </div>
 
 <div class=card>
@@ -389,46 +386,70 @@ function ddSync(){
   ddRender(dd_plan, 'Plan', INSURERS[INS].plans, PLAN, v=>{ PLAN=v; ddSync(); render(); });
 }
 ddSync();
-q.addEventListener('input',()=>{flt.q=q.value.trim().toLowerCase();render();});
-// CONCEPT SEARCH — the query defines the concept; results group by the canonical RBCS category,
-// then collapse into EXACT price tiers (identical com,mcr,mcd — grouping by identity, nothing averaged).
-function render(){
+q.addEventListener('input',()=>{flt.q=q.value.trim().toLowerCase();CONCEPT=null;buildSugg();});
+// CONCEPT SEARCH v2 — type a procedure, pick the concept, LAND on the anchor code's page.
+// Anchor = the CMS-shoppable member of the concept when one exists (deterministic), else the
+// lowest-priced version. Exploration = exact price-vector tiers as pills ON the per-code card.
+const SHOPPABLE=new Set(['45378','45380','43235','43239','70450','70551','70553','72110','72148','73721','76700','77067','29881','47562','66984','59400','93000','80053','80061','85025','84443','99203','99213','G0105','G0121','19120','20610','42820','49505','55700']);
+let CONCEPT=null;
+const tcase=t=>t.replace(/\b\w/g,c=>c.toUpperCase());
+function conceptHits(){
   const terms=flt.q.split(/\s+/).filter(Boolean);
-  if(!terms.length){ tb.innerHTML='<div style="padding:26px 18px;color:var(--tx3);font-size:13px">Search a procedure — every matching billing code is grouped by category, then by exact price. Nothing is averaged; every code stays one click away.</div>'; cnt.textContent=''; return; }
-  const hits=[];
-  for(const r of D.rows){
-    const hay=(r[0]+' '+r[2]).toLowerCase();
-    if(terms.every(t=>hay.includes(t))) hits.push(r);
-  }
-  const cats={};
-  for(const r of hits){ const k=r[10]||'(unmapped)'; (cats[k]=cats[k]||[]).push(r); }
-  let html='', tiersTotal=0;
-  const catKeys=Object.keys(cats).sort((a,b)=>cats[b].length-cats[a].length);
-  for(const ck of catKeys){
-    const rows=cats[ck], tiers={};
-    for(const r of rows){ const tk=[r[5],r[6],r[7]].join('|'); (tiers[tk]=tiers[tk]||[]).push(r); }
-    const tlist=Object.values(tiers).sort((a,b)=> (a[0][PIDX[PLAN]]??1/0) - (b[0][PIDX[PLAN]]??1/0) );
-    tiersTotal+=tlist.length;
-    const prices=tlist.map(t=>t[0][PIDX[PLAN]]).filter(v=>v!=null);
-    const rng = prices.length ? (prices.length>1 ? fmt0(Math.min(...prices))+' – '+fmt0(Math.max(...prices)) : fmt0(prices[0])) : '—';
-    html+='<div class=ccat><div class=ch><span class=cn>'+ck+'</span><span class=cm>'+fmtI(rows.length)+' billing codes · '+tlist.length+' distinct price'+(tlist.length>1?'s':'')+' · '+rng+'</span></div>';
-    tlist.slice(0,12).forEach(t=>{
-      const r0=[...t].sort((a,b)=>a[2].length-b[2].length)[0];
-      const v=r0[PIDX[PLAN]];
-      const est=r0[4]==='pct'?'<span class=est>EST</span>':'';
-      const chips=t.map(r=>'<span class=cchip data-c="'+r[0]+'" data-t="'+r[1]+'" title="'+r[2].replace(/"/g,'&quot;')+'">'+r[0]+'</span>').join('');
-      html+='<div class=ctier><span class=tp>'+(v==null?'—':fmt0(v))+est+'</span><span class=tx>'+r0[2]+(t.length>1?' <span style="color:var(--tx3)">and '+(t.length-1)+' clinically-coded variant'+(t.length>2?'s':'')+' at this exact price</span>':'')+'</span><span class=tn>'+t.length+' code'+(t.length>1?'s':'')+' ▾</span><div class=cchips>'+chips+'</div></div>';
-    });
-    if(tlist.length>12) html+='<div style="padding:6px 2px;color:var(--tx3);font-size:11.5px">+'+(tlist.length-12)+' more prices — narrow the search</div>';
-    html+='</div>';
-  }
-  tb.innerHTML = html || '<div style="padding:26px 18px;color:var(--tx3);font-size:13px">No matches.</div>';
-  cnt.textContent = fmtI(hits.length)+' codes · '+tiersTotal+' distinct prices · '+INSURERS[INS].name+' · '+PNAME[PLAN];
+  if(!terms.length) return [];
+  return D.rows.filter(r=>{ const hay=(r[0]+' '+r[2]).toLowerCase(); return terms.every(t=>hay.includes(t)); });
 }
-tb.addEventListener('click', e => {
-  const tn=e.target.closest('.tn'); if(tn){ tn.closest('.ctier').classList.toggle('open'); return; }
-  const ch=e.target.closest('.cchip'); if(ch){ goCode(ch.dataset.c, ch.dataset.t); }
+function tierAnchor(t){
+  const sh=t.filter(r=>SHOPPABLE.has(String(r[0])));
+  if(sh.length) return sh.sort((a,b)=>String(a[0])<String(b[0])?-1:1)[0];
+  return [...t].sort((a,b)=>a[2].length-b[2].length)[0];
+}
+function pickConcept(cat, opts){
+  opts=opts||{};
+  const hits=conceptHits().filter(r=>(r[10]||'(unmapped)')===cat);
+  if(!hits.length){ CONCEPT=null; return; }
+  const tiers={};
+  hits.forEach(r=>{ const tk=[r[5],r[6],r[7]].join('|'); (tiers[tk]=tiers[tk]||[]).push(r); });
+  const tl=Object.values(tiers).sort((a,b)=>(a[0][PIDX[PLAN]]??1/0)-(b[0][PIDX[PLAN]]??1/0));
+  CONCEPT={q:flt.q, cat, tiers:tl};
+  let anchor=null, viaShop=false;
+  for(const t of tl){ const sh=t.filter(r=>SHOPPABLE.has(String(r[0]))); if(sh.length){ anchor=sh.sort((a,b)=>String(a[0])<String(b[0])?-1:1)[0]; viaShop=true; break; } }
+  if(!anchor) anchor=tierAnchor(tl[0]);
+  cnt.textContent = tcase(CONCEPT.q)+' · '+cat+' · '+hits.length+' billing codes · '+tl.length+' distinct price'+(tl.length>1?'s':'')+' · opened at the '+(viaShop?'CMS-shoppable base':'lowest-priced version');
+  if(!opts.keep){
+    codePage(anchor[0], anchor[1], 0);
+    try{history.replaceState('','','#c/'+anchor[1]+':'+encodeURIComponent(anchor[0]));}catch(e){}
+    if(opts.scroll) cbars.closest('.card').scrollIntoView({behavior:'smooth',block:'start'});
+  } else {
+    codePage(CP.code, CP.ct, CP.vi);
+  }
+}
+function buildSugg(){
+  const hits=conceptHits();
+  if(!hits.length){ sugg.classList.remove('open'); sugg.innerHTML=''; return; }
+  const cats={};
+  hits.forEach(r=>{ const k=r[10]||'(unmapped)'; (cats[k]=cats[k]||[]).push(r); });
+  const entries=Object.keys(cats).sort((a,b)=>cats[b].length-cats[a].length).slice(0,6);
+  sugg.innerHTML=entries.map((ck,i)=>{
+    const rows=cats[ck], prices=rows.map(r=>r[PIDX[PLAN]]).filter(v=>v!=null);
+    const from=prices.length?fmt0(Math.min(...prices)):'—';
+    return '<div class="sgit'+(i===0?' hot':'')+'" data-cat="'+ck+'"><b>'+tcase(flt.q)+'</b><span>'+ck+' · '+rows.length+' code'+(rows.length>1?'s':'')+' · from '+from+'</span></div>';
+  }).join('');
+  sugg.classList.add('open');
+}
+function render(){
+  buildSugg();
+  if(CONCEPT) pickConcept(CONCEPT.cat, {keep:true});
+}
+sugg.addEventListener('mousedown', e => {
+  const it=e.target.closest('.sgit'); if(!it) return;
+  e.preventDefault(); sugg.classList.remove('open');
+  pickConcept(it.dataset.cat, {scroll:true});
 });
+q.addEventListener('keydown', e => {
+  if(e.key==='Enter'){ const first=sugg.querySelector('.sgit'); if(first){ sugg.classList.remove('open'); pickConcept(first.dataset.cat, {scroll:true}); } }
+  if(e.key==='Escape') sugg.classList.remove('open');
+});
+q.addEventListener('blur', ()=>setTimeout(()=>sugg.classList.remove('open'), 150));
 // FINE PRINT + FOOTER
 fine.innerHTML = `<b>The dials, precisely.</b> ${D.lanes.map(l=>`${l.label} ×${l.k} (n=${fmtI(l.n)}, ${l.fit2}% within $2)`).join(' · ')}.
 Weighted, <b>${wfit.toFixed(1)}%</b> of all dollar prices sit within $2 of their dial line — the offsets are whole-dollar rounding (δ ∈ {0,±1,±2}), disclosed per row in the lookup; <b>${fmtI(D.funnel.exceptions)}</b> rows sit beyond and are individually inspectable ("Off-dial rows").<br>
@@ -442,7 +463,6 @@ Weighted, <b>${wfit.toFixed(1)}%</b> of all dollar prices sit within $2 of their
 <b>One relationship.</b> This page describes Kaiser-at-Kaiser only. The same insurer at Queen's West Oʻahu binds at the cent (2.80×/2.75×, 100.000% penny-exact); here the bond is at the dollar grain — the difference is the publisher's pipeline, not the contract's intent.`;
 foot.innerHTML=`${D.hospital} · NPI ${D.npi} · license ${D.license} · attester ${D.attester} · published ${D.updated} · CMS v${D.version}<br>
 byte-exact capture (SHA-256 ${D.pin_sha8}…, ${fmtI(D.cells)} cells) · hostile-sealed · every number recomputed at build and cross-checked by a second engine — full method in the fine print.`;
-q.value='colonoscopy'; flt.q='colonoscopy'; render();
 // PER-CODE PAGES — the bottom card IS the code's page. Every code on this page is clickable; hash-addressable (#c/TYPE:CODE).
 // Data: D.rows row = [0 code,1 type,2 desc,3 setting,4 lane,5 mcr,6 com,7 mcd,8 delta,9 daytag,10 rbcs,
 //                     11 srcrow,12 modifier,13 comNote,14 mcrNote,15 mcdNote,16 genNote,17 min,18 max,19 gross,20 cash]
@@ -466,9 +486,16 @@ function codePage(code,ct,vi){
   let dec='<div class=vrow><span class=vk>Setting</span><span class=vv>'+(r[3]==='both'?'both <span class=vc>outpatient &amp; inpatient</span>':r[3])+'</span></div>'
     +'<div class=vrow><span class=vk>Methodology</span><span class=vv>'+meth[0]+' <span class=vc>'+meth[1]+'</span></span></div>';
   if(rows.length>1){
-    dec+='<div class=vrow><span class=vk>Variants</span><span class=vv>'+rows.map((x,i)=>
+    dec += '<div class=vrow><span class=vk>Variants</span><span class=vv>'+rows.map((x,i)=>
       '<span class=vflt2 data-vi="'+i+'" style="cursor:pointer;font-weight:600;color:'+(i===CP.vi?'#FF5A1F':'inherit')+'">'+vname(x)+'</span>')
       .join(' <span style="opacity:.45">&#92;</span> ')+'</span></div>';
+  }
+  if(typeof CONCEPT!=='undefined' && CONCEPT && CONCEPT.tiers.some(t=>t.some(x=>x[0]===code&&x[1]===ct))){
+    dec += '<div class=vrow><span class=vk>Versions</span><span class=vv style="display:flex;gap:7px;flex-wrap:wrap">'+CONCEPT.tiers.map((t,ti)=>{
+      const v=t[0][PIDX[PLAN]], on=t.some(x=>x[0]===code&&x[1]===ct);
+      const tip=t.map(x=>x[0]+' '+x[2]).join('&#10;').replace(/"/g,'&quot;');
+      return '<span class="vtier'+(on?' on':'')+'" data-ti="'+ti+'" title="'+tip+'">'+(v==null?'—':fmt0(v))+' <span class=n>· '+t.length+' code'+(t.length>1?'s':'')+'</span></span>';
+    }).join('')+'</span></div>';
   }
   cpdec.innerHTML=dec;
   cpsrc.textContent='source row #'+r[11]+' · every value below traces here';
@@ -543,7 +570,11 @@ function renderCodeGraph(){
   cbars.innerHTML=h;
 }
 window.addEventListener('resize',renderCodeGraph);
-cpdec.addEventListener('click',e=>{ const v=e.target.closest('.vflt2'); if(v) codePage(CP.code,CP.ct,+v.dataset.vi); });
+cpdec.addEventListener('click',e=>{
+  const v=e.target.closest('.vflt2'); if(v){ codePage(CP.code,CP.ct,+v.dataset.vi); return; }
+  const t=e.target.closest('.vtier'); if(t && CONCEPT){ const a=tierAnchor(CONCEPT.tiers[+t.dataset.ti]); codePage(a[0],a[1],0);
+    try{history.replaceState('','','#c/'+a[1]+':'+encodeURIComponent(a[0]));}catch(e2){} }
+});
 function goCode(c,t){
   if(codePage(c,t,0)){
     try{history.replaceState('','','#c/'+t+':'+encodeURIComponent(c));}catch(e){}
@@ -551,8 +582,12 @@ function goCode(c,t){
   }
 }
 
-(function(){ const m=location.hash.match(/^#c\/([A-Z-]+):(.+)$/);
-  if(!(m&&codePage(decodeURIComponent(m[2]),m[1],0))) codePage('44406','CPT',0); })();
+(function(){
+  q.value='colonoscopy'; flt.q='colonoscopy';
+  const m=location.hash.match(/^#c\/([A-Z-]+):(.+)$/);
+  if(m&&codePage(decodeURIComponent(m[2]),m[1],0)){ pickConcept('Procedure',{keep:true}); return; }
+  pickConcept('Procedure',{});
+})();
 // THE MAP — legacy console treatment (kept OUTSIDE the chart block so chart patches can't delete it)
 (function(){
   const el=document.getElementById('lmap'); if(!el||!window.L) return;
