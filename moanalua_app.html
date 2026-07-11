@@ -461,7 +461,7 @@ const METH={case:['Case Rate','per case'],perdiem:['Per Diem','per day'],other:[
   fee_lab:['Fee Schedule','per test'],fee_imaging:['Fee Schedule','per scan'],fee_drugs:['Fee Schedule','per unit'],
   fee_misc:['Fee Schedule','per service'],pct:['percent of total billed charges','share of list']};
 const m$=v=>'$'+v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-let CP={code:null,ct:null,vi:0}, GPAIRS=[], GEST=false;
+let CP={code:null,ct:null,vi:0}, GPAIRS=[];
 function vname(x){ return x[9] || (x[12]?'mod '+x[12]:'') || (METH[x[4]]?METH[x[4]][0]:x[4]); }
 function codePage(code,ct,vi){
   const rows=D.rows.filter(r=>r[0]===code&&r[1]===ct);
@@ -499,7 +499,6 @@ function codePage(code,ct,vi){
     mtxt='published min–max '+fmt0(r[17])+'–'+fmt0(r[18])+(isP?'':(r[17]===Math.min(...pr3)&&r[18]===Math.max(...pr3)?' · matches the plan prices above':' · DOES NOT MATCH the plan prices above'));
   }
   if(r[19]!=null) mtxt+=(mtxt?' · ':'')+'list '+fmt$(r[19]);
-  if(r[20]!=null) mtxt+=' · cash '+fmt$(r[20]);
   if(mtxt){ mono.textContent=mtxt; cnotes.appendChild(mono); }
   // the WO menu — same data, program layout; % rows carry the percentage type honestly
   const val=(v,pctv)=>isP
@@ -515,9 +514,10 @@ function codePage(code,ct,vi){
   +'</div>'
   +(r[20]!=null?'<div class="prog-block cash"><div class="prog-hd"><span class="prog-name">Cash</span><span class="prog-sum">'+m$(r[20])+'</span></div><div class="prog-sub">Self-pay / uninsured price</div></div>':'');
   // the price graph — Commercial vs the Medicare base (Medicaid stays in the menu)
-  GEST=isP; GPAIRS=[];
-  if(r[6]!=null) GPAIRS.push({price:r[6],v:'com',label:'COMMERCIAL'});
-  if(r[5]!=null) GPAIRS.push({price:r[5],v:'mcr',label:'MEDICARE',base:1});
+  GPAIRS=[];
+  if(r[6]!=null) GPAIRS.push({price:r[6],v:'com',label:'COMMERCIAL',est:isP});
+  if(r[5]!=null) GPAIRS.push({price:r[5],v:'mcr',label:'MEDICARE',base:1,est:isP});
+  if(r[20]!=null) GPAIRS.push({price:r[20],v:'cash',label:'CASH'});
   renderCodeGraph();
   return true;
 }
@@ -543,12 +543,12 @@ function renderCodeGraph(){
   }
   pts.forEach((t,i)=>{
     const lx=t.price/mx*W;
-    const LSTYLE={com:'width:3px;background:#365b95', mcr:'width:0;border-left:2px dotted rgba(150,0,24,.75)', mcd:'width:3px;background:#960018'};
+    const LSTYLE={com:'width:3px;background:#365b95', mcr:'width:0;border-left:2px dotted rgba(150,0,24,.75)', mcd:'width:3px;background:#960018', cash:'width:3px;background:#2ecc71'};
     h+='<div style="position:absolute;top:'+TOPH+'px;bottom:18px;left:'+(lx-1).toFixed(1)+'px;border-radius:1px;'+LSTYLE[t.ps[0].v]+'"></div>';
     const lbls=t.ps.map(x=>'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:'+T.lab+'">'+x.label+'</div>').join('');
     h+='<div style="position:absolute;top:2px;left:'+(cx[i]-80).toFixed(1)+'px;width:160px;text-align:center;line-height:1.25">'
       +'<div style="font-family:JetBrains Mono,monospace;font-size:15px;font-weight:800;color:'+T.val+'">'+fmt0(t.price)
-      +(GEST?'<span style="font-size:9px;font-weight:700;color:var(--gold)"> EST</span>':'')+'</div>'+lbls+'</div>';
+      +(t.ps.every(x=>x.est)?'<span style="font-size:9px;font-weight:700;color:var(--gold)"> EST</span>':'')+'</div>'+lbls+'</div>';
   });
   cbars.innerHTML=h;
 }
