@@ -510,6 +510,7 @@ Weighted, <b>${wfit.toFixed(1)}%</b> of all dollar prices sit within $2 of their
 <b>The whole book, accounted.</b> ${fmtI(D.funnel.dollar)} dollar prices on five dials (±$2; ${fmtI(D.funnel.exceptions)} exceptions) + ${fmtI(D.funnel.pct)} at exactly ${D.pcts.com}% of list + ${fmtI(D.funnel.chargemaster_only)} rows this plan does not price = ${fmtI(D.funnel.rows)} rows — 100% accounted.<br>
 <b>Estimates are not the contract.</b> For no-schedule items the hospital also publishes historical estimated-allowed medians (EST in the lookup): ${D.estdrift.exact_pct}% equal 66% × today's list to the cent; the rest drift (backward-looking medians vs the current list, p90 $${D.estdrift.p90}) — a data-quality observation, not a pricing rule.<br>
 <b>Class-B placeholders excluded.</b> ${fmtI(D.classb_n)} penny rows whose code also carries a real price (the file contradicting itself) are excluded from every dial, fit and density on this page — they remain in the lookup. Consistent penny rows (penny base, on-dial ratio) are genuine per-unit prices and are kept.<br>
+<b>Setting display.</b> Rows the file marks “both” display as <b>outpatient</b> — this publisher explicitly labels every inpatient structure (the per-diem MS-DRG rows), so “both” is its idiom for standard outpatient-payable care. The raw value is unchanged in the data.<br>
 <b>Lookup keys.</b> “round” = dollars off the dial line (publisher rounding, shown for the Commercial plan); EST = the hospital's own estimated-allowed for %-of-list rows.<br>
 <b>Product lines are canonical.</b> Row categories use the CMS RBCS RY2025 taxonomy (refs/rbcs_taxonomy_RY2025.csv), resolved deterministically per code; unmapped codes are surfaced as “(unmapped)”, never silently relabeled. Bar names are the dominant RBCS categories on each dial.<br>
 <b>One relationship.</b> This page describes Kaiser-at-Kaiser only. The same insurer at Queen's West Oʻahu binds at the cent (2.80×/2.75×, 100.000% penny-exact); here the bond is at the dollar grain — the difference is the publisher's pipeline, not the contract's intent.`;
@@ -535,7 +536,7 @@ function codePage(code,ct,vi){
   cpcodes.innerHTML='<span class=codeline></span> <span class=cmut></span>';
   cpcodes.firstChild.textContent=code; cpcodes.lastChild.textContent=ct;
   const meth=METH[r[4]]||[r[4],''];
-  let dec='<div class=vrow><span class=vk>Setting</span><span class=vv>'+(r[3]==='both'?'both <span class=vc>outpatient &amp; inpatient</span>':r[3])+'</span></div>'
+  let dec='<div class=vrow><span class=vk>Setting</span><span class=vv>'+(r[3]==='both'?'outpatient':r[3])+'</span></div>'
     +'<div class=vrow><span class=vk>Methodology</span><span class=vv>'+meth[0]+' <span class=vc>'+meth[1]+'</span></span></div>';
   if(rows.length>1){
     dec += '<div class=vrow><span class=vk>Variants</span><span class=vv>'+rows.map((x,i)=>
