@@ -61,6 +61,9 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .vtier:hover{border-color:var(--ac);color:var(--tx)}
 .vtier.on{color:#FF5A1F;border-color:#FF5A1F}
 .vtier .n{color:var(--tx3);font-weight:500;font-size:10px}
+.mrb{font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,90,31,.16);color:#ff8a55;border-radius:5px;padding:2px 7px;vertical-align:2px}
+.sgit .mr{font-size:11px;color:var(--tx2);margin-top:3px}
+[data-theme=light] .mrb{background:rgba(255,90,31,.13);color:#d2481a}
 .cwrap{display:grid;grid-template-columns:3fr 2fr;gap:12px;margin-top:14px}
 @media(max-width:800px){.cwrap{grid-template-columns:1fr}}
 .cbox{border:1px solid var(--line);border-radius:14px;background:#0c1017;padding:11px}
@@ -487,11 +490,11 @@ function pickConcept(cat, opts){
   const tiers={};
   hits.forEach(r=>{ const tk=[r[5],r[6],r[7]].join('|'); (tiers[tk]=tiers[tk]||[]).push(r); });
   const tl=Object.values(tiers).sort((a,b)=>(a[0][PIDX[PLAN]]??1/0)-(b[0][PIDX[PLAN]]??1/0));
-  CONCEPT={q:conceptLabel(hits, committedQ), query:committedQ, cat, tiers:tl, ccs:ex.ccs};
   let anchor=null, viaShop=false;
   for(const t of tl){ const sh=t.filter(r=>SHOPPABLE.has(String(r[0]))); if(sh.length){ anchor=sh.sort((a,b)=>String(a[0])<String(b[0])?-1:1)[0]; viaShop=true; break; } }
   if(!anchor) anchor=tierAnchor(tl[0]);
-  cnt.textContent = CONCEPT.q+' · '+cat+' · '+hits.length+' billing codes · '+tl.length+' distinct price'+(tl.length>1?'s':'')+(ex.ccs!=null?' · membership: AHRQ CCS “'+D.ccs_labels[String(ex.ccs)]+'”':'')+' · opened at the '+(viaShop?'CMS-shoppable base':'lowest-priced version');
+  CONCEPT={q:conceptLabel(hits, committedQ), query:committedQ, cat, tiers:tl, ccs:ex.ccs, anchor:[anchor[0],anchor[1]], viaShop:viaShop};
+  cnt.textContent = CONCEPT.q+' · '+cat+' · '+hits.length+' billing codes · '+tl.length+' distinct price'+(tl.length>1?'s':'')+(ex.ccs!=null?' · membership: AHRQ CCS “'+D.ccs_labels[String(ex.ccs)]+'”':'')+(viaShop?' · opened at the MOST RELEVANT code — CMS-designated ('+anchor[0]+')':' · opened at the lowest-priced version');
   if(!opts.keep){
     codePage(anchor[0], anchor[1], 0);
     try{history.replaceState('','','#c/'+anchor[1]+':'+encodeURIComponent(anchor[0]));}catch(e){}
@@ -510,9 +513,10 @@ function renderPanel(){
       const ex=[...t].sort((a,b)=>a[2].length-b[2].length)[0];
       const shop=t.filter(r=>SHOPPABLE.has(String(r[0])));
       const sub= shop.length ? D.shoppable[String(shop[0][0])]+(shop.length>1?'  (+'+(shop.length-1)+' more shoppable)':'') : ex[2];
+      const isMR=CONCEPT.viaShop && t.some(r=>r[0]===CONCEPT.anchor[0]&&r[1]===CONCEPT.anchor[1]);
       const pop='<div class=cpop><div class=ch2>'+t.length+' billing code'+(t.length>1?'s':'')+' at exactly this price · MRF titles verbatim</div>'
         + t.map(r=>'<div class=cr><span class=cc>'+r[0]+'</span><span class=ct2>'+r[2]+'</span></div>').join('')+'</div>';
-      return '<div class="copt'+(ti===activeTi?' on':'')+'" data-ti="'+ti+'"><span class=pl><span class=p>'+(v==null?'—':fmt0(v))+(t[0][4]==='pct'?' <span class=est>EST</span>':'')+'</span><span class=sub>'+sub+'</span></span><span class=rt>'+t.length+' code'+(t.length>1?'s':'')+'</span>'+pop+'</div>';
+      return '<div class="copt'+(ti===activeTi?' on':'')+'" data-ti="'+ti+'"><span class=pl><span class=p>'+(v==null?'—':fmt0(v))+(t[0][4]==='pct'?' <span class=est>EST</span>':'')+(isMR?' <span class=mrb title="CMS designates this the service consumers shop for this concept">MOST RELEVANT</span>':'')+'</span><span class=sub>'+sub+'</span></span><span class=rt>'+t.length+' code'+(t.length>1?'s':'')+'</span>'+pop+'</div>';
     }).join('');
   const act=CONCEPT.tiers[activeTi];
   cbox2.innerHTML = '<div class=cbh>Plans — '+INSURERS[INS].name+'</div>'
@@ -542,7 +546,14 @@ function buildSugg(){
     const rows=ccsExpand(trows, ck).rows;
     const prices=rows.map(r=>r[PIDX[PLAN]]).filter(v=>v!=null);
     const from=prices.length?fmt0(Math.min(...prices)):'—';
-    return '<div class="sgit'+(i===0?' hot':'')+'" data-cat="'+ck+'" data-q="'+cq.replace(/"/g,'&quot;')+'"><b>'+label+'</b><span>'+ck+' · '+rows.length+' code'+(rows.length>1?'s':'')+' · from '+from+'</span></div>';
+    // CMS is King: if CMS designates a shoppable member, the suggestion names it MOST RELEVANT
+    const shopRows=rows.filter(r=>SHOPPABLE.has(String(r[0])));
+    let mr='';
+    if(shopRows.length){
+      const a=shopRows.sort((x,y)=>((x[PIDX[PLAN]]??1/0)-(y[PIDX[PLAN]]??1/0))||(String(x[0])<String(y[0])?-1:1))[0];
+      mr='<div class=mr><span class=mrb>MOST RELEVANT</span> '+D.shoppable[String(a[0])]+(a[PIDX[PLAN]]!=null?' · '+fmt0(a[PIDX[PLAN]]):'')+' <span style="color:var(--tx3)">· CMS-designated · '+a[0]+'</span></div>';
+    }
+    return '<div class="sgit'+(i===0?' hot':'')+'" data-cat="'+ck+'" data-q="'+cq.replace(/"/g,'&quot;')+'"><span style="min-width:0"><b>'+label+'</b><span> '+ck+' · '+rows.length+' code'+(rows.length>1?'s':'')+' · from '+from+'</span>'+mr+'</span></div>';
   }).join('');
   if(document.activeElement===q && sugg.innerHTML) sugg.classList.add('open'); else sugg.classList.remove('open');
 }
@@ -595,7 +606,8 @@ function codePage(code,ct,vi){
   CP={code,ct,vi:Math.min(vi||0,rows.length-1)};
   const r=rows[CP.vi], isP=r[4]==='pct';
   cph2.textContent=r[2];
-  cpplain.innerHTML = SHOPPABLE.has(String(code)) ? D.shoppable[String(code)]+' <span class=cmut>· a CMS-specified shoppable service</span>' : '';
+  const _isMR = typeof CONCEPT!=='undefined' && CONCEPT && CONCEPT.viaShop && CONCEPT.anchor[0]===code && CONCEPT.anchor[1]===ct;
+  cpplain.innerHTML = SHOPPABLE.has(String(code)) ? (_isMR?'<span class=mrb title="CMS designates this the service consumers shop for this concept">MOST RELEVANT</span> ':'')+D.shoppable[String(code)]+' <span class=cmut>· a CMS-specified shoppable service</span>' : '';
   cpcodes.innerHTML='<span class=codeline></span> <span class=cmut></span>';
   cpcodes.firstChild.textContent=code; cpcodes.lastChild.textContent=ct;
   const meth=METH[r[4]]||[r[4],''];
