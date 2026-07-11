@@ -869,7 +869,7 @@ document.getElementById('tabs').addEventListener('click', e => { switchTo(e.targ
 // a same-direction re-swipe unlocks on a magnitude rise vs the decaying inertia envelope.
 (function(){
   const ORDER=['explore','browse','audit'];
-  let accX=0, gestT=null, locked=false, lockDir=0, tailMax=0, lockT=0, lastT=0;
+  let accX=0, locked=false, lockDir=0, tailMax=0, lockT=0, lastT=0;
   function scrollsX(el){
     for(let n=el; n && n.nodeType===1 && n!==document.body; n=n.parentElement){
       if(n.scrollWidth - n.clientWidth > 2){
@@ -892,20 +892,23 @@ document.getElementById('tabs').addEventListener('click', e => { switchTo(e.targ
     if(!inZone(e) || scrollsX(e.target)) return;
     e.preventDefault();
     const dx=e.deltaX, mag=Math.abs(dx), sgn=dx>0?1:-1, now=performance.now();
-    clearTimeout(gestT); gestT=setTimeout(()=>{ accX=0; locked=false; lockDir=0; tailMax=0; }, 150);
+    const dt=Math.min(now-lastT, 1000); lastT=now;
+    // no timers: the accumulator and the tail envelope both decay with TIME, so a dying
+    // inertia trickle can never re-cross the threshold — only a fresh burst can.
+    accX    *= Math.pow(0.99,  dt);   // run-up half-life ~69ms: switching takes a burst
+    tailMax *= Math.pow(0.994, dt);   // envelope half-life ~115ms
     if(locked){
-      const env = tailMax*Math.pow(0.994, now-lastT);   // inertia envelope, decayed to now
-      const flip = sgn !== lockDir;
-      const rise = (now-lockT > 260) && mag > Math.max(26, env*1.6);
-      if(!flip && !rise){ tailMax=Math.max(env, mag); lastT=now; return; }
+      const flip = (sgn !== lockDir) && mag >= 10;                       // inertia never flips sign
+      const rise = (now-lockT > 260) && mag > Math.max(26, tailMax*1.6); // fresh push beats the tail
+      const idle = (now-lockT > 700) && tailMax < 12 && mag >= 12;       // tail long dead, gentle swipe
+      if(!flip && !rise && !idle){ tailMax=Math.max(tailMax, mag); return; }
       locked=false; accX=0; tailMax=0;
     }
-    lastT = now;
     if(accX!==0 && (accX>0)!==(sgn>0)) accX=0;   // mid-run-up reversal starts fresh
-    accX += dx;
+    if(mag>=3) accX += dx;
     if(Math.abs(accX) < 100) return;
     const dir = accX>0 ? 'r' : 'l';
-    accX=0; locked=true; lockDir=(dir==='r'?1:-1); tailMax=mag; lockT=now;
+    accX=0; locked=true; lockDir=(dir==='r'?1:-1); tailMax=Math.max(mag,60); lockT=now;
     const cur=ORDER.indexOf(document.querySelector('.tabb.on').dataset.tab);
     const nxt=cur + (dir==='r'?1:-1);
     if(nxt<0 || nxt>=ORDER.length) return;
