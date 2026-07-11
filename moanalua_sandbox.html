@@ -88,7 +88,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 [data-theme=light] .dvpanel{background:#ffffff;box-shadow:0 18px 48px rgba(16,24,40,.18)}
 @keyframes dvin{from{opacity:0}to{opacity:1}}
 .cpop{display:none;position:fixed;left:0;top:0;z-index:120}
-.cpopin{background:#0d1119;border:1px solid var(--line2);border-radius:12px;padding:10px 13px;box-shadow:0 16px 44px rgba(0,0,0,.6);width:max-content;max-width:540px;max-height:340px;overflow-y:auto;scrollbar-width:thin}
+.cpopin{background:#0d1119;border:1px solid var(--line2);border-radius:12px;padding:10px 13px;box-shadow:0 16px 44px rgba(0,0,0,.6);width:max-content;max-width:540px;max-height:340px;overflow-y:auto;scrollbar-width:thin;overscroll-behavior:contain}
 
 .cpop .cr{display:flex;gap:11px;font-size:11.5px;padding:3px 0;align-items:baseline}
 .cpop .cc{font-family:JetBrains Mono,monospace;color:#FF5A1F;min-width:50px;font-weight:600}
@@ -550,8 +550,8 @@ function renderPanel(){
       return '<div class="copt'+(pp[0]===PLAN?' on':'')+'" data-plan="'+pp[0]+'"><span class=pl><span style="font-size:13px;font-weight:700">'+pp[1]+'</span></span><span class=rp>'+(v==null?'not published':fmt0(v))+'</span></div>';
     }).join('');
 }
-let POPT=null, POPEL=null;
-function hidePop(){ clearTimeout(POPT); if(POPEL){ POPEL.style.display='none'; POPEL=null; } }
+let POPT=null, POPEL=null, POPHOVER=false;
+function hidePop(){ clearTimeout(POPT); POPHOVER=false; if(POPEL){ POPEL.style.display='none'; POPEL=null; } }
 cpanel.addEventListener('mouseover', e => {
   const rt=e.target.closest('.rt');
   if(rt){
@@ -568,18 +568,28 @@ cpanel.addEventListener('mouseover', e => {
     }
     return;
   }
-  if(e.target.closest('.cpop')) clearTimeout(POPT);
+  if(e.target.closest('.cpop')){ POPHOVER=true; clearTimeout(POPT); }
 });
 cpanel.addEventListener('mouseout', e => {
   const from=e.target.closest('.rt, .cpop');
   if(!from) return;
   const to=e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.rt, .cpop') : null;
   if(to) return;
+  if(e.target.closest('.cpop')) POPHOVER=false;
   clearTimeout(POPT);
   POPT=setTimeout(hidePop, e.target.closest('.cpop') ? 110 : 280);   // off the list -> gone almost immediately; rt->list travel keeps grace
 });
 cpanel.addEventListener('scroll', e => { if(e.target && e.target.closest && e.target.closest('.cpop')) return; hidePop(); }, true);
-window.addEventListener('scroll', () => hidePop(), {passive:true});
+window.addEventListener('scroll', () => { if(!POPHOVER) hidePop(); }, {passive:true});
+cpanel.addEventListener('wheel', e => {
+  const pop=e.target.closest ? e.target.closest('.cpop') : null;
+  if(!pop) return;
+  const pin=e.target.closest('.cpopin');
+  if(!pin){ e.preventDefault(); return; }                            // hovering the list frame: the page must not move
+  const canDown = pin.scrollTop + pin.clientHeight < pin.scrollHeight - 1;
+  const canUp = pin.scrollTop > 0;
+  if((e.deltaY > 0 && !canDown) || (e.deltaY < 0 && !canUp)) e.preventDefault();   // at the ends the wheel stops — leave the list to scroll the page
+}, {passive:false});
 cpanel.addEventListener('click', e => {
   if(e.target.closest('.rt') || e.target.closest('.cpop')) return;   // inspecting the code list never toggles the selector
   const ti=e.target.closest('.copt[data-ti]');
