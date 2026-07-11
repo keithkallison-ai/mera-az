@@ -45,10 +45,14 @@ td .lz{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:
 td .est{color:var(--gold);font-size:10px;font-weight:700;margin-left:5px}
 .tbox{max-height:500px;overflow:auto;border:1px solid var(--line);border-radius:12px}
 input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-radius:11px;padding:10px 15px;font:inherit;font-size:13.5px;width:320px;max-width:100%}input.q:focus{outline:none;border-color:var(--ac)}
-.tabs{display:flex;gap:0;margin:0 0 22px;border-bottom:1px solid var(--line)}
-.tabb{flex:1;text-align:center;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;color:var(--tx3);font-family:inherit;font-size:15.5px;font-weight:800;letter-spacing:.03em;padding:15px 0;cursor:pointer;transition:color .12s,border-color .12s}
+.tabs{display:flex;gap:0;margin:0 0 22px;border-bottom:1px solid var(--line);position:relative}
+.tabb{flex:1;text-align:center;background:none;border:0;color:var(--tx3);font-family:inherit;font-size:15.5px;font-weight:800;letter-spacing:.03em;padding:15px 0;cursor:pointer;transition:color .22s ease}
 .tabb:hover{color:var(--tx2)}
-.tabb.on{color:var(--tx);border-bottom-color:#FF5A1F}
+.tabb.on{color:var(--tx)}
+#tabbar{position:absolute;bottom:-1px;height:3px;border-radius:999px;background:linear-gradient(90deg,rgba(255,90,31,0) 0%,#FF5A1F 24%,#ff8a52 50%,#FF5A1F 76%,rgba(255,90,31,0) 100%);box-shadow:0 0 14px rgba(255,90,31,.4);pointer-events:none;transition:left .34s cubic-bezier(.3,.86,.24,1),width .34s cubic-bezier(.3,.86,.24,1)}
+[data-theme=light] #tabbar{box-shadow:0 0 10px rgba(255,90,31,.25)}
+.pane-in{animation:panein .3s cubic-bezier(.25,.7,.25,1) both}
+@keyframes panein{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 .sugg{position:absolute;top:calc(100% + 7px);left:0;right:0;background:#0d1119;border:1px solid var(--line2);border-radius:13px;padding:6px;z-index:70;box-shadow:0 14px 40px rgba(0,0,0,.55);display:none}
 .sugg.open{display:block}
 .sgit{padding:10px 13px;border-radius:9px;cursor:pointer;font-size:13.5px;display:flex;align-items:baseline;gap:10px;transition:background .1s}
@@ -294,9 +298,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 <div class=wrap>
 
 <div class=tabs id=tabs>
-  <button class="tabb on" data-tab=browse type=button>Browse</button>
   <button class=tabb data-tab=explore type=button>Analyze</button>
+  <button class="tabb on" data-tab=browse type=button>Browse</button>
   <button class=tabb data-tab=audit type=button>Audit</button>
+  <div id=tabbar></div>
 </div>
 
 <div id=pane_browse>
@@ -833,13 +838,29 @@ function goCode(c,t){
   auqual.innerHTML=qh;
 })();
 // DIVISIONS — Browse · Explore · Audit
+const TABBAR=document.getElementById('tabbar');
+function moveBar(b, instant){
+  const w=Math.max(96, b.offsetWidth*0.42);
+  if(instant) TABBAR.style.transition='none';
+  TABBAR.style.width=w+'px';
+  TABBAR.style.left=(b.offsetLeft+(b.offsetWidth-w)/2)+'px';
+  if(instant){ void TABBAR.offsetHeight; TABBAR.style.transition=''; }
+}
 document.getElementById('tabs').addEventListener('click', e => {
-  const b=e.target.closest('.tabb'); if(!b) return;
+  const b=e.target.closest('.tabb'); if(!b || b.classList.contains('on')) return;
   document.querySelectorAll('.tabb').forEach(x=>x.classList.toggle('on', x===b));
-  for(const k of ['browse','explore','audit']) document.getElementById('pane_'+k).style.display = (b.dataset.tab===k?'':'none');
+  moveBar(b);
+  for(const k of ['browse','explore','audit']){
+    const p=document.getElementById('pane_'+k), show=(b.dataset.tab===k);
+    p.style.display = show?'':'none';
+    p.classList.remove('pane-in');
+    if(show){ void p.offsetWidth; p.classList.add('pane-in'); }
+  }
   if(b.dataset.tab==='explore') draw();
   if(b.dataset.tab==='browse' && CP.code) codePage(CP.code, CP.ct, CP.vi);
 });
+window.addEventListener('resize', () => { const b=document.querySelector('.tabb.on'); if(b) moveBar(b, true); });
+moveBar(document.querySelector('.tabb.on'), true);
 // THEME TOGGLE — sun/moon (legacy audit_app behavior), charts re-render with the theme palette
 document.getElementById('theme')?.addEventListener('click',()=>{
   const d=document.documentElement, t=d.dataset.theme==='light'?'dark':'light';
