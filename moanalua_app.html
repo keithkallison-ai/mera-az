@@ -45,13 +45,25 @@ td .lz{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:
 td .est{color:var(--gold);font-size:10px;font-weight:700;margin-left:5px}
 .tbox{max-height:500px;overflow:auto;border:1px solid var(--line);border-radius:12px}
 input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-radius:11px;padding:10px 15px;font:inherit;font-size:13.5px;width:320px;max-width:100%}input.q:focus{outline:none;border-color:var(--ac)}
-select.q{appearance:none;-webkit-appearance:none;background-color:#0f141d;color:var(--tx);border:1px solid var(--line2);border-radius:11px;padding:10px 36px 10px 14px;font:inherit;font-size:13px;font-weight:600;letter-spacing:-.01em;max-width:100%;cursor:pointer;transition:border-color .15s,background-color .15s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%235c6675' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center}
-select.q:hover{border-color:var(--ac);background-color:#121826}
-select.q:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(94,234,212,.12)}
-select.q option{background:#0f141d;color:var(--tx)}
-[data-theme=light] select.q{background-color:#ffffff;color:#171b21;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%237d8899' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
-[data-theme=light] select.q:hover{background-color:#f6f8fb}
-[data-theme=light] select.q option{background:#ffffff;color:#171b21}
+.dd{position:relative;flex:0 0 auto}
+.ddbtn{display:flex;align-items:center;gap:10px;background:#0f141d;border:1px solid var(--line2);border-radius:11px;padding:6px 14px;color:var(--tx);font:inherit;cursor:pointer;transition:border-color .15s,background .15s;min-height:41px}
+.ddbtn:hover{border-color:var(--ac);background:#121826}
+.ddbtn .stack{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25}
+.ddbtn .lab{font-size:8.5px;letter-spacing:.09em;color:var(--tx3);text-transform:uppercase;font-weight:800}
+.ddbtn .cur{font-size:13px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+.ddbtn svg{flex:0 0 auto;color:var(--tx3);transition:transform .18s}
+.dd.open .ddbtn{border-color:var(--ac)}
+.dd.open .ddbtn svg{transform:rotate(180deg)}
+.ddlist{position:absolute;top:calc(100% + 7px);right:0;min-width:100%;background:#0d1119;border:1px solid var(--line2);border-radius:13px;padding:6px;z-index:60;box-shadow:0 14px 40px rgba(0,0,0,.55);display:none}
+.dd.open .ddlist{display:block}
+.ddit{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;white-space:nowrap;transition:background .1s,color .1s}
+.ddit:hover{background:#141b28;color:var(--tx)}
+.ddit.on{color:var(--ac)}
+.ddit.on::after{content:'✓';font-weight:800}
+[data-theme=light] .ddbtn{background:#ffffff}
+[data-theme=light] .ddbtn:hover{background:#f6f8fb}
+[data-theme=light] .ddlist{background:#ffffff;box-shadow:0 14px 40px rgba(16,24,40,.14)}
+[data-theme=light] .ddit:hover{background:#eef2f7}
 .tb{display:flex;gap:11px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .count{font-size:11.5px;color:var(--tx3);margin:8px 2px 0}
 .fine{color:var(--tx3);font-size:11.4px;line-height:1.75}
@@ -240,8 +252,8 @@ select.q option{background:#0f141d;color:var(--tx)}
   <h2>Look up <em>any price</em>.</h2>
   <div class=tb>
     <input class=q id=q style="flex:1;min-width:240px" placeholder="Search a procedure or a code — try 'mri', 'birth', 'knee', '80053'…">
-    <select class=q id=selins title="Insurer"></select>
-    <select class=q id=selplan title="Plan"></select>
+    <div class=dd id=dd_ins></div>
+    <div class=dd id=dd_plan></div>
   </div>
   <div class=tbox><table id=tbl><thead><tr>
     <th>Code</th><th>Service</th><th>Setting</th><th>Family</th><th style="text-align:right" id=prhead>Price</th><th id=rndhead>round</th>
@@ -346,11 +358,21 @@ const flt={q:''};
 const INSURERS=[{name:D.codepage.payer, plans:[['com','Commercial'],['mcr','Medicare'],['mcd','Medicaid']]}];
 let PLAN='com';
 const PIDX={com:6,mcr:5,mcd:7}, PNAME={com:'Commercial',mcr:'Medicare',mcd:'Medicaid'};
-selins.innerHTML=INSURERS.map((x,i)=>'<option value="'+i+'">'+x.name+'</option>').join('');
-function fillPlans(){ selplan.innerHTML=INSURERS[+selins.value].plans.map(pp=>'<option value="'+pp[0]+'"'+(pp[0]===PLAN?' selected':'')+'>'+pp[1]+'</option>').join(''); }
-fillPlans();
-selins.onchange=()=>{ PLAN='com'; fillPlans(); render(); };
-selplan.onchange=()=>{ PLAN=selplan.value; render(); };
+let INS=0;
+function ddChev(){ return '<svg width=12 height=12 viewBox="0 0 24 24" aria-hidden=true><path fill=none stroke=currentColor stroke-width=3 stroke-linecap=round stroke-linejoin=round d="m6 9 6 6 6-6"/></svg>'; }
+function ddRender(el, lab, items, cur, pick){
+  el.innerHTML = '<button class=ddbtn type=button><span class=stack><span class=lab>'+lab+'</span><span class=cur>'+items.find(x=>x[0]===cur)[1]+'</span></span>'+ddChev()+'</button>'
+    +'<div class=ddlist>'+items.map(x=>'<div class=ddit'+(x[0]===cur?' on':'')+' data-v="'+x[0]+'">'+x[1]+'</div>').join('')+'</div>';
+  el.querySelector('.ddbtn').onclick = e => { e.stopPropagation(); const was = el.classList.contains('open');
+    document.querySelectorAll('.dd.open').forEach(x=>x.classList.remove('open')); if(!was) el.classList.add('open'); };
+  el.querySelectorAll('.ddit').forEach(it=>{ it.onclick = e => { e.stopPropagation(); el.classList.remove('open'); pick(it.dataset.v); }; });
+}
+document.addEventListener('click', ()=>document.querySelectorAll('.dd.open').forEach(x=>x.classList.remove('open')));
+function ddSync(){
+  ddRender(dd_ins, 'Insurer', INSURERS.map((x,i)=>[String(i), x.name]), String(INS), v=>{ INS=+v; PLAN='com'; ddSync(); render(); });
+  ddRender(dd_plan, 'Plan', INSURERS[INS].plans, PLAN, v=>{ PLAN=v; ddSync(); render(); });
+}
+ddSync();
 q.addEventListener('input',()=>{flt.q=q.value.trim().toLowerCase();render();});
 function render(){
   const terms=flt.q.split(/\s+/).filter(Boolean);
@@ -368,7 +390,7 @@ function render(){
     }
   }
   tb.innerHTML=out.join('');
-  cnt.textContent = `${fmtI(hit)} rows · showing ${Math.min(hit,250).toLocaleString()} · ${INSURERS[+selins.value].name} · ${PNAME[PLAN]}`;
+  cnt.textContent = `${fmtI(hit)} rows · showing ${Math.min(hit,250).toLocaleString()} · ${INSURERS[INS].name} · ${PNAME[PLAN]}`;
 }
 // FINE PRINT + FOOTER
 fine.innerHTML = `<b>The dials, precisely.</b> ${D.lanes.map(l=>`${l.label} ×${l.k} (n=${fmtI(l.n)}, ${l.fit2}% within $2)`).join(' · ')}.
