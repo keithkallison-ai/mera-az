@@ -87,11 +87,13 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 [data-theme=light] .copt:hover{background:#f2f5f9}
 [data-theme=light] .cpop{background:#ffffff;box-shadow:0 16px 44px rgba(16,24,40,.16)}
 .dd{position:relative;flex:0 0 auto}
+#dd_ins .ddbtn{width:335px}
+#dd_plan .ddbtn{width:168px}
 .ddbtn{display:flex;align-items:center;gap:10px;background:#0f141d;border:1px solid var(--line2);border-radius:11px;padding:6px 14px;color:var(--tx);font:inherit;cursor:pointer;transition:border-color .15s,background .15s;min-height:41px}
 .ddbtn:hover{border-color:var(--ac);background:#121826}
-.ddbtn .stack{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25}
+.ddbtn .stack{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25;flex:1;min-width:0}
 .ddbtn .lab{font-size:8.5px;letter-spacing:.09em;color:var(--tx3);text-transform:uppercase;font-weight:800}
-.ddbtn .cur{font-size:13px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+.ddbtn .cur{font-size:13px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;text-align:left}
 .ddbtn svg{flex:0 0 auto;color:var(--tx3);transition:transform .18s}
 .dd.open .ddbtn{border-color:var(--ac)}
 .dd.open .ddbtn svg{transform:rotate(180deg)}
@@ -214,10 +216,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .vflt2:hover{color:#FF5A1F!important}
 /* == West Oahu record-identity header (audit_app/web/style.css, legacy dark values inlined) == */
 .rec-id{flex:1;min-width:0}
-.rec-id h2{margin:.1em 0;font-size:19px;color:#FFFFFF;font-weight:800}
+.rec-id h2{margin:.1em 0;font-size:17px;line-height:1.35;color:#FFFFFF;font-weight:800;min-height:46px}
 .rec-id .codeline{font-family:ui-monospace,Menlo,Consolas,monospace;color:#FF5A1F}
 .rec-id .cmut{color:#8E949E;font-size:12.5px}
-.decoded{display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-top:10px;width:100%;min-width:0}
+.decoded{display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-top:10px;width:100%;min-width:0;min-height:66px}
 .vrow{display:flex;align-items:center;gap:8px;width:100%;max-width:100%;min-width:0}
 .vrow .vk{min-width:96px;margin:0}
 .vk{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#8E949E;align-self:center;margin-right:1px}
@@ -302,7 +304,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 
 <div class=card>
   <div style="display:flex;justify-content:space-between;align-items:start;gap:14px">
-    <div class=rec-id><h2 id=cph2></h2><div id=cpplain style="font-size:12.5px;font-weight:600;color:var(--tx2);margin:2px 0 3px"></div><div id=cpcodes></div><div class=decoded id=cpdec></div></div>
+    <div class=rec-id><h2 id=cph2></h2><div id=cpplain style="font-size:12.5px;font-weight:600;color:var(--tx2);margin:2px 0 3px;min-height:19px"></div><div id=cpcodes></div><div class=decoded id=cpdec></div></div>
     <span class=src id=cpsrc></span>
   </div>
   <div class=cwrap id=cpanel style="display:none">
@@ -418,11 +420,20 @@ draw();
 const LANE_LBL = Object.assign({pct:'% of list'},Object.fromEntries(D.lanes.map(l=>[l.id,l.label])));
 const LANE_COL = Object.assign({pct:'#fbbf24'},Object.fromEntries(D.lanes.map(l=>[l.id,l.color])));
 const flt={q:''};
-// search by procedure; scope by INSURER, then PLAN. No plan chosen -> the most common commercial plan.
-const INSURERS=[{name:D.codepage.payer, plans:[['com','Commercial'],['mcr','Medicare'],['mcd','Medicaid']]}];
+// search by procedure; scope by INSURER, then PLAN. Medicare/Medicaid are INSURERS (administered programs),
+// not plans under the commercial insurer. No plan chosen -> the most common commercial plan.
+const INSURERS=[
+  {name:D.codepage.payer, plans:[['com','Commercial']]},
+  {name:'Medicare',       plans:[['mcr','Medicare']]},
+  {name:'Medicaid',       plans:[['mcd','Medicaid']]}
+];
 let PLAN='com';
 const PIDX={com:6,mcr:5,mcd:7}, PNAME={com:'Commercial',mcr:'Medicare',mcd:'Medicaid'};
 let INS=0;
+// the cross-price rows for Box 2: every program priced for the active division
+const PROGRAMS=[{ins:0,plan:'com',label:D.codepage.payer.split(',')[0]+' · Commercial'},
+                {ins:1,plan:'mcr',label:'Medicare'},
+                {ins:2,plan:'mcd',label:'Medicaid'}];
 function ddChev(){ return '<svg width=12 height=12 viewBox="0 0 24 24" aria-hidden=true><path fill=none stroke=currentColor stroke-width=3 stroke-linecap=round stroke-linejoin=round d="m6 9 6 6 6-6"/></svg>'; }
 function ddRender(el, lab, items, cur, pick){
   el.innerHTML = '<button class=ddbtn type=button><span class=stack><span class=lab>'+lab+'</span><span class=cur>'+items.find(x=>x[0]===cur)[1]+'</span></span>'+ddChev()+'</button>'
@@ -433,7 +444,7 @@ function ddRender(el, lab, items, cur, pick){
 }
 document.addEventListener('click', ()=>document.querySelectorAll('.dd.open').forEach(x=>x.classList.remove('open')));
 function ddSync(){
-  ddRender(dd_ins, 'Insurer', INSURERS.map((x,i)=>[String(i), x.name]), String(INS), v=>{ INS=+v; PLAN='com'; ddSync(); render(); });
+  ddRender(dd_ins, 'Insurer', INSURERS.map((x,i)=>[String(i), x.name]), String(INS), v=>{ INS=+v; PLAN=INSURERS[INS].plans[0][0]; ddSync(); render(); });
   ddRender(dd_plan, 'Plan', INSURERS[INS].plans, PLAN, v=>{ PLAN=v; ddSync(); render(); });
 }
 ddSync();
@@ -519,10 +530,10 @@ function renderPanel(){
       return '<div class="copt'+(ti===activeTi?' on':'')+'" data-ti="'+ti+'"><span class=pl><span class=p>'+(v==null?'—':fmt0(v))+(t[0][4]==='pct'?' <span class=est>EST</span>':'')+(isMR?' <span class=mrb title="CMS designates this the service consumers shop for this concept">MOST RELEVANT</span>':'')+'</span><span class=sub>'+sub+'</span></span><span class=rt>'+t.length+' code'+(t.length>1?'s':'')+'</span>'+pop+'</div>';
     }).join('');
   const act=CONCEPT.tiers[activeTi];
-  cbox2.innerHTML = '<div class=cbh>Plans — '+INSURERS[INS].name+'</div>'
-    + INSURERS[INS].plans.map(pp=>{
-      const v=act[0][PIDX[pp[0]]];
-      return '<div class="copt'+(pp[0]===PLAN?' on':'')+'" data-plan="'+pp[0]+'"><span class=pl><span style="font-size:13px;font-weight:700">'+pp[1]+'</span></span><span class=rp>'+(v==null?'not published':fmt0(v))+'</span></div>';
+  cbox2.innerHTML = '<div class=cbh>Coverage — this division under every program</div>'
+    + PROGRAMS.map(pg=>{
+      const v=act[0][PIDX[pg.plan]];
+      return '<div class="copt'+(pg.plan===PLAN?' on':'')+'" data-plan="'+pg.plan+'" data-ins="'+pg.ins+'"><span class=pl><span style="font-size:13px;font-weight:700">'+pg.label+'</span></span><span class=rp>'+(v==null?'not published':fmt0(v))+'</span></div>';
     }).join('');
 }
 cpanel.addEventListener('click', e => {
@@ -530,7 +541,7 @@ cpanel.addEventListener('click', e => {
   if(ti && CONCEPT){ const a=tierAnchor(CONCEPT.tiers[+ti.dataset.ti]); codePage(a[0],a[1],0);
     try{history.replaceState('','','#c/'+a[1]+':'+encodeURIComponent(a[0]));}catch(e2){} return; }
   const pl=e.target.closest('.copt[data-plan]');
-  if(pl){ PLAN=pl.dataset.plan; ddSync(); if(CONCEPT) pickConcept(CONCEPT.cat,{keep:true}); }
+  if(pl){ PLAN=pl.dataset.plan; if(pl.dataset.ins!=null) INS=+pl.dataset.ins; ddSync(); if(CONCEPT) pickConcept(CONCEPT.cat,{keep:true}); }
 });
 function buildSugg(){
   const hits=conceptHits(flt.q);
@@ -614,7 +625,7 @@ function codePage(code,ct,vi){
   let dec='<div class=vrow><span class=vk>Setting</span><span class=vv>'+(r[3]==='both'?'outpatient':r[3])+'</span></div>'
     +'<div class=vrow><span class=vk>Methodology</span><span class=vv>'+meth[0]+' <span class=vc>'+meth[1]+'</span></span></div>';
   if(rows.length>1){
-    dec += '<div class=vrow><span class=vk>Variants</span><span class=vv>'+rows.map((x,i)=>
+    dec += '<div class=vrow><span class=vk>Variants</span><span class=vv style="display:block;max-height:40px;overflow-y:auto">'+rows.map((x,i)=>
       '<span class=vflt2 data-vi="'+i+'" style="cursor:pointer;font-weight:600;color:'+(i===CP.vi?'#FF5A1F':'inherit')+'">'+vname(x)+'</span>')
       .join(' <span style="opacity:.45">&#92;</span> ')+'</span></div>';
   }
