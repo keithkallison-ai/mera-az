@@ -64,7 +64,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .mrb{font-size:8.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,90,31,.16);color:#ff8a55;border-radius:5px;padding:2px 7px;vertical-align:2px}
 .sgit .mr{font-size:11px;color:var(--tx2);margin-top:3px}
 [data-theme=light] .mrb{background:rgba(255,90,31,.13);color:#d2481a}
-.cwrap{display:grid;grid-template-columns:3fr 2fr;gap:12px;margin-top:14px}
+.cwrap{display:grid;grid-template-columns:3fr 2fr;gap:12px;margin-top:14px;align-items:start}
 @media(max-width:800px){.cwrap{grid-template-columns:1fr}}
 .cbox{border:1px solid var(--line);border-radius:14px;background:#0c1017;padding:11px}
 .gframe{height:216px;margin-top:14px;border:1px solid var(--line);border-radius:14px;background:#0c1017;padding:12px 16px}
@@ -79,6 +79,12 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .copt .rt{font-size:10.5px;color:var(--tx3);white-space:nowrap;flex:0 0 auto;cursor:help;border-bottom:1px dotted var(--tx3)}
 .copt .rp{font-family:JetBrains Mono,monospace;font-size:13px;font-weight:700;color:var(--tx2);white-space:nowrap;flex:0 0 auto}
 .copt.on .rp{color:var(--tx)}
+.divsel:not(.open) .copt:not(.on){display:none}
+.divsel .copt.on{cursor:pointer}
+.divsel .dvchev{margin-left:4px;color:var(--tx3);display:inline-flex;flex:0 0 auto;transition:transform .18s}
+.divsel.open .copt.on .dvchev{transform:rotate(180deg)}
+.divsel.open .copt:not(.on){animation:dvin .16s ease both}
+@keyframes dvin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .cpop{display:none;position:absolute;left:calc(100% + 12px);top:-6px;z-index:85;background:#0d1119;border:1px solid var(--line2);border-radius:12px;padding:10px 13px;box-shadow:0 16px 44px rgba(0,0,0,.6);width:max-content;max-width:560px}
 .copt .rt:hover ~ .cpop{display:block}
 .copt .cpop:hover{display:block}
@@ -287,7 +293,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 
 <div class=tabs id=tabs>
   <button class="tabb on" data-tab=browse type=button>Browse</button>
-  <button class=tabb data-tab=explore type=button>Explore</button>
+  <button class=tabb data-tab=explore type=button>Analyze</button>
   <button class=tabb data-tab=audit type=button>Audit</button>
 </div>
 
@@ -521,7 +527,8 @@ function renderPanel(){
   if(!CONCEPT || !CONCEPT.tiers.length){ cpanel.style.display='none'; return; }
   cpanel.style.display='grid';
   const activeTi = Math.max(0, CONCEPT.tiers.findIndex(t=>t.some(x=>x[0]===CP.code&&x[1]===CP.ct)));
-  cbox1.innerHTML = '<div class=cbh>'+CONCEPT.q+' — the '+CONCEPT.tiers.length+' real price'+(CONCEPT.tiers.length>1?'s':'')+' in this hospital’s file</div>'
+  cbox1.className = 'cbox divsel';   // collapsed by default: only the selected price point shows
+  cbox1.innerHTML = '<div class=cbh>'+CONCEPT.q+' — the '+CONCEPT.tiers.length+' real price'+(CONCEPT.tiers.length>1?'s':'')+' in this hospital’s file <span style="text-transform:none;letter-spacing:0;font-weight:600">· tap the price to change</span></div>'
     + CONCEPT.tiers.map((t,ti)=>{
       const v=t[0][PIDX[PLAN]];
       const ex=[...t].sort((a,b)=>a[2].length-b[2].length)[0];
@@ -530,7 +537,7 @@ function renderPanel(){
       const isMR=CONCEPT.viaShop && t.some(r=>r[0]===CONCEPT.anchor[0]&&r[1]===CONCEPT.anchor[1]);
       const pop='<div class=cpop><div class=ch2>'+t.length+' billing code'+(t.length>1?'s':'')+' at exactly this price · MRF titles verbatim</div>'
         + t.map(r=>'<div class=cr><span class=cc>'+r[0]+'</span><span class=ct2>'+r[2]+'</span></div>').join('')+'</div>';
-      return '<div class="copt'+(ti===activeTi?' on':'')+'" data-ti="'+ti+'"><span class=pl><span class=p>'+(v==null?'—':fmt0(v))+(t[0][4]==='pct'?' <span class=est>EST</span>':'')+(isMR?' <span class=mrb title="CMS designates this the service consumers shop for this concept">MOST RELEVANT</span>':'')+'</span><span class=sub>'+sub+'</span></span><span class=rt>'+t.length+' code'+(t.length>1?'s':'')+'</span>'+pop+'</div>';
+      return '<div class="copt'+(ti===activeTi?' on':'')+'" data-ti="'+ti+'"><span class=pl><span class=p>'+(v==null?'—':fmt0(v))+(t[0][4]==='pct'?' <span class=est>EST</span>':'')+(isMR?' <span class=mrb title="CMS designates this the service consumers shop for this concept">MOST RELEVANT</span>':'')+'</span><span class=sub>'+sub+'</span></span><span class=rt>'+t.length+' code'+(t.length>1?'s':'')+'</span>'+(ti===activeTi?'<span class=dvchev>'+ddChev()+'</span>':'')+pop+'</div>';
     }).join('');
   const act=CONCEPT.tiers[activeTi];
   cbox2.innerHTML = '<div class=cbh>Plans — '+INSURERS[INS].name+'</div>'
@@ -540,8 +547,14 @@ function renderPanel(){
     }).join('');
 }
 cpanel.addEventListener('click', e => {
+  if(e.target.closest('.rt') || e.target.closest('.cpop')) return;   // inspecting the code list never toggles the selector
   const ti=e.target.closest('.copt[data-ti]');
-  if(ti && CONCEPT){ const a=tierAnchor(CONCEPT.tiers[+ti.dataset.ti]); codePage(a[0],a[1],0);
+  if(ti && CONCEPT){
+    const open=cbox1.classList.contains('open');
+    if(!open){ cbox1.classList.add('open'); return; }                 // collapsed -> reveal the other price points
+    const t=CONCEPT.tiers[+ti.dataset.ti];
+    if(t.some(x=>x[0]===CP.code&&x[1]===CP.ct)){ cbox1.classList.remove('open'); return; }   // re-click the selected -> fold
+    const a=tierAnchor(t); codePage(a[0],a[1],0);                     // pick -> swap the page; the re-render folds it
     try{history.replaceState('','','#c/'+a[1]+':'+encodeURIComponent(a[0]));}catch(e2){} return; }
   const pl=e.target.closest('.copt[data-plan]');
   if(pl){ PLAN=pl.dataset.plan; if(pl.dataset.ins!=null) INS=+pl.dataset.ins; ddSync(); if(CONCEPT) pickConcept(CONCEPT.cat,{keep:true}); }
