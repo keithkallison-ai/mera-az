@@ -57,6 +57,28 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .vtier:hover{border-color:var(--ac);color:var(--tx)}
 .vtier.on{color:#FF5A1F;border-color:#FF5A1F}
 .vtier .n{color:var(--tx3);font-weight:500;font-size:10px}
+.cwrap{display:grid;grid-template-columns:3fr 2fr;gap:12px;margin-top:14px}
+@media(max-width:800px){.cwrap{grid-template-columns:1fr}}
+.cbox{border:1px solid var(--line);border-radius:14px;background:#0c1017;padding:11px}
+.cbh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin:3px 6px 9px}
+.copt{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border:1px solid transparent;border-radius:10px;cursor:pointer;transition:background .12s,border-color .12s}
+.copt:hover{background:#10161f}
+.copt.on{border-color:#2c5b54;background:rgba(94,234,212,.07)}
+.copt .pl{display:flex;flex-direction:column;gap:2px;min-width:0}
+.copt .p{font-family:JetBrains Mono,monospace;font-size:14px;font-weight:800;color:var(--tx)}
+.copt .sub{font-size:10.5px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+.copt .rt{font-size:10.5px;color:var(--tx3);white-space:nowrap;flex:0 0 auto}
+.copt .rp{font-family:JetBrains Mono,monospace;font-size:13px;font-weight:700;color:var(--tx2);white-space:nowrap;flex:0 0 auto}
+.copt.on .rp{color:var(--tx)}
+.cpop{display:none;position:absolute;left:calc(100% + 12px);top:-6px;z-index:85;background:#0d1119;border:1px solid var(--line2);border-radius:12px;padding:10px 13px;box-shadow:0 16px 44px rgba(0,0,0,.6);width:max-content;max-width:560px}
+.copt:hover .cpop{display:block}
+.cpop .cr{display:flex;gap:11px;font-size:11.5px;padding:3px 0;align-items:baseline}
+.cpop .cc{font-family:JetBrains Mono,monospace;color:#FF5A1F;min-width:50px;font-weight:600}
+.cpop .ct2{color:var(--tx2)}
+.cpop .ch2{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);margin-bottom:5px}
+[data-theme=light] .cbox{background:#ffffff}
+[data-theme=light] .copt:hover{background:#f2f5f9}
+[data-theme=light] .cpop{background:#ffffff;box-shadow:0 16px 44px rgba(16,24,40,.16)}
 .dd{position:relative;flex:0 0 auto}
 .ddbtn{display:flex;align-items:center;gap:10px;background:#0f141d;border:1px solid var(--line2);border-radius:11px;padding:6px 14px;color:var(--tx);font:inherit;cursor:pointer;transition:border-color .15s,background .15s;min-height:41px}
 .ddbtn:hover{border-color:var(--ac);background:#121826}
@@ -272,6 +294,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
     <div class=dd id=dd_plan></div>
   </div>
   <div class=count id=cnt style="margin-top:9px"></div>
+  <div class=cwrap id=cpanel style="display:none">
+    <div class=cbox id=cbox1></div>
+    <div class=cbox id=cbox2></div>
+  </div>
 </div>
 
 <div class=card>
@@ -423,6 +449,32 @@ function pickConcept(cat, opts){
     codePage(CP.code, CP.ct, CP.vi);
   }
 }
+function renderPanel(){
+  if(!CONCEPT || !CONCEPT.tiers.length){ cpanel.style.display='none'; return; }
+  cpanel.style.display='grid';
+  const activeTi = Math.max(0, CONCEPT.tiers.findIndex(t=>t.some(x=>x[0]===CP.code&&x[1]===CP.ct)));
+  cbox1.innerHTML = '<div class=cbh>'+tcase(CONCEPT.q)+' — the '+CONCEPT.tiers.length+' real price'+(CONCEPT.tiers.length>1?'s':'')+' in this hospital’s file</div>'
+    + CONCEPT.tiers.map((t,ti)=>{
+      const v=t[0][PIDX[PLAN]];
+      const ex=[...t].sort((a,b)=>a[2].length-b[2].length)[0];
+      const pop='<div class=cpop><div class=ch2>'+t.length+' billing code'+(t.length>1?'s':'')+' at exactly this price · MRF titles verbatim</div>'
+        + t.map(r=>'<div class=cr><span class=cc>'+r[0]+'</span><span class=ct2>'+r[2]+'</span></div>').join('')+'</div>';
+      return '<div class="copt'+(ti===activeTi?' on':'')+'" data-ti="'+ti+'"><span class=pl><span class=p>'+(v==null?'—':fmt0(v))+(t[0][4]==='pct'?' <span class=est>EST</span>':'')+'</span><span class=sub>'+ex[2]+'</span></span><span class=rt>'+t.length+' code'+(t.length>1?'s':'')+'</span>'+pop+'</div>';
+    }).join('');
+  const act=CONCEPT.tiers[activeTi];
+  cbox2.innerHTML = '<div class=cbh>Plans — '+INSURERS[INS].name+'</div>'
+    + INSURERS[INS].plans.map(pp=>{
+      const v=act[0][PIDX[pp[0]]];
+      return '<div class="copt'+(pp[0]===PLAN?' on':'')+'" data-plan="'+pp[0]+'"><span class=pl><span style="font-size:13px;font-weight:700">'+pp[1]+'</span></span><span class=rp>'+(v==null?'not published':fmt0(v))+'</span></div>';
+    }).join('');
+}
+cpanel.addEventListener('click', e => {
+  const ti=e.target.closest('.copt[data-ti]');
+  if(ti && CONCEPT){ const a=tierAnchor(CONCEPT.tiers[+ti.dataset.ti]); codePage(a[0],a[1],0);
+    try{history.replaceState('','','#c/'+a[1]+':'+encodeURIComponent(a[0]));}catch(e2){} return; }
+  const pl=e.target.closest('.copt[data-plan]');
+  if(pl){ PLAN=pl.dataset.plan; ddSync(); if(CONCEPT) pickConcept(CONCEPT.cat,{keep:true}); }
+});
 function buildSugg(){
   const hits=conceptHits();
   if(!hits.length){ sugg.classList.remove('open'); sugg.innerHTML=''; return; }
@@ -434,7 +486,7 @@ function buildSugg(){
     const from=prices.length?fmt0(Math.min(...prices)):'—';
     return '<div class="sgit'+(i===0?' hot':'')+'" data-cat="'+ck+'"><b>'+tcase(flt.q)+'</b><span>'+ck+' · '+rows.length+' code'+(rows.length>1?'s':'')+' · from '+from+'</span></div>';
   }).join('');
-  sugg.classList.add('open');
+  if(document.activeElement===q) sugg.classList.add('open'); else sugg.classList.remove('open');
 }
 function render(){
   buildSugg();
@@ -490,13 +542,6 @@ function codePage(code,ct,vi){
       '<span class=vflt2 data-vi="'+i+'" style="cursor:pointer;font-weight:600;color:'+(i===CP.vi?'#FF5A1F':'inherit')+'">'+vname(x)+'</span>')
       .join(' <span style="opacity:.45">&#92;</span> ')+'</span></div>';
   }
-  if(typeof CONCEPT!=='undefined' && CONCEPT && CONCEPT.tiers.some(t=>t.some(x=>x[0]===code&&x[1]===ct))){
-    dec += '<div class=vrow><span class=vk>Versions</span><span class=vv style="display:flex;gap:7px;flex-wrap:wrap">'+CONCEPT.tiers.map((t,ti)=>{
-      const v=t[0][PIDX[PLAN]], on=t.some(x=>x[0]===code&&x[1]===ct);
-      const tip=t.map(x=>x[0]+' '+x[2]).join('&#10;').replace(/"/g,'&quot;');
-      return '<span class="vtier'+(on?' on':'')+'" data-ti="'+ti+'" title="'+tip+'">'+(v==null?'—':fmt0(v))+' <span class=n>· '+t.length+' code'+(t.length>1?'s':'')+'</span></span>';
-    }).join('')+'</span></div>';
-  }
   cpdec.innerHTML=dec;
   cpsrc.textContent='source row #'+r[11]+' · every value below traces here';
   // notes (verbatim, grouped when identical across plans) + published min/max + list/cash
@@ -536,6 +581,7 @@ function codePage(code,ct,vi){
   if(r[5]!=null) GPAIRS.push({price:r[5],v:'mcr',label:'MEDICARE',base:1,est:isP});
   if(r[20]!=null) GPAIRS.push({price:r[20],v:'cash',label:'CASH'});
   renderCodeGraph();
+  if(typeof renderPanel==='function') renderPanel();
   return true;
 }
 function renderCodeGraph(){
@@ -572,8 +618,6 @@ function renderCodeGraph(){
 window.addEventListener('resize',renderCodeGraph);
 cpdec.addEventListener('click',e=>{
   const v=e.target.closest('.vflt2'); if(v){ codePage(CP.code,CP.ct,+v.dataset.vi); return; }
-  const t=e.target.closest('.vtier'); if(t && CONCEPT){ const a=tierAnchor(CONCEPT.tiers[+t.dataset.ti]); codePage(a[0],a[1],0);
-    try{history.replaceState('','','#c/'+a[1]+':'+encodeURIComponent(a[0]));}catch(e2){} }
 });
 function goCode(c,t){
   if(codePage(c,t,0)){
