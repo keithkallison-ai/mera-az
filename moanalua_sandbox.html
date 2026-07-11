@@ -419,6 +419,20 @@ q.addEventListener('input',()=>{flt.q=q.value.trim().toLowerCase();CONCEPT=null;
 const SHOPPABLE=new Set(['45378','45380','43235','43239','70450','70551','70553','72110','72148','73721','76700','77067','29881','47562','66984','59400','93000','80053','80061','85025','84443','99203','99213','G0105','G0121','19120','20610','42820','49505','55700']);
 let CONCEPT=null;
 const tcase=t=>t.replace(/\b\w/g,c=>c.toUpperCase());
+const escRe=t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+// the concept NAME is the autocomplete CONCLUSION of the query: each typed term completes to the most
+// frequent full word containing it across the matched MRF titles ('colonosco' -> 'Colonoscopy').
+function conceptLabel(rows){
+  const terms=flt.q.split(/\s+/).filter(Boolean);
+  return terms.map(term=>{
+    const re=new RegExp('[A-Za-z0-9/&-]*'+escRe(term)+'[A-Za-z0-9/&-]*','gi');
+    const counts={};
+    for(const r of rows){ const m=String(r[2]||'').match(re); if(m) for(const w of m) counts[w]=(counts[w]||0)+1; }
+    const best=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
+    if(!best) return tcase(term);
+    return (best===best.toUpperCase()&&best.length>4)?tcase(best.toLowerCase()):(best[0].toUpperCase()+best.slice(1));
+  }).join(' ');
+}
 function conceptHits(){
   const terms=flt.q.split(/\s+/).filter(Boolean);
   if(!terms.length) return [];
@@ -436,11 +450,11 @@ function pickConcept(cat, opts){
   const tiers={};
   hits.forEach(r=>{ const tk=[r[5],r[6],r[7]].join('|'); (tiers[tk]=tiers[tk]||[]).push(r); });
   const tl=Object.values(tiers).sort((a,b)=>(a[0][PIDX[PLAN]]??1/0)-(b[0][PIDX[PLAN]]??1/0));
-  CONCEPT={q:flt.q, cat, tiers:tl};
+  CONCEPT={q:conceptLabel(hits), cat, tiers:tl};
   let anchor=null, viaShop=false;
   for(const t of tl){ const sh=t.filter(r=>SHOPPABLE.has(String(r[0]))); if(sh.length){ anchor=sh.sort((a,b)=>String(a[0])<String(b[0])?-1:1)[0]; viaShop=true; break; } }
   if(!anchor) anchor=tierAnchor(tl[0]);
-  cnt.textContent = tcase(CONCEPT.q)+' · '+cat+' · '+hits.length+' billing codes · '+tl.length+' distinct price'+(tl.length>1?'s':'')+' · opened at the '+(viaShop?'CMS-shoppable base':'lowest-priced version');
+  cnt.textContent = CONCEPT.q+' · '+cat+' · '+hits.length+' billing codes · '+tl.length+' distinct price'+(tl.length>1?'s':'')+' · opened at the '+(viaShop?'CMS-shoppable base':'lowest-priced version');
   if(!opts.keep){
     codePage(anchor[0], anchor[1], 0);
     try{history.replaceState('','','#c/'+anchor[1]+':'+encodeURIComponent(anchor[0]));}catch(e){}
@@ -453,7 +467,7 @@ function renderPanel(){
   if(!CONCEPT || !CONCEPT.tiers.length){ cpanel.style.display='none'; return; }
   cpanel.style.display='grid';
   const activeTi = Math.max(0, CONCEPT.tiers.findIndex(t=>t.some(x=>x[0]===CP.code&&x[1]===CP.ct)));
-  cbox1.innerHTML = '<div class=cbh>'+tcase(CONCEPT.q)+' — the '+CONCEPT.tiers.length+' real price'+(CONCEPT.tiers.length>1?'s':'')+' in this hospital’s file</div>'
+  cbox1.innerHTML = '<div class=cbh>'+CONCEPT.q+' — the '+CONCEPT.tiers.length+' real price'+(CONCEPT.tiers.length>1?'s':'')+' in this hospital’s file</div>'
     + CONCEPT.tiers.map((t,ti)=>{
       const v=t[0][PIDX[PLAN]];
       const ex=[...t].sort((a,b)=>a[2].length-b[2].length)[0];
@@ -484,7 +498,7 @@ function buildSugg(){
   sugg.innerHTML=entries.map((ck,i)=>{
     const rows=cats[ck], prices=rows.map(r=>r[PIDX[PLAN]]).filter(v=>v!=null);
     const from=prices.length?fmt0(Math.min(...prices)):'—';
-    return '<div class="sgit'+(i===0?' hot':'')+'" data-cat="'+ck+'"><b>'+tcase(flt.q)+'</b><span>'+ck+' · '+rows.length+' code'+(rows.length>1?'s':'')+' · from '+from+'</span></div>';
+    return '<div class="sgit'+(i===0?' hot':'')+'" data-cat="'+ck+'"><b>'+conceptLabel(rows)+'</b><span>'+ck+' · '+rows.length+' code'+(rows.length>1?'s':'')+' · from '+from+'</span></div>';
   }).join('');
   if(document.activeElement===q) sugg.classList.add('open'); else sugg.classList.remove('open');
 }
