@@ -52,7 +52,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .tabb.on{color:var(--tx)}
 #tabbar{position:absolute;bottom:-1px;height:3px;border-radius:999px;background:linear-gradient(90deg,rgba(255,90,31,0) 0%,#FF5A1F 24%,#ff8a52 50%,#FF5A1F 76%,rgba(255,90,31,0) 100%);box-shadow:0 0 14px rgba(255,90,31,.4);pointer-events:none;transition:left .34s cubic-bezier(.3,.86,.24,1),width .34s cubic-bezier(.3,.86,.24,1)}
 [data-theme=light] #tabbar{box-shadow:0 0 10px rgba(255,90,31,.25)}
-.divscroll{display:flex;align-items:flex-start;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none}
+.divscroll{display:flex;align-items:flex-start;overflow-x:hidden;overflow-y:clip;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-y}
 .divscroll::-webkit-scrollbar{display:none;width:0;height:0}
 .divpane{flex:0 0 100%;width:100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
 #pane_explore{order:0}#pane_browse{order:1}#pane_audit{order:2}
@@ -1151,9 +1151,12 @@ function goCode(c,t){
   xr.querySelectorAll('.lens button').forEach(b=>b.addEventListener('click',()=>setLens(b.dataset.l)));
   setLens('flag');
 })();
-// DIVISIONS — a NATIVE horizontal scroll-snap carousel (Analyze · Browse · Audit).
-// The browser's own scroll engine handles the two-finger swipe, momentum, snapping and
-// nested scrollers — so it is exactly as smooth as scrolling up and down. No gesture code.
+// DIVISIONS (Analyze · Browse · Audit). The strip is overflow-x:hidden — programmatically
+// scrollable but the user's wheel over CONTENT can't move it (no accidental switch) and vertical
+// is plain PAGE scroll. A horizontal swipe over the TAB BAR fires ONE native smooth scrollTo per
+// swipe: the browser animates it (no per-event scroll -> no stagger) and it lands on exactly one
+// pane (overshoot impossible). Native momentum from a sibling bar is impossible, so this is the
+// correct header-gated design (verified against MDN/CSSWG + Swiper/Embla wheel algorithms).
 const TABBAR=document.getElementById('tabbar');
 function moveBar(b, instant){
   if(!b) return;
@@ -1176,35 +1179,31 @@ function setActive(i){
   if(tab==='explore') requestAnimationFrame(draw);
   if(tab==='browse' && CP.code) requestAnimationFrame(()=>codePage(CP.code, CP.ct, CP.vi));
 }
-let scrolling=false, stt=0;
-DS.addEventListener('scroll', ()=>{ scrolling=true; setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1)));
-  clearTimeout(stt); stt=setTimeout(()=>{ scrolling=false; fit(); }, 90); }, {passive:true});
-// block a horizontal wheel over the CONTENT from moving the carousel (only the tab bar may switch);
-// but leave genuine horizontal menus (the browse grid) alone, and never touch vertical (page scroll).
-function scrollsX(el){ for(let n=el;n&&n.nodeType===1&&n!==DS;n=n.parentElement){ if(n.scrollWidth-n.clientWidth>2){ const o=getComputedStyle(n).overflowX; if(o==='auto'||o==='scroll') return true; } } return false; }
-DS.addEventListener('wheel', e=>{ if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)) return; if(scrollsX(e.target)) return; e.preventDefault(); }, {passive:false});
+let scrolling=false, stt=0, programmatic=false;
+// All horizontal scroll is programmatic (the strip is overflow-x:hidden). During a glide, don't let the
+// scroll handler fight the target highlight (that caused the underline flicker); just fit on settle.
+DS.addEventListener('scroll', ()=>{ scrolling=true;
+  if(!programmatic) setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1)));
+  clearTimeout(stt); stt=setTimeout(()=>{ scrolling=false; programmatic=false; fit(); }, 90); }, {passive:true});
 let targetIdx=1;
-function goTo(i, smooth){ i=Math.max(0,Math.min(2,i)); targetIdx=i; setActive(i); fit();
+function goTo(i, smooth){ i=Math.max(0,Math.min(2,i)); targetIdx=i;
+  const p=document.getElementById('pane_'+IDXTAB[i]); if(p) DS.style.height=p.scrollHeight+'px';
+  programmatic=true; setActive(i);
   DS.scrollTo({left:i*DS.clientWidth, behavior:(smooth && !matchMedia('(prefers-reduced-motion:reduce)').matches)?'smooth':'auto'}); }
-// ONLY a horizontal swipe over the tab bar switches — and the switch itself is a NATIVE smooth
-// scroll (scrollTo behavior:smooth), so it glides. One switch per swipe; a pause re-arms.
-// Over the tab bar a VERTICAL swipe still scrolls the page; over the content, horizontal does nothing.
-let sAcc=0, sLast=0, sLockUntil=0, sDir=0;
+// Switch ONLY on a horizontal swipe over the tab bar. A trackpad's inertia tail only ever DECAYS in
+// magnitude and never reverses, so we fire ONCE on a fresh push (rising |dx| when armed) and re-arm when
+// the tail dies (|dx|<REARM) or the finger reverses — never on a timer (gaps and decay both lie). One
+// scrollTo per swipe -> cannot overshoot. A VERTICAL swipe over the bar still scrolls the PAGE.
+let sArmed=true, sDir=0, sFire=0;
+const S_FIRE=8, S_REARM=5, S_GUARD=80;
 tabsEl.addEventListener('wheel', e => {
-  if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+  if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;   // vertical -> let the page scroll
   e.preventDefault();
-  const mag=Math.abs(e.deltaX), sgn=e.deltaX>0?1:-1, now=performance.now(), dt=now-sLast; sLast=now;
-  if(now < sLockUntil){
-    // HARD lock after a switch: nothing same-direction can get through (inertia can't outlast it),
-    // so a single swipe can only ever move one division. Only a deliberate REVERSE swipe breaks it early.
-    if(sgn!==sDir && mag>12){ sLockUntil=0; sAcc=0; }
-    else return;
-  }
-  if(dt>250 || (sAcc!==0 && (sAcc>0)!==(sgn>0))) sAcc=0;   // fresh gesture, or a reversal mid run-up
-  sAcc += e.deltaX;
-  if(Math.abs(sAcc) < 45) return;
-  sAcc=0; sDir=sgn; sLockUntil=now+600;
-  goTo(targetIdx + sgn, true);   // step from the committed target, not the mid-animation position
+  const a=Math.abs(e.deltaX), d=e.deltaX>0?1:-1, now=e.timeStamp;
+  if(a < S_REARM){ sArmed=true; sDir=d; return; }        // inertia died / quiet -> ready for the next swipe
+  if(d !== sDir) sArmed=true;                            // reversed direction -> a new gesture
+  if(sArmed && a >= S_FIRE && now - sFire > S_GUARD){ goTo(targetIdx + d, true); sArmed=false; sFire=now; }
+  sDir=d;
 }, {passive:false});
 tabsEl.addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) goTo(IDXTAB.indexOf(b.dataset.tab), true); });
 try{ const RO=new ResizeObserver(()=>{ if(!scrolling) fit(); }); IDXTAB.forEach(k=>RO.observe(document.getElementById('pane_'+k))); }catch(e){}
