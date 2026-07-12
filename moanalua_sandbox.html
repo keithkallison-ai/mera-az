@@ -52,11 +52,11 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .tabb.on{color:var(--tx)}
 #tabbar{position:absolute;bottom:-1px;height:3px;border-radius:999px;background:linear-gradient(90deg,rgba(255,90,31,0) 0%,#FF5A1F 24%,#ff8a52 50%,#FF5A1F 76%,rgba(255,90,31,0) 100%);box-shadow:0 0 14px rgba(255,90,31,.4);pointer-events:none;transition:left .34s cubic-bezier(.3,.86,.24,1),width .34s cubic-bezier(.3,.86,.24,1)}
 [data-theme=light] #tabbar{box-shadow:0 0 10px rgba(255,90,31,.25)}
-.divscroll{display:flex;align-items:flex-start;overflow-x:hidden;overflow-y:clip;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-y}
-.divscroll::-webkit-scrollbar{display:none;width:0;height:0}
-.divpane{flex:0 0 100%;width:100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
+.divscroll{position:relative;overflow-x:clip;overflow-y:visible}
+.divtrack{display:flex;width:100%;will-change:transform;transition:transform .42s cubic-bezier(.22,.61,.36,1)}
+.divpane{flex:0 0 100%;width:100%;min-width:0}
 #pane_explore{order:0}#pane_browse{order:1}#pane_audit{order:2}
-@media (prefers-reduced-motion:reduce){.divscroll{scroll-behavior:auto}}
+@media (prefers-reduced-motion:reduce){.divtrack{transition:none}}
 /* ===== AUDIT BINDER ===== */
 .binder{display:grid;grid-template-columns:60px 1fr;gap:20px;position:relative}
 .spine{position:sticky;top:76px;align-self:start;display:flex;flex-direction:column;gap:4px;padding:8px 0 8px 14px}
@@ -1151,12 +1151,12 @@ function goCode(c,t){
   xr.querySelectorAll('.lens button').forEach(b=>b.addEventListener('click',()=>setLens(b.dataset.l)));
   setLens('flag');
 })();
-// DIVISIONS (Analyze · Browse · Audit). The strip is overflow-x:hidden — programmatically
-// scrollable but the user's wheel over CONTENT can't move it (no accidental switch) and vertical
-// is plain PAGE scroll. A horizontal swipe over the TAB BAR fires ONE native smooth scrollTo per
-// swipe: the browser animates it (no per-event scroll -> no stagger) and it lands on exactly one
-// pane (overshoot impossible). Native momentum from a sibling bar is impossible, so this is the
-// correct header-gated design (verified against MDN/CSSWG + Swiper/Embla wheel algorithms).
+// DIVISIONS (Analyze · Browse · Audit). The strip scrolls NATIVELY (overflow-x:auto) — swipe over the
+// divisions and the browser scrolls with full trackpad momentum: smooth as butter, tracking your fingers
+// in real time. scroll-snap-stop:always caps a fling at ONE pane (native, no overshoot); mandatory snap
+// settles tiny drifts back. The strip is natural-height + overflow-y:clip (NOT hidden), so there is no
+// nested scroller — a VERTICAL two-finger scroll is plain PAGE scroll. That removes the fixed-height
+// tradeoff. The tab bar (a sibling above) can't be natively scrolled, so its wheel is forwarded 1:1.
 const TABBAR=document.getElementById('tabbar');
 function moveBar(b, instant){
   if(!b) return;
@@ -1167,55 +1167,59 @@ function moveBar(b, instant){
   if(instant){ void TABBAR.offsetHeight; TABBAR.style.transition=''; }
 }
 const DS=document.getElementById('divscroll'), IDXTAB=['explore','browse','audit'], tabsEl=document.getElementById('tabs');
-let curIdx=1;
-// The carousel is NOT user-scrollable (overflow:hidden). Each pane flows at natural height, so
-// vertical scroll is plain PAGE scroll. The carousel only moves when you swipe over the TAB BAR.
-function fit(){ const p=document.getElementById('pane_'+IDXTAB[curIdx]); if(p) DS.style.height=p.scrollHeight+'px'; }
-function setActive(i){
-  i=Math.max(0,Math.min(2,i)); if(i===curIdx){ moveBar(document.querySelector('.tabb.on')); return; }
-  curIdx=i; const tab=IDXTAB[i];
+const PANE=IDXTAB.map(k=>document.getElementById('pane_'+k));
+let curIdx=1, drawn=false, lastCP='', slideT=0;
+// Only the ACTIVE pane carries height, so the page's vertical scroll is ALWAYS plain page scroll — the
+// tall Audit pane can never trap it. Switching slides a TRACK on the GPU (compositor-only transform):
+// smooth as butter, no layout/stagger, and it cannot overshoot (one pane step per swipe).
+const TRACK=document.createElement('div'); TRACK.className='divtrack'; TRACK.id='divtrack';
+PANE.forEach(p=>TRACK.appendChild(p)); DS.appendChild(TRACK);
+function show(i,on){ const p=PANE[i]; if(!p) return; p.style.height=on?'auto':'0px'; p.style.overflow=on?'visible':'hidden'; }
+function setTab(i){
+  const tab=IDXTAB[i];
   document.querySelectorAll('.tabb').forEach(x=>x.classList.toggle('on', x.dataset.tab===tab));
   moveBar(document.querySelector('.tabb.on'));
-  if(tab==='explore') requestAnimationFrame(draw);
-  if(tab==='browse' && CP.code) requestAnimationFrame(()=>codePage(CP.code, CP.ct, CP.vi));
+  if(tab==='explore' && !drawn){ drawn=true; requestAnimationFrame(draw); }
+  if(tab==='browse' && CP.code){ const k=CP.code+'|'+CP.ct+'|'+CP.vi; if(k!==lastCP){ lastCP=k; requestAnimationFrame(()=>codePage(CP.code, CP.ct, CP.vi)); } }
 }
-let scrolling=false, stt=0, programmatic=false;
-// All horizontal scroll is programmatic (the strip is overflow-x:hidden). During a glide, don't let the
-// scroll handler fight the target highlight (that caused the underline flicker); just fit on settle.
-DS.addEventListener('scroll', ()=>{ scrolling=true;
-  if(!programmatic) setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1)));
-  clearTimeout(stt); stt=setTimeout(()=>{ scrolling=false; programmatic=false; fit(); }, 90); }, {passive:true});
-let targetIdx=1;
-function goTo(i, smooth){ i=Math.max(0,Math.min(2,i)); targetIdx=i;
-  const p=document.getElementById('pane_'+IDXTAB[i]); if(p) DS.style.height=p.scrollHeight+'px';
-  programmatic=true; setActive(i);
-  DS.scrollTo({left:i*DS.clientWidth, behavior:(smooth && !matchMedia('(prefers-reduced-motion:reduce)').matches)?'smooth':'auto'}); }
-// Switch ONLY on a horizontal swipe over the tab bar. A trackpad's inertia tail only ever DECAYS in
-// magnitude and never reverses, so we fire ONCE on a fresh push (rising |dx| when armed) and re-arm when
-// the tail dies (|dx|<REARM) or the finger reverses — never on a timer (gaps and decay both lie). One
-// scrollTo per swipe -> cannot overshoot. A VERTICAL swipe over the bar still scrolls the PAGE.
+function slideTo(i, instant){
+  i=Math.max(0,Math.min(2,i)); if(i===curIdx && !instant){ setTab(i); return; }
+  show(i,true);                                            // reveal the target so it is visible mid-slide
+  curIdx=i;
+  if(instant){ const t=TRACK.style.transition; TRACK.style.transition='none'; TRACK.style.transform='translateX(-'+(i*100)+'%)'; void TRACK.offsetWidth; TRACK.style.transition=t; }
+  else TRACK.style.transform='translateX(-'+(i*100)+'%)';
+  setTab(i);
+  clearTimeout(slideT);
+  slideT=setTimeout(()=>{ IDXTAB.forEach((k,j)=>{ if(j!==i) show(j,false); }); }, instant?0:470);
+}
+function setActive(i){ slideTo(i, false); }               // aliases kept for any external caller
+function goTo(i){ slideTo(i, false); }
+// ONE slide per physical swipe — over the divisions OR the tab bar. A trackpad's inertia tail only
+// DECAYS in magnitude and never reverses, so fire on a fresh push (rising |dx| when armed) and re-arm
+// when the tail dies (|dx|<REARM) or the finger reverses. Vertical is never intercepted -> PAGE scroll.
 let sArmed=true, sDir=0, sFire=0;
-const S_FIRE=8, S_REARM=5, S_GUARD=80;
-tabsEl.addEventListener('wheel', e => {
-  if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;   // vertical -> let the page scroll
+const S_FIRE=8, S_REARM=5, S_GUARD=90;
+function onSwipe(e){
+  if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;    // vertical -> let the page scroll
   e.preventDefault();
   const a=Math.abs(e.deltaX), d=e.deltaX>0?1:-1, now=e.timeStamp;
-  if(a < S_REARM){ sArmed=true; sDir=d; return; }        // inertia died / quiet -> ready for the next swipe
-  if(d !== sDir) sArmed=true;                            // reversed direction -> a new gesture
-  if(sArmed && a >= S_FIRE && now - sFire > S_GUARD){ goTo(targetIdx + d, true); sArmed=false; sFire=now; }
+  if(a < S_REARM){ sArmed=true; sDir=d; return; }
+  if(d !== sDir) sArmed=true;
+  if(sArmed && a >= S_FIRE && now - sFire > S_GUARD){ slideTo(curIdx + d, false); sArmed=false; sFire=now; }
   sDir=d;
-}, {passive:false});
-tabsEl.addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) goTo(IDXTAB.indexOf(b.dataset.tab), true); });
-try{ const RO=new ResizeObserver(()=>{ if(!scrolling) fit(); }); IDXTAB.forEach(k=>RO.observe(document.getElementById('pane_'+k))); }catch(e){}
-window.addEventListener('resize', ()=>{ DS.scrollLeft=curIdx*DS.clientWidth; fit(); });
-requestAnimationFrame(()=>{ DS.scrollLeft=DS.clientWidth; setActive(1); moveBar(document.querySelector('.tabb.on'), true); setTimeout(fit, 60); });
+}
+DS.addEventListener('wheel', onSwipe, {passive:false});
+tabsEl.addEventListener('wheel', onSwipe, {passive:false});
+tabsEl.addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) slideTo(IDXTAB.indexOf(b.dataset.tab), false); });
+window.addEventListener('resize', ()=> moveBar(document.querySelector('.tabb.on'), true));
+requestAnimationFrame(()=>{ IDXTAB.forEach((k,j)=> show(j, j===1)); slideTo(1, true); moveBar(document.querySelector('.tabb.on'), true); });
 // THEME TOGGLE — sun/moon (legacy audit_app behavior), charts re-render with the theme palette
 document.getElementById('theme')?.addEventListener('click',()=>{
   const d=document.documentElement, t=d.dataset.theme==='light'?'dark':'light';
   d.dataset.theme=t;
   try{localStorage.setItem('mera_moanalua_theme',t)}catch(e){}
   if(window._tile) window._tile.setUrl(window._tileUrl());
-  draw();
+  drawn = (curIdx===0); if(curIdx===0) draw();   // redraw explore now if visible; else defer to next reveal
   window.dispatchEvent(new Event('resize'));
 });
 </script></body></html>
