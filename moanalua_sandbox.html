@@ -6,6 +6,7 @@
 <style>
 :root{--bg:#07090d;--line:#1a2130;--line2:#28313f;--tx:#e9edf4;--tx2:#9aa6b7;--tx3:#5c6675;--ac:#5eead4;--ac2:#818cf8;--gold:#fbbf24;--mcd:#34d399;--mcr:#818cf8;--com:#fb7185}
 *{box-sizing:border-box}
+html{overscroll-behavior-x:none}
 body{margin:0;background:radial-gradient(130% 90% at 0% 0%,#0d1421,#07090d 55%);color:var(--tx);font-family:Inter,system-ui,Segoe UI,sans-serif;font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .wrap{max-width:1120px;margin:0 auto;padding:30px 22px 70px}
 .card{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#0d1119,#0a0d13);padding:22px 24px;margin-bottom:16px}
@@ -45,15 +46,14 @@ td .lz{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:
 td .est{color:var(--gold);font-size:10px;font-weight:700;margin-left:5px}
 .tbox{max-height:500px;overflow:auto;border:1px solid var(--line);border-radius:12px}
 input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-radius:11px;padding:10px 15px;font:inherit;font-size:13.5px;width:320px;max-width:100%}input.q:focus{outline:none;border-color:var(--ac)}
-.tabs{display:flex;gap:0;margin:0 0 16px;border-bottom:1px solid var(--line);position:sticky;top:47px;z-index:900;background:var(--bg);box-shadow:0 16px 0 0 var(--bg);scroll-margin-top:47px}
+.tabs{display:flex;gap:0;margin:0 0 22px;border-bottom:1px solid var(--line);position:relative;cursor:ew-resize;touch-action:pan-y}
 .tabb{flex:1;text-align:center;background:none;border:0;color:var(--tx3);font-family:inherit;font-size:15.5px;font-weight:800;letter-spacing:.03em;padding:15px 0;cursor:pointer;transition:color .22s ease}
 .tabb:hover{color:var(--tx2)}
 .tabb.on{color:var(--tx)}
 #tabbar{position:absolute;bottom:-1px;height:3px;border-radius:999px;background:linear-gradient(90deg,rgba(255,90,31,0) 0%,#FF5A1F 24%,#ff8a52 50%,#FF5A1F 76%,rgba(255,90,31,0) 100%);box-shadow:0 0 14px rgba(255,90,31,.4);pointer-events:none;transition:left .34s cubic-bezier(.3,.86,.24,1),width .34s cubic-bezier(.3,.86,.24,1)}
 [data-theme=light] #tabbar{box-shadow:0 0 10px rgba(255,90,31,.25)}
-.divscroll{display:flex;align-items:flex-start;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none}
-.divscroll::-webkit-scrollbar{display:none;width:0;height:0}
-.divpane{flex:0 0 100%;width:100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
+.divscroll{display:flex;align-items:flex-start;overflow:hidden}
+.divpane{flex:0 0 100%;width:100%;min-width:0}
 #pane_explore{order:0}#pane_browse{order:1}#pane_audit{order:2}
 @media (prefers-reduced-motion:reduce){.divscroll{scroll-behavior:auto}}
 /* ===== AUDIT BINDER ===== */
@@ -1162,32 +1162,39 @@ function moveBar(b, instant){
   TABBAR.style.left=(b.offsetLeft+(b.offsetWidth-w)/2)+'px';
   if(instant){ void TABBAR.offsetHeight; TABBAR.style.transition=''; }
 }
-const DS=document.getElementById('divscroll'), IDXTAB=['explore','browse','audit'];
-let curIdx=1, scrolling=false, endT=0;
-// the carousel's height tracks the ACTIVE pane, so each division flows into the page at its
-// natural height (vertical scroll = page scroll). Height is only re-fitted when the horizontal
-// swipe has SETTLED — never mid-swipe, so mandatory-snap never yanks back on the reflow.
+const DS=document.getElementById('divscroll'), IDXTAB=['explore','browse','audit'], tabsEl=document.getElementById('tabs');
+let curIdx=1, dragging=false;
+// The carousel is NOT user-scrollable (overflow:hidden). Each pane flows at natural height, so
+// vertical scroll is plain PAGE scroll. The carousel only moves when you swipe over the TAB BAR.
 function fit(){ const p=document.getElementById('pane_'+IDXTAB[curIdx]); if(p) DS.style.height=p.scrollHeight+'px'; }
 function setActive(i){
-  i=Math.max(0,Math.min(2,i)); const changed=i!==curIdx; curIdx=i; const tab=IDXTAB[i];
+  i=Math.max(0,Math.min(2,i)); if(i===curIdx){ moveBar(document.querySelector('.tabb.on')); return; }
+  curIdx=i; const tab=IDXTAB[i];
   document.querySelectorAll('.tabb').forEach(x=>x.classList.toggle('on', x.dataset.tab===tab));
   moveBar(document.querySelector('.tabb.on'));
-  if(changed){
-    if(tab==='explore') requestAnimationFrame(()=>{ draw(); if(!scrolling) fit(); });
-    if(tab==='browse' && CP.code) requestAnimationFrame(()=>{ codePage(CP.code, CP.ct, CP.vi); if(!scrolling) fit(); });
-  }
+  if(tab==='explore') requestAnimationFrame(draw);
+  if(tab==='browse' && CP.code) requestAnimationFrame(()=>codePage(CP.code, CP.ct, CP.vi));
 }
-function settle(){ scrolling=false; const prev=curIdx; setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1))); fit();
-  if(curIdx!==prev) document.getElementById('tabs').scrollIntoView({block:'start'}); }   // switching a division lands you at its top
-DS.addEventListener('scroll', ()=>{ scrolling=true;
-  setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1)));
-  clearTimeout(endT); endT=setTimeout(settle, 90); }, {passive:true});
-if('onscrollend' in DS) DS.addEventListener('scrollend', settle);
-function switchTo(b){ if(!b) return; const i=IDXTAB.indexOf(b.dataset.tab); if(i<0) return;
-  const rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  DS.scrollTo({left:i*DS.clientWidth, behavior:rm?'auto':'smooth'}); }
-document.getElementById('tabs').addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) switchTo(b); });
-try{ const RO=new ResizeObserver(()=>{ if(!scrolling) fit(); }); IDXTAB.forEach(k=>RO.observe(document.getElementById('pane_'+k))); }catch(e){}
+DS.addEventListener('scroll', ()=>setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1))), {passive:true});
+function goTo(i, smooth){ i=Math.max(0,Math.min(2,i)); setActive(i); fit();
+  DS.scrollTo({left:i*DS.clientWidth, behavior:(smooth && !matchMedia('(prefers-reduced-motion:reduce)').matches)?'smooth':'auto'}); }
+// ONLY a horizontal swipe over the tab bar moves the carousel — 1:1 drag while you swipe, snap on release.
+// Over the tab bar, a VERTICAL swipe still scrolls the page; over the content, horizontal does nothing.
+let anchor=null, lastT=0, snapT=0;
+tabsEl.addEventListener('wheel', e => {
+  if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+  e.preventDefault();
+  const now=performance.now(), cw=DS.clientWidth;
+  if(anchor===null || now-lastT>150) anchor=Math.round(DS.scrollLeft/cw)*cw;   // pin to the current pane at gesture start
+  lastT=now; dragging=true;
+  DS.scrollLeft=Math.max(0, Math.min(2*cw, Math.max(anchor-cw, Math.min(anchor+cw, DS.scrollLeft + e.deltaX*1.6))));
+  clearTimeout(snapT); snapT=setTimeout(()=>{
+    const a=anchor/cw, d=DS.scrollLeft/cw - a; anchor=null; dragging=false;
+    goTo(Math.abs(d)>0.22 ? a+(d>0?1:-1) : Math.round(a), true);   // a decisive nudge switches; a small one springs back
+  }, 110);
+}, {passive:false});
+tabsEl.addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) goTo(IDXTAB.indexOf(b.dataset.tab), true); });
+try{ const RO=new ResizeObserver(()=>{ if(!dragging) fit(); }); IDXTAB.forEach(k=>RO.observe(document.getElementById('pane_'+k))); }catch(e){}
 window.addEventListener('resize', ()=>{ DS.scrollLeft=curIdx*DS.clientWidth; fit(); });
 requestAnimationFrame(()=>{ DS.scrollLeft=DS.clientWidth; setActive(1); moveBar(document.querySelector('.tabb.on'), true); setTimeout(fit, 60); });
 // THEME TOGGLE — sun/moon (legacy audit_app behavior), charts re-render with the theme palette
