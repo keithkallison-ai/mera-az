@@ -52,8 +52,9 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .tabb.on{color:var(--tx)}
 #tabbar{position:absolute;bottom:-1px;height:3px;border-radius:999px;background:linear-gradient(90deg,rgba(255,90,31,0) 0%,#FF5A1F 24%,#ff8a52 50%,#FF5A1F 76%,rgba(255,90,31,0) 100%);box-shadow:0 0 14px rgba(255,90,31,.4);pointer-events:none;transition:left .34s cubic-bezier(.3,.86,.24,1),width .34s cubic-bezier(.3,.86,.24,1)}
 [data-theme=light] #tabbar{box-shadow:0 0 10px rgba(255,90,31,.25)}
-.divscroll{display:flex;align-items:flex-start;overflow:hidden}
-.divpane{flex:0 0 100%;width:100%;min-width:0}
+.divscroll{display:flex;align-items:flex-start;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none}
+.divscroll::-webkit-scrollbar{display:none;width:0;height:0}
+.divpane{flex:0 0 100%;width:100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
 #pane_explore{order:0}#pane_browse{order:1}#pane_audit{order:2}
 @media (prefers-reduced-motion:reduce){.divscroll{scroll-behavior:auto}}
 /* ===== AUDIT BINDER ===== */
@@ -1163,7 +1164,7 @@ function moveBar(b, instant){
   if(instant){ void TABBAR.offsetHeight; TABBAR.style.transition=''; }
 }
 const DS=document.getElementById('divscroll'), IDXTAB=['explore','browse','audit'], tabsEl=document.getElementById('tabs');
-let curIdx=1, dragging=false;
+let curIdx=1;
 // The carousel is NOT user-scrollable (overflow:hidden). Each pane flows at natural height, so
 // vertical scroll is plain PAGE scroll. The carousel only moves when you swipe over the TAB BAR.
 function fit(){ const p=document.getElementById('pane_'+IDXTAB[curIdx]); if(p) DS.style.height=p.scrollHeight+'px'; }
@@ -1175,26 +1176,32 @@ function setActive(i){
   if(tab==='explore') requestAnimationFrame(draw);
   if(tab==='browse' && CP.code) requestAnimationFrame(()=>codePage(CP.code, CP.ct, CP.vi));
 }
-DS.addEventListener('scroll', ()=>setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1))), {passive:true});
+let scrolling=false, stt=0;
+DS.addEventListener('scroll', ()=>{ scrolling=true; setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1)));
+  clearTimeout(stt); stt=setTimeout(()=>{ scrolling=false; fit(); }, 90); }, {passive:true});
+// block a horizontal wheel over the CONTENT from moving the carousel (only the tab bar may switch);
+// but leave genuine horizontal menus (the browse grid) alone, and never touch vertical (page scroll).
+function scrollsX(el){ for(let n=el;n&&n.nodeType===1&&n!==DS;n=n.parentElement){ if(n.scrollWidth-n.clientWidth>2){ const o=getComputedStyle(n).overflowX; if(o==='auto'||o==='scroll') return true; } } return false; }
+DS.addEventListener('wheel', e=>{ if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)) return; if(scrollsX(e.target)) return; e.preventDefault(); }, {passive:false});
 function goTo(i, smooth){ i=Math.max(0,Math.min(2,i)); setActive(i); fit();
   DS.scrollTo({left:i*DS.clientWidth, behavior:(smooth && !matchMedia('(prefers-reduced-motion:reduce)').matches)?'smooth':'auto'}); }
-// ONLY a horizontal swipe over the tab bar moves the carousel — 1:1 drag while you swipe, snap on release.
-// Over the tab bar, a VERTICAL swipe still scrolls the page; over the content, horizontal does nothing.
-let anchor=null, lastT=0, snapT=0;
+// ONLY a horizontal swipe over the tab bar switches — and the switch itself is a NATIVE smooth
+// scroll (scrollTo behavior:smooth), so it glides. One switch per swipe; a pause re-arms.
+// Over the tab bar a VERTICAL swipe still scrolls the page; over the content, horizontal does nothing.
+let sacc=0, slastT=0, slock=false;
 tabsEl.addEventListener('wheel', e => {
   if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
   e.preventDefault();
-  const now=performance.now(), cw=DS.clientWidth;
-  if(anchor===null || now-lastT>150) anchor=Math.round(DS.scrollLeft/cw)*cw;   // pin to the current pane at gesture start
-  lastT=now; dragging=true;
-  DS.scrollLeft=Math.max(0, Math.min(2*cw, Math.max(anchor-cw, Math.min(anchor+cw, DS.scrollLeft + e.deltaX*1.6))));
-  clearTimeout(snapT); snapT=setTimeout(()=>{
-    const a=anchor/cw, d=DS.scrollLeft/cw - a; anchor=null; dragging=false;
-    goTo(Math.abs(d)>0.22 ? a+(d>0?1:-1) : Math.round(a), true);   // a decisive nudge switches; a small one springs back
-  }, 110);
+  const now=performance.now(), dt=now-slastT; slastT=now;
+  if(dt>140){ sacc=0; slock=false; }   // a real pause = a fresh gesture
+  if(slock) return;                     // one switch per swipe; the inertia tail is ignored
+  sacc += e.deltaX;
+  if(Math.abs(sacc) < 42) return;
+  const dir=sacc>0?1:-1; sacc=0; slock=true;
+  goTo(curIdx+dir, true);
 }, {passive:false});
 tabsEl.addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) goTo(IDXTAB.indexOf(b.dataset.tab), true); });
-try{ const RO=new ResizeObserver(()=>{ if(!dragging) fit(); }); IDXTAB.forEach(k=>RO.observe(document.getElementById('pane_'+k))); }catch(e){}
+try{ const RO=new ResizeObserver(()=>{ if(!scrolling) fit(); }); IDXTAB.forEach(k=>RO.observe(document.getElementById('pane_'+k))); }catch(e){}
 window.addEventListener('resize', ()=>{ DS.scrollLeft=curIdx*DS.clientWidth; fit(); });
 requestAnimationFrame(()=>{ DS.scrollLeft=DS.clientWidth; setActive(1); moveBar(document.querySelector('.tabb.on'), true); setTimeout(fit, 60); });
 // THEME TOGGLE — sun/moon (legacy audit_app behavior), charts re-render with the theme palette
