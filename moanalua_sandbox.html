@@ -543,12 +543,7 @@ html.binder-snap{scroll-snap-type:y proximity}
 
 <div id=pane_audit class=divpane>
 <div class=card>
-  <div class=stamp id=stamp1></div>
-  <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap">
-    <h2 style="margin:0">The <em>file</em>, audited.</h2>
-    <div id=austars style="font-size:22px;letter-spacing:2px;color:#fbbf24;font-weight:700"></div>
-  </div>
-  <div id=auform class=sub style="margin:2px 0 0"></div>
+  <h2 style="margin:0 0 22px;letter-spacing:-.01em">Pricing Data Quality <span style="color:var(--tx3);font-weight:300;margin:0 7px">┃</span> CMS Compliance</h2>
   <div id=xray></div>
   <div class=xsec style="margin-top:26px"><span class=xex>B</span> Pricing-data quality — the full census</div>
   <div id=auqual></div>
@@ -1002,10 +997,7 @@ function goCode(c,t){
 // AUDIT — Lever A checklist + Lever B quality
 (function(){
   const A=D.audit; if(!A) return;
-  const full=Math.floor(A.stars), half=(A.stars%1)>=0.5;
-  austars.innerHTML='<span>'+'★'.repeat(full)+(half?'½':'')+'</span><span style="color:var(--tx3);opacity:.4;font-weight:400">'+'☆'.repeat(5-full-(half?1:0))+'</span>';
-  austars.title=A.stars+' / 5';
-  auform.textContent=A.stars.toFixed(1)+' / 5 · 60% CMS compliance ('+(A.comp_frac*100).toFixed(0)+'%) + 40% plan-rate data quality ('+(A.qual_frac*100).toFixed(1)+'% — '+A.quality.flags.toLocaleString()+' flags / '+A.quality.priced.toLocaleString()+' priced cells)';
+  // (stars + score summary removed — decluttered; the checklist below carries the compliance detail)
   {const ac=document.getElementById('aucount'); if(ac) ac.textContent=A.checks.filter(c=>c.status==='pass').length+' of '+A.checks.length+' checks pass';}
   auchecks.innerHTML = A.checks.map(c=>
     '<div style="display:flex;align-items:baseline;gap:10px;padding:7px 6px;border-top:1px solid #12171f">'
@@ -1038,15 +1030,7 @@ function goCode(c,t){
 // PAGE 01 — X-RAY renderer + binder spine
 (function(){
   const X=D.xray; if(!X) return;
-  const sha8=X.sha256.slice(0,8).toUpperCase();
-  const s1=document.getElementById('stamp1');
-  if(s1) s1.textContent='MERA AUDIT FILE · CASE #'+sha8+' · '+D.hospital;
-  const cap='<div class=xchip>'
-    +'<span class=ok>BYTE-EXACT · HOSTILE-SEALED</span>'
-    +'<span>SHA-256 '+sha8+'…</span>'
-    +'<span class=ok>'+X.dialect.cells_nonempty.toLocaleString()+' CELLS · 0 UNACCOUNTED</span>'
-    +'<span class="'+(X.has_billing_class?'':'amber')+'">'+(X.has_billing_class?'FACILITY + PROFESSIONAL':'FACILITY-ONLY FILE')+'</span>'
-    +'</div>';
+  // (stamp line + byte-exact/SHA/cells/facility verdict chips removed — decluttered)
   const exA='<div class="xsec"><span class=xex>EXHIBIT A</span> The specimen — the machine-readable file</div>'
     +'<div class=xgrid>'
     +'<div class=xk>Download</div><div class=xv><a class=dl href="'+X.source_url+'" download target=_blank rel=noopener>'+X.filename+' ↓</a></div>'
@@ -1070,9 +1054,7 @@ function goCode(c,t){
   const rl=[0,0.25,0.5,0.75,1].map(f=>Math.round(NT*f));
   const prowlab='<div class=prowlab>'+rl.map(n=>'<span>'+(n>=1000?Math.round(n/1000)+'k':n)+'</span>').join('')+'</div>';
   // Quality Signals are no longer a separate row — they ARE the legend for the Signals lens (setLens builds it).
-  const exBrowse='<div class="xsec"><span class=xex>Browse</span> The whole file — its structure, and every quality issue</div>'
-    +'<div class=mintro>The strip on the left is the entire file — all '+NT.toLocaleString()+' rows. Drag it to fly anywhere; the panel shows the real rows there. Switch the <b>lens</b> to read structure or quality, or click an issue below to fly straight to it.</div>'
-    +'<div class=xctl>'+lensbar
+  const exBrowse='<div class=xctl>'+lensbar
       +'<div class=legrow><span class=ctllbl>What the colors mean</span><div class=llegend id=llegend></div></div>'
     +'</div>'
     +'<div class=bwrap>'
@@ -1132,21 +1114,8 @@ function goCode(c,t){
     +'<div class=meter><div class=ml><span>Min/max coverage of all rows</span><b>'+mm.coverage_pct+'%</b></div><div class=mtrack><i style="width:'+Math.max(2,mm.coverage_pct)+'%"></i></div></div>'
     +(mm.mismatch>0?'<div class=xbanner><b>'+mm.mismatch.toLocaleString()+' rows where the file disagrees with itself</b> — the declared minimum or maximum does not match the lowest/highest price the file actually publishes for that item. Carried to the pricing file as a self-consistency finding.</div>':'')
     +(X.has_billing_class?'':'<div class=xbanner><b>Facility-only file.</b> There is no <span style="font-family:JetBrains Mono,monospace">billing_class</span> column, so the professional charge — the surgeon, anesthesiologist, and radiologist read — is not in this file. A price here is structurally <b>half</b> the cost of care and must be cross-sourced before it is shopped.</div>');
-  // COVERAGE — answers "are there codes with no price?" up front (every row is priced; negotiated is the 7% overlay)
-  const CV=X.cover;
-  const cover='<div class="xsec"><span class=xex>&#10003;</span> Is anything unpriced? Almost nothing &mdash; but read what &ldquo;priced&rdquo; means</div>'
-    +'<div class=cover>'
-      +'<div class=covbar>'
-        +'<div class=covseg style="flex:'+(CV.rows-CV.neg)+' '+(CV.rows-CV.neg)+' 0;background:#334155;color:#cbd5e1">list price only</div>'
-        +'<div class=covseg style="flex:'+CV.neg+' '+CV.neg+' 0;background:#5eead4;color:#04120e">negotiated</div>'
-      +'</div>'
-      +'<div class=covstats>'
-        +'<div class=covstat><b>'+CV.rows.toLocaleString()+'</b><span><em>Every</em> row carries a list + cash price &mdash; only '+CV.noprice+' blank. Nothing here is truly unpriced.</span></div>'
-        +'<div class=covstat><b>'+CV.neg.toLocaleString()+' &middot; '+CV.neg_pct+'%</b><span>of rows carry a <em>negotiated</em> rate (a real contracted price, any plan). The other '+(CV.rows-CV.neg).toLocaleString()+' are list/cash only.</span></div>'
-        +'<div class=covstat><b>0 of '+CV.codes.toLocaleString()+'</b><span>distinct codes are unpriced. <em>'+CV.codes_cm_only.toLocaleString()+'</em> are list-only (never contracted); '+CV.codes_neg.toLocaleString()+' are contracted somewhere.</span></div>'
-      +'</div>'
-    +'</div>';
-  const xr=document.getElementById('xray'); if(xr) xr.innerHTML=cap+cover+exBrowse+'<div style="margin-top:26px"></div>'+exC+exD;
+  // (coverage strip removed from the Audit header — decluttered; the coverage figures still live in the "How the file is put together" scale funnel below)
+  const xr=document.getElementById('xray'); if(xr) xr.innerHTML=exBrowse+'<div style="margin-top:26px"></div>'+exC+exD;
   const spdiv=document.getElementById('specimen'); if(spdiv) spdiv.innerHTML=exA+exE;
   // THE FILE: minimap navigator + browsable detail, one lens recolors both
   const LEG={fill:[['a value is present','rgba(94,234,212,.6)'],['blank','transparent']],
@@ -1183,7 +1152,7 @@ function goCode(c,t){
     if(pimg) pimg.src=(l==='flag'||l==='claims')?P.sig:P.fill;
     const lg=document.getElementById('llegend'); if(!lg) return;
     // Signals/Claims lenses: the legend IS the quality-signal key (colour + name + count); other lenses: plain swatches.
-    const sig=(l==='flag')?['contra','minmax','penny','echo','n0','observed']:(l==='claims')?['n0','observed']:null;
+    const sig=(l==='flag')?['contra','minmax','penny','echo']:(l==='claims')?['n0','observed']:null;
     if(sig){ lg.innerHTML=sig.map(k=>{const f=FIND.find(x=>x.key===k); return f?'<span title="'+f.note.replace(/"/g,'&quot;')+'"><i style="background:'+(FCLR[k]||'var(--line2)')+'"></i>'+f.label+' <b>'+f.count+'</b></span>':'';}).join(''); }
     else { lg.innerHTML=(LEG[l]||[]).map(x=>'<span><i style="background:'+x[1]+'"></i>'+x[0]+'</span>').join(''); } }
   xr.querySelectorAll('.lens button').forEach(b=>b.addEventListener('click',()=>setLens(b.dataset.l)));
