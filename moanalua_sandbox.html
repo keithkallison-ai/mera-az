@@ -51,6 +51,12 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .tabb.on{color:var(--tx)}
 #tabbar{position:absolute;bottom:-1px;height:3px;border-radius:999px;background:linear-gradient(90deg,rgba(255,90,31,0) 0%,#FF5A1F 24%,#ff8a52 50%,#FF5A1F 76%,rgba(255,90,31,0) 100%);box-shadow:0 0 14px rgba(255,90,31,.4);pointer-events:none;transition:left .34s cubic-bezier(.3,.86,.24,1),width .34s cubic-bezier(.3,.86,.24,1)}
 [data-theme=light] #tabbar{box-shadow:0 0 10px rgba(255,90,31,.25)}
+.divscroll{display:flex;align-items:stretch;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none;height:calc(100vh - 132px);min-height:540px}
+.divscroll::-webkit-scrollbar{display:none;width:0;height:0}
+.divpane{flex:0 0 100%;width:100%;min-width:0;height:100%;overflow-y:auto;overflow-x:hidden;scroll-snap-align:start;scroll-snap-stop:always;padding-bottom:4px}
+.divpane::-webkit-scrollbar{width:9px}.divpane::-webkit-scrollbar-thumb{background:var(--line2);border-radius:6px}
+#pane_explore{order:0}#pane_browse{order:1}#pane_audit{order:2}
+@media (prefers-reduced-motion:reduce){.divscroll{scroll-behavior:auto}}
 /* ===== AUDIT BINDER ===== */
 .binder{display:grid;grid-template-columns:60px 1fr;gap:20px;position:relative}
 .spine{position:sticky;top:76px;align-self:start;display:flex;flex-direction:column;gap:4px;padding:8px 0 8px 14px}
@@ -472,7 +478,8 @@ html.binder-snap{scroll-snap-type:y proximity}
   <div id=tabbar></div>
 </div>
 
-<div id=pane_browse>
+<div class=divscroll id=divscroll>
+<div id=pane_browse class=divpane>
 <div class=card>
   <h2>Search by <em>procedure</em>.</h2>
   <div class=tb>
@@ -501,7 +508,7 @@ html.binder-snap{scroll-snap-type:y proximity}
 </div>
 </div>
 
-<div id=pane_explore style="display:none">
+<div id=pane_explore class=divpane>
 <div class=card>
   <h2><span id=pbt></span></h2>
   <div class=chips style="margin:10px 0 2px">
@@ -513,7 +520,7 @@ html.binder-snap{scroll-snap-type:y proximity}
 </div>
 </div>
 
-<div id=pane_audit style="display:none">
+<div id=pane_audit class=divpane>
 <div class=card>
   <div class=stamp id=stamp1></div>
   <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap">
@@ -529,6 +536,7 @@ html.binder-snap{scroll-snap-type:y proximity}
   <div class=xbanner id=aupost style="border-color:var(--line2);background:none;margin-top:12px"></div>
   <div class=xsec style="margin-top:26px"><span class=xex>D</span> File details &amp; completeness</div>
   <div id=specimen></div>
+</div>
 </div>
 </div>
 
@@ -1143,70 +1151,35 @@ function goCode(c,t){
   xr.querySelectorAll('.lens button').forEach(b=>b.addEventListener('click',()=>setLens(b.dataset.l)));
   setLens('flag');
 })();
-// DIVISIONS — Browse · Explore · Audit
+// DIVISIONS — a NATIVE horizontal scroll-snap carousel (Analyze · Browse · Audit).
+// The browser's own scroll engine handles the two-finger swipe, momentum, snapping and
+// nested scrollers — so it is exactly as smooth as scrolling up and down. No gesture code.
 const TABBAR=document.getElementById('tabbar');
 function moveBar(b, instant){
+  if(!b) return;
   const w=Math.max(96, b.offsetWidth*0.42);
   if(instant) TABBAR.style.transition='none';
   TABBAR.style.width=w+'px';
   TABBAR.style.left=(b.offsetLeft+(b.offsetWidth-w)/2)+'px';
   if(instant){ void TABBAR.offsetHeight; TABBAR.style.transition=''; }
 }
-function switchTo(b, dir){
-  if(!b || b.classList.contains('on')) return;
-  document.querySelectorAll('.tabb').forEach(x=>x.classList.toggle('on', x===b));
-  moveBar(b);
-  for(const k of ['browse','explore','audit']){
-    document.getElementById('pane_'+k).style.display = (b.dataset.tab===k) ? '' : 'none';   // instant cut — no compositing hitch on the heavy audit pane
-  }
-  if(b.dataset.tab==='explore') requestAnimationFrame(()=>draw());
-  if(b.dataset.tab==='browse' && CP.code) requestAnimationFrame(()=>codePage(CP.code, CP.ct, CP.vi));
+const DS=document.getElementById('divscroll'), IDXTAB=['explore','browse','audit'];
+let curIdx=1;
+function setActive(i){
+  i=Math.max(0,Math.min(2,i)); if(i===curIdx){ moveBar(document.querySelector('.tabb.on')); return; }
+  curIdx=i; const tab=IDXTAB[i];
+  document.querySelectorAll('.tabb').forEach(x=>x.classList.toggle('on', x.dataset.tab===tab));
+  moveBar(document.querySelector('.tabb.on'));
+  if(tab==='explore') requestAnimationFrame(()=>draw());
+  if(tab==='browse' && CP.code) requestAnimationFrame(()=>codePage(CP.code, CP.ct, CP.vi));
 }
-document.getElementById('tabs').addEventListener('click', e => { switchTo(e.target.closest('.tabb')); });
-// two-finger horizontal swipe glides across the divisions.
-// One switch per gesture; a REVERSED swipe unlocks instantly (inertia never flips sign);
-// a same-direction re-swipe unlocks on a magnitude rise vs the decaying inertia envelope.
-(function(){
-  const ORDER=['explore','browse','audit'];
-  let acc=0, lastT=0, locked=false, lockDir=0, glide=0;
-  function scrollsX(el){
-    for(let n=el; n && n.nodeType===1 && n!==document.body; n=n.parentElement){
-      if(n.scrollWidth - n.clientWidth > 2){
-        const o=getComputedStyle(n).overflowX;
-        if(o==='auto'||o==='scroll') return true;
-      }
-    }
-    return false;
-  }
-  function inZone(e){
-    if(e.target.closest && e.target.closest('#pane_browse,#pane_explore,#pane_audit,#tabs')) return true;
-    if(e.target===document.body || e.target===document.documentElement){
-      const t=document.getElementById('tabs').getBoundingClientRect();
-      return e.clientY >= t.top;   // side gutters beside the divisions count too
-    }
-    return false;
-  }
-  document.addEventListener('wheel', e => {
-    if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-    if(!inZone(e) || scrollsX(e.target)) return;
-    e.preventDefault();
-    const dx=e.deltaX, mag=Math.abs(dx), sgn=dx>0?1:-1, now=performance.now(), dt=now-lastT; lastT=now;
-    if(dt>130){ acc=0; locked=false; }                          // a real pause = a fresh gesture
-    if(locked){                                                 // one switch per gesture:
-      if(sgn!==lockDir){ locked=false; acc=0; }                 //   reversal is always intentional -> unlock now
-      else if(mag>glide*1.7 && mag>=20){ locked=false; acc=0; } //   a fresh harder push (inertia only decays) -> unlock
-      else { glide=mag; return; }                               //   otherwise it's the inertia tail -> absorb
-    }
-    if(acc!==0 && (acc>0)!==(sgn>0)) acc=0;
-    acc+=dx;
-    if(Math.abs(acc) < 55) return;
-    const dir=acc>0?1:-1; acc=0; locked=true; lockDir=dir; glide=mag;
-    const cur=ORDER.indexOf(document.querySelector('.tabb.on').dataset.tab), nxt=cur+dir;
-    if(nxt>=0 && nxt<ORDER.length) switchTo(document.querySelector('.tabb[data-tab="'+ORDER[nxt]+'"]'), dir>0?'r':'l');
-  }, {passive:false});
-})();
-window.addEventListener('resize', () => { const b=document.querySelector('.tabb.on'); if(b) moveBar(b, true); });
-moveBar(document.querySelector('.tabb.on'), true);
+DS.addEventListener('scroll', ()=>{ setActive(Math.round(DS.scrollLeft/(DS.clientWidth||1))); }, {passive:true});
+function switchTo(b){ if(!b) return; const i=IDXTAB.indexOf(b.dataset.tab); if(i<0) return;
+  const rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  DS.scrollTo({left:i*DS.clientWidth, behavior:rm?'auto':'smooth'}); }
+document.getElementById('tabs').addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) switchTo(b); });
+window.addEventListener('resize', ()=>{ DS.scrollLeft=curIdx*DS.clientWidth; });
+requestAnimationFrame(()=>{ DS.scrollLeft=DS.clientWidth; setActive(1); moveBar(document.querySelector('.tabb.on'), true); });
 // THEME TOGGLE — sun/moon (legacy audit_app behavior), charts re-render with the theme palette
 document.getElementById('theme')?.addEventListener('click',()=>{
   const d=document.documentElement, t=d.dataset.theme==='light'?'dark':'light';
