@@ -1157,15 +1157,8 @@ function switchTo(b, dir){
   document.querySelectorAll('.tabb').forEach(x=>x.classList.toggle('on', x===b));
   moveBar(b);
   for(const k of ['browse','explore','audit']){
-    const p=document.getElementById('pane_'+k), show=(b.dataset.tab===k);
-    if(show){
-      p.style.display='';
-      p.getAnimations().forEach(a=>a.cancel());
-      const from = dir==='r' ? 'translateX(16px)' : dir==='l' ? 'translateX(-16px)' : 'translateY(6px)';
-      p.animate([{opacity:.3,transform:from},{opacity:1,transform:'none'}],{duration:185,easing:'cubic-bezier(.3,.85,.35,1)'});
-    } else p.style.display='none';
+    document.getElementById('pane_'+k).style.display = (b.dataset.tab===k) ? '' : 'none';   // instant cut — no compositing hitch on the heavy audit pane
   }
-  // heavy re-renders happen AFTER the pane paints — the switch itself is instant
   if(b.dataset.tab==='explore') requestAnimationFrame(()=>draw());
   if(b.dataset.tab==='browse' && CP.code) requestAnimationFrame(()=>codePage(CP.code, CP.ct, CP.vi));
 }
@@ -1175,7 +1168,7 @@ document.getElementById('tabs').addEventListener('click', e => { switchTo(e.targ
 // a same-direction re-swipe unlocks on a magnitude rise vs the decaying inertia envelope.
 (function(){
   const ORDER=['explore','browse','audit'];
-  let accX=0, locked=false, lockDir=0, lastT=0;
+  let acc=0, lastT=0, locked=false, lockDir=0, glide=0;
   function scrollsX(el){
     for(let n=el; n && n.nodeType===1 && n!==document.body; n=n.parentElement){
       if(n.scrollWidth - n.clientWidth > 2){
@@ -1197,27 +1190,19 @@ document.getElementById('tabs').addEventListener('click', e => { switchTo(e.targ
     if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
     if(!inZone(e) || scrollsX(e.target)) return;
     e.preventDefault();
-    const dx=e.deltaX, mag=Math.abs(dx), sgn=dx>0?1:-1, now=performance.now();
-    const dt=Math.min(now-lastT, 1000); lastT=now;
-    accX *= Math.pow(0.99, dt);   // the run-up decays with time: crossing takes a live burst
-    if(locked){
-      // CONTINUITY LAW: an unbroken event stream after a switch is the SAME gesture —
-      // finger-still-down, hitches, and the whole inertia tail are all absorbed.
-      // Same-direction unlock needs a true pause (fingers lifted); a reversal is always new.
-      const flip  = (sgn !== lockDir) && mag >= 10;
-      const fresh = dt >= 90 && mag >= 18;
-      if(!flip && !fresh) return;
-      locked=false; accX=0;
+    const dx=e.deltaX, mag=Math.abs(dx), sgn=dx>0?1:-1, now=performance.now(), dt=now-lastT; lastT=now;
+    if(dt>130){ acc=0; locked=false; }                          // a real pause = a fresh gesture
+    if(locked){                                                 // one switch per gesture:
+      if(sgn!==lockDir){ locked=false; acc=0; }                 //   reversal is always intentional -> unlock now
+      else if(mag>glide*1.7 && mag>=20){ locked=false; acc=0; } //   a fresh harder push (inertia only decays) -> unlock
+      else { glide=mag; return; }                               //   otherwise it's the inertia tail -> absorb
     }
-    if(accX!==0 && (accX>0)!==(sgn>0)) accX=0;   // mid-run-up reversal starts fresh
-    if(mag>=3) accX += dx;
-    if(Math.abs(accX) < 70) return;
-    const dir = accX>0 ? 'r' : 'l';
-    accX=0; locked=true; lockDir=(dir==='r'?1:-1);
-    const cur=ORDER.indexOf(document.querySelector('.tabb.on').dataset.tab);
-    const nxt=cur + (dir==='r'?1:-1);
-    if(nxt<0 || nxt>=ORDER.length) return;
-    switchTo(document.querySelector('.tabb[data-tab="'+ORDER[nxt]+'"]'), dir);
+    if(acc!==0 && (acc>0)!==(sgn>0)) acc=0;
+    acc+=dx;
+    if(Math.abs(acc) < 55) return;
+    const dir=acc>0?1:-1; acc=0; locked=true; lockDir=dir; glide=mag;
+    const cur=ORDER.indexOf(document.querySelector('.tabb.on').dataset.tab), nxt=cur+dir;
+    if(nxt>=0 && nxt<ORDER.length) switchTo(document.querySelector('.tabb[data-tab="'+ORDER[nxt]+'"]'), dir>0?'r':'l');
   }, {passive:false});
 })();
 window.addEventListener('resize', () => { const b=document.querySelector('.tabb.on'); if(b) moveBar(b, true); });
