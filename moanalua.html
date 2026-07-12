@@ -257,11 +257,13 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 @media(max-width:720px){.bwrap{grid-template-columns:1fr;gap:10px}.bmini{flex-direction:row}}
 .bmini{position:sticky;top:76px;display:grid;grid-template-columns:26px 1fr;gap:6px}
 .bmini .prowlab{padding-top:0}
-.bminimg{position:relative;height:640px;border:1px solid var(--line);border-radius:6px;overflow:hidden;cursor:ns-resize;touch-action:none}
+.bminimg{position:relative;height:min(56vh,520px);border:1px solid var(--line);border-radius:6px;overflow:hidden;cursor:ns-resize;touch-action:none}
 .bminimg img{display:block;width:100%;height:100%;image-rendering:pixelated;pointer-events:none;user-select:none}
 .bview{position:absolute;left:0;right:0;border:1.5px solid #fff;background:rgba(255,255,255,.15);box-shadow:0 0 0 9999px rgba(6,8,12,.44);pointer-events:none;min-height:5px;border-radius:2px}
 .bdet{min-width:0}
-#bscroll{max-height:680px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.leghead{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:8px 13px;background:var(--bg);border:1px solid var(--line);border-bottom:1px solid var(--line2);border-radius:11px 11px 0 0}
+.bdet #bscroll{max-height:min(56vh,520px);border-top:none;border-radius:0 0 11px 11px}
+#bscroll{max-height:min(56vh,520px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
 #bscroll::-webkit-scrollbar{width:11px;height:11px}
 #bscroll::-webkit-scrollbar-track{background:transparent}
 #bscroll::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px;border:3px solid transparent;background-clip:padding-box;transition:background .15s}
@@ -1106,11 +1108,9 @@ function goCode(c,t){
   const prowlab='<div class=prowlab>'+rl.map(n=>'<span>'+(n>=1000?Math.round(n/1000)+'k':n)+'</span>').join('')+'</div>';
   // Quality Signals are no longer a separate row — they ARE the legend for the Signals lens (setLens builds it).
   const exBrowse='<div class="xsec" style="margin-top:2px"><span class=xex>spreadsheet</span> Browse the whole file — every row, every column</div>'
-    +'<div class=xctl>'+lensbar
-      +'<div class=legrow><span class=ctllbl>Legend</span><div class=llegend id=llegend></div></div>'
-    +'</div>'
+    +'<div class=xctl>'+lensbar+'</div>'
     +'<div class=bwrap>'
-      +'<div class=bdet><div class=lwrap id=bscroll><table class=lgrid data-lens=flag id=btable><thead>'+lreg+lhd+lfl+'</thead><tbody id=bbody></tbody></table></div></div>'
+      +'<div class=bdet><div class=leghead><span class=ctllbl>Legend</span><div class=llegend id=llegend></div></div><div class=lwrap id=bscroll><table class=lgrid data-lens=flag id=btable><thead>'+lreg+lhd+lfl+'</thead><tbody id=bbody></tbody></table></div></div>'
       +'<div class=bmini>'+prowlab+'<div class=bminimg id=bminimg><img id=pimg src="'+P.fill+'" alt="the whole file"><div class=bview id=bview></div></div><div class=bminihint>click and hold to scroll</div></div>'
     +'</div>'
     +'<div class=pread id=pread></div>';
