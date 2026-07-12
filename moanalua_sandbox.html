@@ -1183,22 +1183,28 @@ DS.addEventListener('scroll', ()=>{ scrolling=true; setActive(Math.round(DS.scro
 // but leave genuine horizontal menus (the browse grid) alone, and never touch vertical (page scroll).
 function scrollsX(el){ for(let n=el;n&&n.nodeType===1&&n!==DS;n=n.parentElement){ if(n.scrollWidth-n.clientWidth>2){ const o=getComputedStyle(n).overflowX; if(o==='auto'||o==='scroll') return true; } } return false; }
 DS.addEventListener('wheel', e=>{ if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)) return; if(scrollsX(e.target)) return; e.preventDefault(); }, {passive:false});
-function goTo(i, smooth){ i=Math.max(0,Math.min(2,i)); setActive(i); fit();
+let targetIdx=1;
+function goTo(i, smooth){ i=Math.max(0,Math.min(2,i)); targetIdx=i; setActive(i); fit();
   DS.scrollTo({left:i*DS.clientWidth, behavior:(smooth && !matchMedia('(prefers-reduced-motion:reduce)').matches)?'smooth':'auto'}); }
 // ONLY a horizontal swipe over the tab bar switches — and the switch itself is a NATIVE smooth
 // scroll (scrollTo behavior:smooth), so it glides. One switch per swipe; a pause re-arms.
 // Over the tab bar a VERTICAL swipe still scrolls the page; over the content, horizontal does nothing.
-let sacc=0, slastT=0, slock=false;
+let sAcc=0, sLast=0, sLock=false, sDir=0;
 tabsEl.addEventListener('wheel', e => {
   if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
   e.preventDefault();
-  const now=performance.now(), dt=now-slastT; slastT=now;
-  if(dt>140){ sacc=0; slock=false; }   // a real pause = a fresh gesture
-  if(slock) return;                     // one switch per swipe; the inertia tail is ignored
-  sacc += e.deltaX;
-  if(Math.abs(sacc) < 42) return;
-  const dir=sacc>0?1:-1; sacc=0; slock=true;
-  goTo(curIdx+dir, true);
+  const mag=Math.abs(e.deltaX), sgn=e.deltaX>0?1:-1, now=performance.now(), dt=now-sLast; sLast=now;
+  if(sLock){
+    // inertia only DECAYS in magnitude and never reverses — so ignore it until it dies (mag<5),
+    // the finger clearly reverses, or there is a real pause. This is what stops the overshoot.
+    if((sgn!==sDir && mag>8) || mag<5 || dt>320){ sLock=false; sAcc=0; }
+    else return;
+  }
+  if(sAcc!==0 && (sAcc>0)!==(sgn>0)) sAcc=0;
+  sAcc += e.deltaX;
+  if(Math.abs(sAcc) < 45) return;
+  sAcc=0; sLock=true; sDir=sgn;
+  goTo(targetIdx + sgn, true);   // step from the committed target, not the mid-animation position
 }, {passive:false});
 tabsEl.addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) goTo(IDXTAB.indexOf(b.dataset.tab), true); });
 try{ const RO=new ResizeObserver(()=>{ if(!scrolling) fit(); }); IDXTAB.forEach(k=>RO.observe(document.getElementById('pane_'+k))); }catch(e){}
