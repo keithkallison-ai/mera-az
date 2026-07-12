@@ -1194,8 +1194,8 @@ function slideTo(i, instant){
 }
 function setActive(i){ slideTo(i, false); }               // aliases kept for any external caller
 function goTo(i){ slideTo(i, false); }
-// ONE slide per physical swipe — over the divisions OR the tab bar. A trackpad's inertia tail only
-// DECAYS in magnitude and never reverses, so fire on a fresh push (rising |dx| when armed) and re-arm
+// ONE slide per physical swipe, fired ONLY from the tab bar (the title line). A trackpad's inertia tail
+// only DECAYS in magnitude and never reverses, so fire on a fresh push (rising |dx| when armed) and re-arm
 // when the tail dies (|dx|<REARM) or the finger reverses. Vertical is never intercepted -> PAGE scroll.
 let sArmed=true, sDir=0, sFire=0;
 const S_FIRE=8, S_REARM=5, S_GUARD=90;
@@ -1208,7 +1208,8 @@ function onSwipe(e){
   if(sArmed && a >= S_FIRE && now - sFire > S_GUARD){ slideTo(curIdx + d, false); sArmed=false; sFire=now; }
   sDir=d;
 }
-DS.addEventListener('wheel', onSwipe, {passive:false});
+// Bind swipe-to-switch to the TITLE LINE ONLY (not DS/content), so a horizontal swipe over the wide
+// file grid — or any inner horizontal menu — scrolls it natively instead of being eaten to switch divisions.
 tabsEl.addEventListener('wheel', onSwipe, {passive:false});
 tabsEl.addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) slideTo(IDXTAB.indexOf(b.dataset.tab), false); });
 window.addEventListener('resize', ()=> moveBar(document.querySelector('.tabb.on'), true));
