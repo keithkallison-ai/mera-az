@@ -1189,21 +1189,21 @@ function goTo(i, smooth){ i=Math.max(0,Math.min(2,i)); targetIdx=i; setActive(i)
 // ONLY a horizontal swipe over the tab bar switches — and the switch itself is a NATIVE smooth
 // scroll (scrollTo behavior:smooth), so it glides. One switch per swipe; a pause re-arms.
 // Over the tab bar a VERTICAL swipe still scrolls the page; over the content, horizontal does nothing.
-let sAcc=0, sLast=0, sLock=false, sDir=0;
+let sAcc=0, sLast=0, sLockUntil=0, sDir=0;
 tabsEl.addEventListener('wheel', e => {
   if(Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
   e.preventDefault();
   const mag=Math.abs(e.deltaX), sgn=e.deltaX>0?1:-1, now=performance.now(), dt=now-sLast; sLast=now;
-  if(sLock){
-    // inertia only DECAYS in magnitude and never reverses — so ignore it until it dies (mag<5),
-    // the finger clearly reverses, or there is a real pause. This is what stops the overshoot.
-    if((sgn!==sDir && mag>8) || mag<5 || dt>320){ sLock=false; sAcc=0; }
+  if(now < sLockUntil){
+    // HARD lock after a switch: nothing same-direction can get through (inertia can't outlast it),
+    // so a single swipe can only ever move one division. Only a deliberate REVERSE swipe breaks it early.
+    if(sgn!==sDir && mag>12){ sLockUntil=0; sAcc=0; }
     else return;
   }
-  if(sAcc!==0 && (sAcc>0)!==(sgn>0)) sAcc=0;
+  if(dt>250 || (sAcc!==0 && (sAcc>0)!==(sgn>0))) sAcc=0;   // fresh gesture, or a reversal mid run-up
   sAcc += e.deltaX;
   if(Math.abs(sAcc) < 45) return;
-  sAcc=0; sLock=true; sDir=sgn;
+  sAcc=0; sDir=sgn; sLockUntil=now+600;
   goTo(targetIdx + sgn, true);   // step from the committed target, not the mid-animation position
 }, {passive:false});
 tabsEl.addEventListener('click', e => { const b=e.target.closest('.tabb'); if(b) goTo(IDXTAB.indexOf(b.dataset.tab), true); });
