@@ -118,10 +118,10 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .slegend span{display:flex;align-items:center;gap:6px}
 .slegend i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
 .slegend b{font-family:JetBrains Mono,monospace;color:var(--tx)}
-.lens{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 12px}
-.lens button{background:var(--bg);border:1px solid var(--line2);color:var(--tx2);border-radius:8px;padding:6px 13px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;transition:.15s}
-.lens button:hover{color:var(--tx);border-color:var(--tx3)}
-.lens button.on{background:var(--ac);color:#04120e;border-color:var(--ac)}
+.lens{display:inline-flex;gap:2px;background:var(--bg);border:1px solid var(--line2);border-radius:11px;padding:3px}
+.lens button{background:none;border:0;color:var(--tx3);border-radius:8px;padding:7px 16px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:color .18s,background .18s,box-shadow .18s;white-space:nowrap}
+.lens button:hover{color:var(--tx)}
+.lens button.on{background:var(--ac);color:#04120e;box-shadow:0 2px 9px -2px var(--ac)}
 .lwrap{overflow-x:auto;overscroll-behavior-x:contain;border:1px solid var(--line);border-radius:12px;background:var(--bg);scrollbar-width:thin}
 .lgrid{border-collapse:collapse;font-size:10px;font-family:JetBrains Mono,monospace;white-space:nowrap}
 .lgrid th,.lgrid td{border:1px solid #10151d;padding:4px 6px;text-align:left}
@@ -132,7 +132,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 [data-theme=light] .lgrid .lhd th{background:#f0f2f6}
 .lgrid .lfl td{padding:0;height:6px}
 .lgrid .lfl .fb{height:6px;background:var(--ac)}
-.lgrid .lrl{position:sticky;left:0;z-index:3;background:#0d1119;color:var(--tx2);font-family:Inter,sans-serif;font-size:10.5px;font-weight:700;min-width:126px;max-width:126px;white-space:normal;line-height:1.25;border-right:2px solid var(--line2)}
+.lgrid .lrl{background:#0d1119;color:var(--tx2);font-family:Inter,sans-serif;font-size:10.5px;font-weight:700;min-width:120px;max-width:120px;white-space:normal;line-height:1.25;border-right:2px solid var(--line2)}
 [data-theme=light] .lgrid .lrl{background:#f0f2f6}
 .lgrid td.cell{color:var(--tx3);max-width:82px;overflow:hidden;text-overflow:ellipsis;transition:background .18s}
 .lgrid td.cell.f1{color:var(--tx2)}
@@ -211,13 +211,20 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .pread b{color:var(--tx)}
 .pkey{display:flex;flex-wrap:wrap;gap:9px 15px;font-size:11px;color:var(--tx2);margin-top:9px}
 .pkey span{display:flex;align-items:center;gap:6px}.pkey i{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
-.finds{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
-.findlbl{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--tx3);margin-right:2px}
-.find{background:var(--bg);border:1px solid var(--line2);color:var(--tx2);border-radius:9px;padding:7px 12px;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:7px}
-.find b{font-family:JetBrains Mono,monospace;font-weight:700;color:var(--tx)}
-.find:hover{border-color:var(--tx3);color:var(--tx)}
-.find.on{border-color:#FF5A1F;background:rgba(255,90,31,.1);color:var(--tx)}
-.find.on b{color:#ff8a52}
+/* control deck — one grouped panel for the lens + the issue jumps */
+.xctl{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--bg);margin:4px 0 18px}
+.ctlrow{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin:0 0 16px}
+.ctllbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--tx3)}
+.ctlrow2 .ctllbl{display:block;margin-bottom:10px}
+.finds{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin:0}
+.find{position:relative;text-align:left;background:var(--bg2,#0c1017);border:1px solid var(--line2);border-radius:12px;padding:11px 13px 11px 16px;cursor:pointer;overflow:hidden;transition:transform .13s ease,border-color .15s,box-shadow .15s}
+.find::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--fc,var(--line2))}
+.find:hover{transform:translateY(-2px);border-color:var(--fc,var(--tx3));box-shadow:0 7px 20px -6px rgba(0,0,0,.5)}
+.find .fcount{display:block;font-family:JetBrains Mono,monospace;font-weight:800;font-size:17px;color:var(--tx);letter-spacing:-.02em;line-height:1.1}
+.find .flabel{display:block;font-size:11px;font-weight:600;color:var(--tx3);margin-top:4px;line-height:1.35}
+.find.on{border-color:var(--fc,#FF5A1F);box-shadow:inset 0 0 0 1px var(--fc,#FF5A1F),0 6px 20px -6px var(--fc,#FF5A1F)}
+.find.on .fcount{color:var(--fc,#ff8a52)}
+.find.on .flabel{color:var(--tx2)}
 .bwrap{display:grid;grid-template-columns:196px 1fr;gap:16px;align-items:start;margin-top:2px}
 @media(max-width:720px){.bwrap{grid-template-columns:120px 1fr;gap:10px}}
 .bmini{position:sticky;top:76px;display:grid;grid-template-columns:30px 1fr;gap:6px}
@@ -1049,14 +1056,19 @@ function goCode(c,t){
   const lreg='<tr class=lreg><th class=lrl></th>'+RG.map(r=>'<th colspan='+r[1]+' class="'+(r[3]?'dk':'')+'" style="background:'+r[2]+'">'+r[0]+'</th>').join('')+'</tr>';
   const lhd='<tr class=lhd><th class=lrl>Row</th>'+COLS.map(c=>'<th title="'+c[0]+'">'+c[0]+'</th>').join('')+'</tr>';
   const lfl='<tr class=lfl><th class=lrl></th>'+FILL.map(n=>'<td><div class=fb style="opacity:'+(0.1+0.8*n/mxf).toFixed(2)+'"></div></td>').join('')+'</tr>';
-  const lensbar='<div class=lens><button data-l=fill>Fill</button><button data-l=type>Value type</button><button class=on data-l=flag>Signals</button><button data-l=claims>Claims</button></div>';
+  const lensbar='<div class=ctlrow><span class=ctllbl>Colour the file by</span>'
+    +'<div class=lens><button data-l=fill>Fill</button><button data-l=type>Value type</button><button class=on data-l=flag>Signals</button><button data-l=claims>Claims</button></div></div>';
+  // finding accent = the exact colour that row lights up in the grid; ordered most-damning first
+  const FCLR={contra:'#fb7185',minmax:'#fb7185',penny:'#fbbf24',echo:'#a78bfa',blanket:'#94a3b8',n0:'#8792a3',observed:'#34d399'};
+  const FORD={contra:0,minmax:1,penny:2,echo:3,blanket:4,n0:5,observed:6};
   const rl=[0,0.25,0.5,0.75,1].map(f=>Math.round(NT*f));
   const prowlab='<div class=prowlab>'+rl.map(n=>'<span>'+(n>=1000?Math.round(n/1000)+'k':n)+'</span>').join('')+'</div>';
-  const findChips='<div class=finds><span class=findlbl>Jump to an issue:</span>'+FIND.map(f=>'<button class=find data-anchor="'+f.anchor+'" data-lens="'+f.lens+'" title="'+f.note.replace(/"/g,'&quot;')+'"><b>'+f.count+'</b> '+f.label+'</button>').join('')+'</div>';
+  const findChips='<div class=ctlrow2><span class=ctllbl>Jump to an issue</span><div class=finds>'
+    +FIND.slice().sort((a,b)=>(FORD[a.key]??9)-(FORD[b.key]??9)).map(f=>'<button class=find data-anchor="'+f.anchor+'" data-lens="'+f.lens+'" data-key="'+f.key+'" style="--fc:'+(FCLR[f.key]||'var(--line2)')+'" title="'+f.note.replace(/"/g,'&quot;')+'"><span class=fcount>'+f.count+'</span><span class=flabel>'+f.label+'</span></button>').join('')
+    +'</div></div>';
   const exBrowse='<div class="xsec"><span class=xex>Browse</span> The whole file — its structure, and every quality issue</div>'
     +'<div class=mintro>The strip on the left is the entire file — all '+NT.toLocaleString()+' rows. Drag it to fly anywhere; the panel shows the real rows there. Switch the <b>lens</b> to read structure or quality, or click an issue below to fly straight to it.</div>'
-    +lensbar
-    +findChips
+    +'<div class=xctl>'+lensbar+findChips+'</div>'
     +'<div class=bwrap>'
       +'<div class=bmini>'+prowlab+'<div class=bminimg id=bminimg><img id=pimg src="'+P.fill+'" alt="the whole file"><div class=bview id=bview></div></div></div>'
       +'<div class=bdet><div class=lwrap id=bscroll><table class=lgrid data-lens=flag id=btable><thead>'+lreg+lhd+lfl+'</thead><tbody id=bbody></tbody></table></div></div>'
