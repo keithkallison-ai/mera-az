@@ -1,5 +1,16 @@
 <!doctype html><html lang=en data-theme=dark><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>Mera — Kaiser Foundation Hospital · Moanalua</title>
+<link rel=icon href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a0d13'/><text x='16' y='24' font-size='23' font-family='Georgia,serif' font-weight='700' fill='%23FF5A1F' text-anchor='middle'>M</text></svg>">
+<meta name="description" content="Mera audit of Kaiser Foundation Hospital (Moanalua): browse every real price in the hospital's machine-readable file, with pricing-data-quality and CMS-compliance analysis.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://keithkallison-ai.github.io/mera-az/moanalua.html">
+<meta property="og:title" content="Mera — Kaiser Foundation Hospital · Moanalua">
+<meta property="og:description" content="Browse every real price in Kaiser Moanalua's price-transparency file — with a full pricing-data-quality and CMS-compliance audit.">
+<meta property="og:image" content="https://keithkallison-ai.github.io/mera-az/og-moanalua.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://keithkallison-ai.github.io/mera-az/og-moanalua.png">
+<meta name="theme-color" content="#07090d">
 <link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel=stylesheet>
 <link rel=stylesheet href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"><script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>try{var _t=localStorage.getItem('mera_moanalua_theme');if(_t)document.documentElement.dataset.theme=_t;}catch(e){}</script>
@@ -542,7 +553,12 @@ html.binder-snap{scroll-snap-type:y proximity}
   <div class=count id=cnt style="margin-top:9px"></div>
 </div>
 
-<div class=card>
+<div class=card id=cpempty style="text-align:center;padding:40px 22px">
+  <div style="font-size:15.5px;color:var(--tx2);font-weight:700;margin-bottom:7px">Search a procedure to see its real prices</div>
+  <div style="font-size:12.5px;color:var(--tx3);line-height:1.6;max-width:470px;margin:0 auto">Type <b style="color:var(--tx2)">colonoscopy</b>, <b style="color:var(--tx2)">MRI</b>, or <b style="color:var(--tx2)">childbirth</b> in the box above &mdash; or open the <b style="color:var(--tx2)">Audit</b> tab to see how this file was graded.</div>
+</div>
+
+<div class=card id=cpcard style="display:none">
   <div style="display:flex;justify-content:space-between;align-items:start;gap:14px">
     <div class=rec-id><h2 id=cph2></h2><div id=cpplain style="font-size:12.5px;font-weight:600;color:var(--tx2);margin:2px 0 3px;min-height:19px"></div><div id=cpcodes></div><div class=decoded id=cpdec></div></div>
     <span class=src id=cpsrc></span>
@@ -908,6 +924,7 @@ function vname(x){ return x[9] || (x[12]?'mod '+x[12]:'') || (METH[x[4]]?METH[x[
 function codePage(code,ct,vi){
   const rows=D.rows.filter(r=>r[0]===code&&r[1]===ct);
   if(!rows.length) return false;
+  {const _cc=document.getElementById('cpcard'),_ce=document.getElementById('cpempty'); if(_cc)_cc.style.display=''; if(_ce)_ce.style.display='none';}   // reveal the code page, hide the empty prompt
   rows.sort((a,b)=>a[11]-b[11]);
   CP={code,ct,vi:Math.min(vi||0,rows.length-1)};
   const r=rows[CP.vi], isP=r[4]==='pct';
@@ -1009,10 +1026,9 @@ function goCode(c,t){
 }
 
 (function(){
-  q.value='colonoscopy'; flt.q='colonoscopy';
   const m=location.hash.match(/^#c\/([A-Z-]+):(.+)$/);
   if(m&&codePage(decodeURIComponent(m[2]),m[1],0)){ pickConcept('Procedure',{keep:true}); return; }
-  pickConcept('Procedure',{});
+  // no default procedure — land on the empty search prompt (a shared #c/ link still deep-loads a code)
 })();
 // THE MAP — legacy console treatment (kept OUTSIDE the chart block so chart patches can't delete it)
 (function(){
