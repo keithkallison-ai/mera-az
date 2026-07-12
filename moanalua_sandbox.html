@@ -151,7 +151,7 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .lgrid[data-lens=flag] td.cell[data-f=observed]{background:#34d399;color:#022016;font-weight:700}
 .lgrid[data-lens=claims] td.cell[data-claim=n0]{background:rgba(120,130,145,.36)}
 .lgrid[data-lens=claims] td.cell[data-claim=obs]{background:#34d399;color:#022016;font-weight:700}
-.llegend{display:flex;flex-wrap:wrap;gap:9px 15px;font-size:11px;color:var(--tx2);margin-top:11px}
+.llegend{display:flex;flex-wrap:wrap;gap:9px 15px;font-size:11px;color:var(--tx2);margin:0}
 .llegend span{display:flex;align-items:center;gap:6px}
 .llegend i{width:11px;height:11px;border-radius:3px;flex:0 0 auto;border:1px solid var(--line2)}
 .mintro{font-size:13px;color:var(--tx2);line-height:1.6;margin:2px 0 16px}
@@ -216,15 +216,20 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .ctlrow{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin:0 0 16px}
 .ctllbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--tx3)}
 .ctlrow2 .ctllbl{display:block;margin-bottom:10px}
-.finds{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin:0}
-.find{position:relative;text-align:left;background:var(--bg2,#0c1017);border:1px solid var(--line2);border-radius:12px;padding:11px 13px 11px 16px;cursor:pointer;overflow:hidden;transition:transform .13s ease,border-color .15s,box-shadow .15s}
-.find::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--fc,var(--line2))}
-.find:hover{transform:translateY(-2px);border-color:var(--fc,var(--tx3));box-shadow:0 7px 20px -6px rgba(0,0,0,.5)}
-.find .fcount{display:block;font-family:JetBrains Mono,monospace;font-weight:800;font-size:17px;color:var(--tx);letter-spacing:-.02em;line-height:1.1}
-.find .flabel{display:block;font-size:11px;font-weight:600;color:var(--tx3);margin-top:4px;line-height:1.35}
-.find.on{border-color:var(--fc,#FF5A1F);box-shadow:inset 0 0 0 1px var(--fc,#FF5A1F),0 6px 20px -6px var(--fc,#FF5A1F)}
-.find.on .fcount{color:var(--fc,#ff8a52)}
-.find.on .flabel{color:var(--tx2)}
+/* Quality Signals — a compact, backslash-separated, navigable row */
+.finds{display:flex;flex-wrap:wrap;align-items:center;gap:1px 2px;margin:0}
+.find{background:none;border:0;padding:4px 8px;border-radius:7px;cursor:pointer;font:inherit;font-size:12px;color:var(--tx2);font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:background .14s,color .14s}
+.find::before{content:'';width:8px;height:8px;border-radius:2px;background:var(--fc,var(--line2));flex:0 0 auto;transition:box-shadow .14s}
+.find .flabel{color:inherit}
+.find .fcount{font-family:JetBrains Mono,monospace;font-weight:700;color:var(--tx);font-size:11.5px}
+.find:hover{background:rgba(255,255,255,.06);color:var(--tx)}
+.find.on{background:color-mix(in srgb,var(--fc) 16%,transparent);color:var(--tx)}
+.find.on::before{box-shadow:0 0 0 3px color-mix(in srgb,var(--fc) 34%,transparent)}
+.find.on .fcount{color:var(--fc)}
+.fsep{color:var(--tx3);opacity:.4;user-select:none;font-size:12px}
+/* legend, relocated ABOVE the grid so the colour key is read first */
+.legrow{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;margin:2px 0 14px}
+.legrow .ctllbl{flex:0 0 auto}
 .bwrap{display:grid;grid-template-columns:196px 1fr;gap:16px;align-items:start;margin-top:2px}
 @media(max-width:720px){.bwrap{grid-template-columns:120px 1fr;gap:10px}}
 .bmini{position:sticky;top:76px;display:grid;grid-template-columns:30px 1fr;gap:6px}
@@ -1056,24 +1061,25 @@ function goCode(c,t){
   const lreg='<tr class=lreg><th class=lrl></th>'+RG.map(r=>'<th colspan='+r[1]+' class="'+(r[3]?'dk':'')+'" style="background:'+r[2]+'">'+r[0]+'</th>').join('')+'</tr>';
   const lhd='<tr class=lhd><th class=lrl>Row</th>'+COLS.map(c=>'<th title="'+c[0]+'">'+c[0]+'</th>').join('')+'</tr>';
   const lfl='<tr class=lfl><th class=lrl></th>'+FILL.map(n=>'<td><div class=fb style="opacity:'+(0.1+0.8*n/mxf).toFixed(2)+'"></div></td>').join('')+'</tr>';
-  const lensbar='<div class=ctlrow><span class=ctllbl>Colour the file by</span>'
+  const lensbar='<div class=ctlrow><span class=ctllbl>Color the data by</span>'
     +'<div class=lens><button data-l=fill>Fill</button><button data-l=type>Value type</button><button class=on data-l=flag>Signals</button><button data-l=claims>Claims</button></div></div>';
   // finding accent = the exact colour that row lights up in the grid; ordered most-damning first
   const FCLR={contra:'#fb7185',minmax:'#fb7185',penny:'#fbbf24',echo:'#a78bfa',blanket:'#94a3b8',n0:'#8792a3',observed:'#34d399'};
   const FORD={contra:0,minmax:1,penny:2,echo:3,blanket:4,n0:5,observed:6};
   const rl=[0,0.25,0.5,0.75,1].map(f=>Math.round(NT*f));
   const prowlab='<div class=prowlab>'+rl.map(n=>'<span>'+(n>=1000?Math.round(n/1000)+'k':n)+'</span>').join('')+'</div>';
-  const findChips='<div class=ctlrow2><span class=ctllbl>Jump to an issue</span><div class=finds>'
-    +FIND.slice().sort((a,b)=>(FORD[a.key]??9)-(FORD[b.key]??9)).map(f=>'<button class=find data-anchor="'+f.anchor+'" data-lens="'+f.lens+'" data-key="'+f.key+'" style="--fc:'+(FCLR[f.key]||'var(--line2)')+'" title="'+f.note.replace(/"/g,'&quot;')+'"><span class=fcount>'+f.count+'</span><span class=flabel>'+f.label+'</span></button>').join('')
+  const findChips='<div class=ctlrow2><span class=ctllbl>Quality Signals</span><div class=finds>'
+    +FIND.slice().sort((a,b)=>(FORD[a.key]??9)-(FORD[b.key]??9)).map((f,i)=>(i?'<span class=fsep>&#92;</span>':'')
+      +'<button class=find data-anchor="'+f.anchor+'" data-lens="'+f.lens+'" data-key="'+f.key+'" style="--fc:'+(FCLR[f.key]||'var(--line2)')+'" title="'+f.note.replace(/"/g,'&quot;')+'"><span class=flabel>'+f.label+'</span><span class=fcount>'+f.count+'</span></button>').join('')
     +'</div></div>';
   const exBrowse='<div class="xsec"><span class=xex>Browse</span> The whole file — its structure, and every quality issue</div>'
     +'<div class=mintro>The strip on the left is the entire file — all '+NT.toLocaleString()+' rows. Drag it to fly anywhere; the panel shows the real rows there. Switch the <b>lens</b> to read structure or quality, or click an issue below to fly straight to it.</div>'
     +'<div class=xctl>'+lensbar+findChips+'</div>'
+    +'<div class=legrow><span class=ctllbl>What each color means</span><div class=llegend id=llegend></div></div>'
     +'<div class=bwrap>'
       +'<div class=bmini>'+prowlab+'<div class=bminimg id=bminimg><img id=pimg src="'+P.fill+'" alt="the whole file"><div class=bview id=bview></div></div></div>'
       +'<div class=bdet><div class=lwrap id=bscroll><table class=lgrid data-lens=flag id=btable><thead>'+lreg+lhd+lfl+'</thead><tbody id=bbody></tbody></table></div></div>'
     +'</div>'
-    +'<div class=llegend id=llegend></div>'
     +'<div class=pread id=pread></div>';
   // EXHIBIT D — THE MAP (the mental model, explained)
   const M=X.map, PAL=['#5eead4','#818cf8','#fbbf24','#f472b6','#34d399','#60a5fa'];
