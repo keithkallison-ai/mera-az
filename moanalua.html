@@ -251,7 +251,13 @@ input.q{background:#0f141d;color:#e6edf3;border:1px solid var(--line2);border-ra
 .bminimg img{display:block;width:100%;image-rendering:pixelated;pointer-events:none;user-select:none}
 .bview{position:absolute;left:0;right:0;border:1.5px solid #fff;background:rgba(255,255,255,.15);box-shadow:0 0 0 9999px rgba(6,8,12,.44);pointer-events:none;min-height:5px;border-radius:2px}
 .bdet{min-width:0}
-#bscroll{max-height:600px;overflow:auto;overscroll-behavior:contain}
+#bscroll{max-height:600px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+#bscroll::-webkit-scrollbar{width:11px;height:11px}
+#bscroll::-webkit-scrollbar-track{background:transparent}
+#bscroll::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px;border:3px solid transparent;background-clip:padding-box;transition:background .15s}
+#bscroll::-webkit-scrollbar-thumb:hover{background:var(--tx3)}
+#bscroll::-webkit-scrollbar-corner{background:transparent}
+.bminihint{grid-column:1 / -1;text-align:center;font-size:10px;font-weight:600;color:var(--tx3);letter-spacing:.02em;margin-top:8px;user-select:none}
 #btable thead th,#btable thead .lreg th{position:sticky;z-index:2;background:#0d1119}
 [data-theme=light] #btable thead th{background:#f0f2f6}
 #btable .lreg th{top:0}
@@ -1073,10 +1079,10 @@ function goCode(c,t){
   const prowlab='<div class=prowlab>'+rl.map(n=>'<span>'+(n>=1000?Math.round(n/1000)+'k':n)+'</span>').join('')+'</div>';
   // Quality Signals are no longer a separate row — they ARE the legend for the Signals lens (setLens builds it).
   const exBrowse='<div class=xctl>'+lensbar
-      +'<div class=legrow><span class=ctllbl>What the colors mean</span><div class=llegend id=llegend></div></div>'
+      +'<div class=legrow><span class=ctllbl>Legend</span><div class=llegend id=llegend></div></div>'
     +'</div>'
     +'<div class=bwrap>'
-      +'<div class=bmini>'+prowlab+'<div class=bminimg id=bminimg><img id=pimg src="'+P.fill+'" alt="the whole file"><div class=bview id=bview></div></div></div>'
+      +'<div class=bmini>'+prowlab+'<div class=bminimg id=bminimg><img id=pimg src="'+P.fill+'" alt="the whole file"><div class=bview id=bview></div></div><div class=bminihint>click and hold to scroll</div></div>'
       +'<div class=bdet><div class=lwrap id=bscroll><table class=lgrid data-lens=flag id=btable><thead>'+lreg+lhd+lfl+'</thead><tbody id=bbody></tbody></table></div></div>'
     +'</div>'
     +'<div class=pread id=pread></div>';
