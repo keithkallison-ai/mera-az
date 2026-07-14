@@ -694,8 +694,19 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
   const CW=GCT.map(t=>t==='text'?240:(t==='setting'||t==='mod'?74:(t==='code'?66:(t==='ctype'?46:80))));
   const XOFF=[]; { let t=GUT; for(let i=0;i<CW.length;i++){XOFF.push(t); t+=CW[i];} var TOTW=t; }
   gspace.style.width=TOTW+'px'; gspace.style.height=(HDR+NR*RH)+'px';
-  function recomputeX(){ let t=GUT; for(let i=0;i<CW.length;i++){ XOFF[i]=t; t+=CW[i]; } TOTW=t; gspace.style.width=TOTW+'px'; }   // rebuild col offsets after a width change
-  function setRowH(h){ RH=Math.max(14,Math.min(140,Math.round(h))); gspace.style.height=(HDR+NR*RH)+'px'; }
+  function recomputeX(){ let t=GUT; for(let i=0;i<CW.length;i++){ XOFF[i]=t; t+=CW[i]; } TOTW=t; }   // col offsets — pure JS, NO DOM
+  function syncSpace(){ gspace.style.width=TOTW+'px'; gspace.style.height=(HDR+NR*RH)+'px'; }       // the DOM write — once, and LAST
+  // ⛔ THE SCROLL EXTENT IS A LIE ABOVE A CERTAIN ROW HEIGHT. The grid scrolls by sizing a spacer HDR+NR*RH tall, and a
+  // browser SILENTLY CLAMPS an element past its layout maximum (Chrome: ~22,369,618px, measured — not documented). Past
+  // that, the scroll extent stops short of the last row and THE TAIL OF THE FILE BECOMES UNREACHABLE: dragging the row
+  // height to 140 (which the old clamp allowed) hid 146,354 of Moanalua's 306,136 rows, while the readout still said
+  // "the whole file, every row". Measure the real limit and never exceed it. A file so tall that even the MINIMUM row
+  // height overflows fails the BUILD (see the spacer assert) — this must never be a silent truncation.
+  let _maxh=0;
+  function rowHMax(){ if(!_maxh){ const h0=gspace.style.height; gspace.style.height='1000000000px';
+      const m=bscroll.scrollHeight; gspace.style.height=h0; if(m>1000) _maxh=m; }          // 0 while the pane is hidden: don't cache it
+    return _maxh ? Math.max(14,Math.min(140,Math.floor((_maxh-HDR)/NR))) : 140; }
+  function setRowH(h){ RH=Math.max(14,Math.min(rowHMax(),Math.round(h))); }
   const ctx=gcanvas.getContext('2d'); let dpr=Math.max(1,window.devicePixelRatio||1); let curLens='flag';
   const FBG={collide:'#fbbf24',selfcontra:'#fb7185',minmax:'#f97316',echo:'#a78bfa',overgross:'#38bdf8',n0:'rgba(120,130,145,.34)',observed:'#34d399'};
   const FTX={collide:'#1a1200',selfcontra:'#2a0008',minmax:'#1c0d00',echo:'#160a2e',overgross:'#04283a',observed:'#022016'};
@@ -935,7 +946,7 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
   bmini.addEventListener('touchmove',e=>{ if(drag) dragQueue(e); },{passive:true});
   bmini.addEventListener('touchend',dragEnd);
   // ---- Excel-like resize: drag a column's right edge (in the header) to widen; drag a row edge (in the gutter) to set row height ----
-  let rz=null; const RZ_EDGE=5;
+  let rz=null, _rzXY=null, _rzRaf=0; const RZ_EDGE=5;
   function hitBorder(mx,my,sl,st){
     if(my<HDR && mx>=GUT){ for(let j=0;j<CW.length;j++){ if(Math.abs(mx-(XOFF[j]+CW[j]-sl))<=RZ_EDGE) return {type:'col',j:j}; } }
     else if(mx<GUT && my>=HDR){ const o=Math.round((st-HDR+my)/RH)-1; if(o>=0 && Math.abs(my-(HDR+(o+1)*RH-st))<=RZ_EDGE) return {type:'row',o:o}; }
@@ -993,10 +1004,17 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
   gcanvas.addEventListener('mousedown',e=>{ const r=gcanvas.getBoundingClientRect(); const hb=hitBorder(e.clientX-r.left,e.clientY-r.top,bscroll.scrollLeft,bscroll.scrollTop); if(!hb) return;
     e.preventDefault(); hideCard(); hideTips(); document.body.style.userSelect='none';
     rz = hb.type==='col' ? {type:'col',j:hb.j,x0:e.clientX,w0:CW[hb.j]} : {type:'row',o:hb.o,y0:e.clientY,h0:RH}; });
-  window.addEventListener('mousemove',e=>{ if(!rz) return;
-    if(rz.type==='col'){ CW[rz.j]=Math.max(34,Math.round(rz.w0+(e.clientX-rz.x0))); recomputeX(); }
-    else { setRowH(rz.h0+(e.clientY-rz.y0)/(rz.o+1)); }
-    draw(); });
+  // draw() used to run straight out of this handler — one FULL redraw per mouse EVENT rather than per frame. Coalesce
+  // to one update per FRAME (the minimap drag's proven pattern). MEASURED HONESTLY: this changes nothing on Chrome,
+  // which already delivers about one mousemove per frame — it is a CAP on the worst case (a device or engine that
+  // delivers more), not a speedup. The real defect in this handler was setRowH's clamp; see rowHMax().
+  function rzApply(x,y){
+    if(rz.type==='col'){ CW[rz.j]=Math.max(34,Math.round(rz.w0+(x-rz.x0))); recomputeX(); }
+    else setRowH(rz.h0+(y-rz.y0)/(rz.o+1));
+    syncSpace(); draw(); }
+  function rzQueue(x,y){ _rzXY=[x,y]; if(_rzRaf) return;
+    _rzRaf=requestAnimationFrame(()=>{ _rzRaf=0; const q=_rzXY; _rzXY=null; if(q&&rz) rzApply(q[0],q[1]); }); }
+  window.addEventListener('mousemove',e=>{ if(rz) rzQueue(e.clientX,e.clientY); });
   window.addEventListener('mouseup',()=>{ if(rz){ rz=null; document.body.style.userSelect=''; gcanvas.style.cursor='default'; } });
   // EVERY lens's legend is built ONCE, up front, and all of them live in the DOM. Switching a lens toggles which set
   // is shown — no innerHTML, no parse, no re-layout on the click. (Rebuilding the row per switch was one of the three
