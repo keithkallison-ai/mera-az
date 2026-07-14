@@ -699,7 +699,7 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
   // ⛔ THE SCROLL EXTENT IS A LIE ABOVE A CERTAIN ROW HEIGHT. The grid scrolls by sizing a spacer HDR+NR*RH tall, and a
   // browser SILENTLY CLAMPS an element past its layout maximum (Chrome: ~22,369,618px, measured — not documented). Past
   // that, the scroll extent stops short of the last row and THE TAIL OF THE FILE BECOMES UNREACHABLE: dragging the row
-  // height to 140 (which the old clamp allowed) hid 146,354 of Moanalua's 306,136 rows, while the readout still said
+  // height to 140 (which the old clamp allowed) hid 146,353 of Moanalua's 306,136 rows, while the readout still said
   // "the whole file, every row". Measure the real limit and never exceed it. A file so tall that even the MINIMUM row
   // height overflows fails the BUILD (see the spacer assert) — this must never be a silent truncation.
   let _maxh=0;
