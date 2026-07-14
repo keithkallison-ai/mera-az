@@ -955,7 +955,7 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
     else if(mx<GUT && my>=HDR){ const o=Math.round((st-HDR+my)/RH)-1; if(o>=0 && Math.abs(my-(HDR+(o+1)*RH-st))<=RZ_EDGE) return {type:'row',o:o}; }
     return null; }
   // hover: rich EVIDENCE card on a flagged cell (the what + why, proved by the row's own numbers); simple value tip otherwise
-  const gtip=document.createElement('div'); gtip.className='mtip'; document.body.appendChild(gtip);
+  const gtip=document.createElement('div'); gtip.id='gtip'; gtip.className='mtip'; document.body.appendChild(gtip);
   const evc=document.createElement('div'); evc.className='evcard'; document.body.appendChild(evc);
   // ⛔ THE GRID'S mousemove HANDLER WAS THRASHING THE MAIN THREAD ON EVERY MOUSE MOVE. It read
   // getBoundingClientRect() (a forced layout), rewrote cursor/display/opacity whether or not they had changed,
@@ -994,6 +994,7 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
     if(mx<GUT||my<HDR){ hideTips(); hideCard(); return; }
     const o=Math.floor((st-HDR+my)/RH); let j=-1; for(let k=0;k<CW.length;k++){ const x=XOFF[k]-sl; if(mx>=x&&mx<x+CW[k]){j=k;break;} }
     if(o<0||o>=NR||j<0){ hideTips(); hideCard(); return; }
+    if(typeof codePage==='function' && RH>=12 && GCT[j]==='code' && GCOL[j](o)!==0) setCursor('pointer');
     const isClaim=(curLens==='claims'); const code=isClaim?claimAt(o,j):flagAt(o,j); const name=(isClaim?CLM:FLAGS)[code];
     if(code && isOn(name)){ hideTips(); _navPos=''; showCard(o,j,name,e.clientX,e.clientY); return; }   // hover: no step position
     const id=GCOL[j](o); if(id===0){ hideTips(); hideCard(); return; }
@@ -1080,6 +1081,42 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
       onSel(); }); }
   document.addEventListener('keydown',e=>{ if(!lastNav||!sel().has(lastNav)) return; if(e.target&&/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
     if(e.key==='n'||e.key==='ArrowDown'){ step(lastNav,1); e.preventDefault(); } else if(e.key==='p'||e.key==='ArrowUp'){ step(lastNav,-1); e.preventDefault(); } });
+  // ---- CODE-CLICK → the Browse per-code page (Founder 2026-07-14). A click on a code cell opens
+  // that code's pricing page in Browse. Text rows only (RH>=12): below that a click cannot honestly
+  // attribute a cell. Codes without a negotiated lane have no browse page — the click SAYS SO
+  // instead of doing nothing. The 280ms defer lets a double-click (reserved for zoom dives in
+  // derived serves) cancel the jump. Serves without a Browse division (typeof codePage/slideTo
+  // undefined — e.g. Leahi) get NO behavior and NO pointer cursor.
+  let _clkT=0, _lastDbl=0, _mdX=0, _mdY=0;
+  gcanvas.addEventListener('mousedown',e=>{ _mdX=e.clientX; _mdY=e.clientY; });
+  gcanvas.addEventListener('dblclick',()=>{ _lastDbl=performance.now(); clearTimeout(_clkT); });
+  gcanvas.addEventListener('click',e=>{
+    if(typeof codePage!=='function'||typeof slideTo!=='function') return;
+    if(RH<12 || rz) return;
+    if(Math.abs(e.clientX-_mdX)>4||Math.abs(e.clientY-_mdY)>4) return;   // a drag is not a click
+    const r=_grect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    if(mx<GUT||my<HDR) return;
+    const st=bscroll.scrollTop, sl=bscroll.scrollLeft;
+    const o=Math.floor((st-HDR+my)/RH); if(o<0||o>=NR) return;
+    let j=-1; for(let k=0;k<CW.length;k++){ const x=XOFF[k]-sl; if(mx>=x&&mx<x+CW[k]){ j=k; break; } }
+    if(j<0||GCT[j]!=='code') return;
+    const code=String(gval(o,j)||''); if(!code) return;
+    const ct=(j+1<GCT.length&&GCT[j+1]==='ctype')?String(gval(o,j+1)||''):'';
+    const cx=e.clientX, cy=e.clientY;
+    clearTimeout(_clkT);
+    _clkT=setTimeout(()=>{ if(performance.now()-_lastDbl<350) return;    // a dive owns rapid taps
+      if(codePage(code,ct,0)!==false){
+        try{ lastCP=code+'|'+ct+'|'+CP.vi; }catch(_e){}
+        try{ history.replaceState('','','#c/'+ct+':'+encodeURIComponent(code)); }catch(_e){}
+        slideTo(1,false);
+        setTimeout(()=>{ const c=document.getElementById('cpcard'); if(c) c.scrollIntoView({behavior:'smooth',block:'start'}); },520);
+      } else {
+        gtip.textContent='no per-code page — '+code+(ct?' ('+ct+')':'')+' carries no negotiated rate in this file';
+        if(!_tipOn){ _tipOn=true; gtip.style.visibility='visible'; }
+        place('gtip',()=>{ const tw=gtip.offsetWidth,th=gtip.offsetHeight;
+          _put(gtip,Math.min(cx+14,window.innerWidth-tw-8),Math.max(8,cy-th-10)); gtip.style.opacity='1'; });
+        setTimeout(hideTips,1800);
+      } },280); });
   resize();
   buildLegends();
   setLens((D.xray&&D.xray.default_lens)||'flag');
