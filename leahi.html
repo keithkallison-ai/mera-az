@@ -640,10 +640,13 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
   // LEG.type is built from the sheet's own left-to-right column order once the grid is in — never a hand-kept list.
   const TGRP={code:'code',ctype:'code',gross:'gc',cash:'gc',dollar:'dollar',pct:'pct',median:'med',p10:'med',p90:'med',count:'count',min:'mm',max:'mm'};
   const TGL={code:['billing code','#fbbf24','rgba(251,191,36,.15)'],gc:['gross / cash','#94a3b8','rgba(148,163,184,.18)'],dollar:['dollar','#34d399','rgba(52,211,153,.22)'],pct:['% of charges','#60a5fa','rgba(96,165,250,.22)'],med:['median / percentiles','#818cf8','rgba(129,140,248,.22)'],count:['claim count','#5eead4','rgba(94,234,212,.20)'],mm:['declared min / max','#e879f9','rgba(232,121,249,.18)']};
+  // Only .fill and .type are read (buildLegends builds the flag/claims legends from FCHIPS/CCHIPS + FIND — i.e. from the
+  // Founder's five flags). LEG.flag / LEG.claims were DEAD, and they shipped the PRE-REWORK flag wording in the page's
+  // bytes: every one of those five phrasings was retired when the Founder authored the current five. Dead code carrying
+  // retired copy is not harmless — it is the stale wording one grep away from being reintroduced. Deleted.
+  // (Caught by the serve gate's own retired-wording check — which then caught this very comment for QUOTING them.)
   const LEG={fill:[['a value is present','rgba(94,234,212,.6)'],['blank','transparent']],
-    type:[],
-    flag:[['placeholder, not a real price','#fbbf24'],['a formula printed as if it were a claim','#a78bfa'],['the file disagrees with itself','#fb7185'],['published but never billed','rgba(120,130,145,.8)'],['backed by a real claim','#34d399']],
-    claims:[['never billed (n=0)','rgba(120,130,145,.8)'],['billed at least once','#34d399'],['a fixed dollar — no claim asserted','transparent']]};
+    type:[]};
   const bview=document.getElementById('bview'), bmini=document.getElementById('bminimg'), pimg=document.getElementById('pimg'), pimgs=document.getElementById('pimgs'), pread=document.getElementById('pread');
   const bscroll=document.getElementById('bscroll'), gcanvas=document.getElementById('gcanvas'), gspace=document.getElementById('gspace');
   // flag code -> name. 'nomgross' is a RETIRED slot: nothing emits it any more (the "list price <= $2" rule was a
