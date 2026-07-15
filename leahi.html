@@ -848,8 +848,8 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
     // telescopes back to the truth: (o-first)*RH*dpr + TY == (HDR+o*RH)*dpr - stD.
     const RB=o=>(o-first)*RH, TY=(HDR+first*RH)*dpr-stD;
     const SCROLLED=()=>ctx.setTransform(dpr,0,0,dpr,0,TY), FIXED=()=>ctx.setTransform(dpr,0,0,dpr,0,0), DEVICE=()=>ctx.setTransform(1,0,0,1,0,0);
-    const fs=_lb(GF,first),fe=_lb(GF,last+1),fm=new Map(); for(let i=fs;i<fe;i++)fm.set(GF[i][0]*64+GF[i][1],GF[i][2]);
-    const cs=_lb(GC,first),ce=_lb(GC,last+1),cm=new Map(); for(let i=cs;i<ce;i++)cm.set(GC[i][0]*64+GC[i][1],GC[i][2]);
+    const fs=_lb(GF,first),fe=_lb(GF,last+1),fm=new Map(); for(let i=fs;i<fe;i++)fm.set(GF[i][0]*512+GF[i][1],GF[i][2]);
+    const cs=_lb(GC,first),ce=_lb(GC,last+1),cm=new Map(); for(let i=cs;i<ce;i++)cm.set(GC[i][0]*512+GC[i][1],GC[i][2]);
     // Every 1px rule here is a fillRect, not a stroke. Skia antialiases a thin STROKE with a per-scanline dither keyed
     // to absolute device y; a blit translates that dither while a redraw regenerates it in place, so the two disagree
     // by ±1/255 at fractional dpr. A rect FILL's coverage is analytic — identical wherever it lands. (Also crisper, and
@@ -860,7 +860,7 @@ const isLight=()=>document.documentElement.dataset.theme==='light';
       if(o&1){ ctx.fillStyle=T.zb; ctx.fillRect(GUT,y,w-GUT+2,RH); }
       for(let j=0;j<CW.length;j++){ const x=XOFF[j]-sl; if(x>w||x+CW[j]<GUT) continue;
         const id=GCOL[j](o); if(id===0) continue; const v=G.cols[j].dv[id-1];
-        const fc=fm.get(o*64+j)||0, cc=cm.get(o*64+j)||0; let tc=T.tx, bg=null;
+        const fc=fm.get(o*512+j)||0, cc=cm.get(o*512+j)||0; let tc=T.tx, bg=null;
         if(curLens==='fill') bg='rgba(94,234,212,.13)';
         else if(curLens==='type'){ const gk=TGRP[GCT[j]]; if(gk&&isOn(gk)) bg=TBG[GCT[j]]; }
         else if(curLens==='flag'){ if(fc && isOn(FLAGS[fc])){ bg=FBG[FLAGS[fc]]; if(FTX[FLAGS[fc]])tc=FTX[FLAGS[fc]]; } }
