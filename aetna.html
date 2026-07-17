@@ -370,7 +370,7 @@ function renderList(){
       +'<div class="swatch" style="background:'+col+'"></div></div></div>';
   }).join('')+(inview.length>CAP?'<div class="count" style="text-align:center">showing cheapest '+CAP+' of '+inview.length.toLocaleString()+' in view</div>':'');
   $$('.hcard').forEach(function(c){var npi=c.getAttribute('data-npi');
-    c.addEventListener('mouseenter',function(){if(markers[npi])markers[npi].openPopup();});
+    c.addEventListener('mouseenter',function(){Object.keys(pills).forEach(function(k){var ic=pills[k]._icon,bb=ic&&ic.querySelector('b');if(bb)bb.classList.toggle('on',k===String(npi));});});
     c.addEventListener('click',function(){highlight(npi,false);});});
   $$('.sortbar .lens button').forEach(function(b){b.addEventListener('click',function(){sortMode=b.getAttribute('data-s');renderList();});});
 }
