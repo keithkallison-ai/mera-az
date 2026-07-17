@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kapiolani Medical Center for Women &amp; Children × Aetna — cross-source rate audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%23b07cd6%22/%3E%3Ctext x=%228%22 y=%2212%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23fff%22%3E%C3%97%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#07090d;--panel:#0f131a;--panel2:#141a23;--line:#20293566;--tx:#e9edf4;--tx2:#9aa6b7;--tx3:#5c6675;
+  --ac:#5eead4;--aetna:#b07cd6;--hosp:#5aa2e0;--gold:#fbbf24;--coral:#fb7185;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+a{color:var(--ac);}
+.wrap{max-width:1200px;margin:0 auto;padding:26px 22px 64px;}
+.top{display:flex;align-items:center;gap:12px;margin:0 0 6px;}
+.brand{font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:#FF5A1F;letter-spacing:.3px;}
+.top .bc{color:var(--tx3);font-size:13px;}
+h1{font-family:'Playfair Display',serif;font-weight:700;font-size:29px;margin:8px 0 4px;letter-spacing:.2px;}
+h1 .x{color:var(--tx3);font-weight:400;margin:0 12px;}
+h1 .pay{color:var(--aetna);} h1 .hn{color:var(--tx);}
+.thesis{color:var(--tx2);font-size:14.5px;max-width:880px;margin:2px 0 16px;}
+.thesis b{color:var(--tx);font-weight:600;}
+.note{background:#1a1520;border:1px solid #3a2b45;border-radius:9px;padding:10px 13px;font-size:13px;color:#d7c2e6;margin:0 0 16px;max-width:880px;}
+.note b{color:var(--aetna);}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px;}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-width:104px;}
+.chip .n{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.chip .l{font-size:10.5px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;}
+.idbar{font-size:12.5px;color:var(--tx2);margin:0 0 18px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-wrap:wrap;gap:6px 22px;}
+.idbar b{color:var(--tx);font-weight:600;} .idbar code{color:var(--tx);font-family:'JetBrains Mono',monospace;}
+.main{display:grid;grid-template-columns:334px 1fr;gap:20px;align-items:start;}
+@media(max-width:860px){.main{grid-template-columns:1fr;}}
+.list{background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;position:sticky;top:12px;}
+.search{width:100%;border:0;border-bottom:1px solid var(--line);background:var(--panel2);color:var(--tx);padding:13px 15px;font-size:13.5px;outline:none;font-family:inherit;}
+.search::placeholder{color:var(--tx2);}
+.codes{max-height:72vh;overflow-y:auto;}
+.ci{display:flex;align-items:baseline;gap:10px;padding:9px 15px;cursor:pointer;border-bottom:1px solid var(--line);}
+.ci:hover{background:var(--panel2);} .ci.sel{background:#1b2432;border-left:3px solid var(--aetna);padding-left:12px;}
+.ci .cc{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;min-width:56px;color:var(--tx);}
+.ci .cd{font-size:11.5px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ci .ca{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--aetna);margin-left:auto;flex:0 0 auto;}
+.detail{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:22px 24px;min-height:340px;}
+.detail h2{margin:0 0 2px;font-size:22px;font-weight:700;font-family:'Playfair Display',serif;}
+.detail h2 .code{font-family:'JetBrains Mono',monospace;color:var(--aetna);margin-right:12px;font-size:20px;}
+.dsub{font-size:14px;color:var(--tx2);margin:0 0 4px;}
+.comp{display:inline-block;font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;border:1px solid var(--line);border-radius:6px;padding:2px 9px;margin:8px 0 18px;}
+.anchor{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;margin:0 0 8px;}
+.anchor .big{font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:700;color:var(--aetna);line-height:1;}
+.anchor .lab{font-size:12px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.anchor .rng{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--tx2);}
+/* spread bar: 0 -> gross, with cash / payer-median / Aetna markers */
+.spread{margin:18px 0 6px;}
+.spread .track{position:relative;height:12px;border-radius:7px;background:linear-gradient(90deg,#15321f,#3a3410 55%,#3a1620);border:1px solid var(--line);}
+.spread .mk{position:absolute;top:-5px;width:2px;height:22px;border-radius:2px;transform:translateX(-1px);}
+.spread .mk.aet{background:var(--aetna);box-shadow:0 0 0 3px #b07cd633;}
+.spread .mk.pay{background:var(--hosp);} .spread .mk.cash{background:var(--gold);}
+.spread .cap{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tx2);margin-top:9px;}
+.spleg{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--tx2);margin:8px 0 2px;}
+.spleg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
+.book{margin-top:20px;}
+.book h3{font-size:12px;text-transform:uppercase;letter-spacing:.7px;margin:0 0 9px;font-weight:700;color:var(--hosp);}
+.book h3 .src{color:var(--tx2);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;}
+.kv{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px;}
+.kv .b{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;min-width:112px;}
+.kv .b .l{font-size:10.5px;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px;}
+.kv .b .v{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;}
+.ptab{width:100%;border-collapse:collapse;font-size:13px;}
+.ptab th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);font-weight:600;padding:0 10px 7px;border-bottom:1px solid var(--line);}
+.ptab td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+.ptab td.p{font-weight:600;} .ptab td.r{font-family:'JetBrains Mono',monospace;text-align:right;font-weight:700;}
+.ptab td.rng{font-family:'JetBrains Mono',monospace;text-align:right;color:var(--tx2);font-size:11.5px;}
+.ptab tr.aetfam td{background:#1a1520;}
+.mtag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:5px;border:1px solid var(--line);color:var(--tx2);white-space:nowrap;}
+.mtag.est{border-color:#5a4a22;color:var(--gold);}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:5px;background:#2a1e33;color:var(--aetna);margin-left:8px;}
+.empty{color:var(--tx2);font-size:13.5px;padding:50px 12px;text-align:center;}
+.foot{margin-top:28px;border-top:1px solid var(--line);padding-top:14px;font-size:11.5px;color:var(--tx2);line-height:1.75;max-width:1000px;}
+.foot b{color:var(--tx);font-weight:600;} .foot code{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span class="brand">Mera</span><span class="bc">Cross-source rate audit &middot; Hospital MRF &times; Payer MRF</span></div>
+  <h1><span class="hn"></span><span class="x">&times;</span><span class="pay"></span></h1>
+  <p class="thesis">Two independent public price disclosures for one provider, joined by NPI &mdash; the
+    hospital&rsquo;s own machine-readable file and the payer&rsquo;s own Transparency-in-Coverage file. This hospital
+    does not name the payer, so rather than claim agreement we place <b>the payer&rsquo;s own filed rate</b> in the
+    context of <b>the hospital&rsquo;s own published book</b>: its list price, its cash price, and what its named
+    payers pay for the same facility service.</p>
+  <div class="note"></div>
+  <div class="stats"></div>
+  <div class="idbar"></div>
+  <div class="main">
+    <div class="list">
+      <input class="search" type="text" placeholder="Search code or procedure&hellip;" aria-label="Search codes">
+      <div class="codes"></div>
+    </div>
+    <div class="detail"><div class="empty">Select a procedure to compare the payer&rsquo;s rate with the hospital&rsquo;s book.</div></div>
+  </div>
+  <div class="foot"></div>
+</div>
+<script>
+var DATA_URL="https://keithkallison-ai.github.io/mera-az/kapiolani_xsrc_data.json", D=null;
+function boot(){
+  var root=document.body, $=function(s){return document.querySelector(s);};
+  function esc(s){var d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+  function moneyR(x){return x==null?'&mdash;':'$'+Math.round(Number(x)).toLocaleString('en-US');}
+  function money2(x){return x==null?'&mdash;':'$'+Number(x).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  var METH=D.methods, PN=D.payerNames;
+  function isEst(mi){return /percent/i.test(METH[mi]||'');}
+  function methShort(mi){var m=METH[mi]||'';if(/percent/i.test(m))return '% of charges';if(/fee schedule/i.test(m))return 'Fee schedule';if(/case rate/i.test(m))return 'Case rate';if(/per diem/i.test(m))return 'Per diem';return m;}
+  // header
+  $('.top .bc');$('h1 .hn').textContent=D.hospital_short; $('h1 .pay').textContent=D.payer;
+  document.title=D.hospital+' × '+D.payer+' — cross-source rate audit';
+  $('.note').innerHTML='<b>Not a corroboration.</b> '+esc(D.aetna_family_note);
+  var st=(function(){var npr=0,ng=0;for(var i=0;i<D.codes.length;i++){npr+=D.codes[i].pr.length;if(D.codes[i].g)ng++;}return{codes:D.codes.length,pr:npr,ng:ng};})();
+  function chip(n,l){return '<div class="chip"><div class="n">'+esc(n)+'</div><div class="l">'+esc(l)+'</div></div>';}
+  $('.stats').innerHTML=chip(st.codes.toLocaleString(),'shared codes')+chip(D.payerNames.length,'hospital payers')
+    +chip(st.ng.toLocaleString(),'with a list price')+chip(D.payer,'payer filing');
+  $('.idbar').innerHTML='<span><b>Provider NPI:</b> <code>'+D.npi+'</code></span>'
+    +'<span><b>State:</b> '+esc(D.state)+'</span>'
+    +'<span><b>Component:</b> '+esc(D.component)+'</span>'
+    +'<span><b>Hospital file SHA-256:</b> <code>'+esc((D.hospital_sha||'').slice(0,16))+'…</code></span>';
+  // code list
+  var listEl=$('.codes'), sel=null;
+  function renderList(q){
+    q=(q||'').trim().toLowerCase(); listEl.innerHTML=''; var shown=0, frag=document.createDocumentFragment();
+    for(var i=0;i<D.codes.length && shown<400;i++){var c=D.codes[i];
+      if(q && c.code.toLowerCase().indexOf(q)<0 && (c.descr||'').toLowerCase().indexOf(q)<0)continue;
+      shown++; var el=document.createElement('div'); el.className='ci'+(sel===c?' sel':'');
+      el.innerHTML='<span class="cc">'+esc(c.code)+'</span><span class="cd">'+esc(c.descr)+'</span><span class="ca">'+moneyR(c.aet[0])+'</span>';
+      (function(cc){el.onclick=function(){sel=cc;renderList(q);renderDetail(cc);};})(c);
+      frag.appendChild(el);}
+    listEl.appendChild(frag);
+    if(!shown)listEl.innerHTML='<div class="empty" style="padding:28px">No codes match &ldquo;'+esc(q)+'&rdquo;.</div>';
+  }
+  // detail
+  function renderDetail(c){
+    var det=$('.detail'), aMed=c.aet[0], aMn=c.aet[1], aMx=c.aet[2], aN=c.aet[3];
+    var gross=c.g, cash=c.c, pmin=c.bk[0], pmed=c.bk[1], pmax=c.bk[2], npy=c.bk[3];
+    // spread scale: 0 -> ceiling (gross, else max of aetna/payer)
+    var ceil=gross || Math.max(aMx||0, pmax||0, aMed||0) || 1;
+    function pct(x){return Math.max(0,Math.min(100,100*(Number(x)/ceil)));}
+    var markers='';
+    if(cash!=null)markers+='<div class="mk cash" style="left:'+pct(cash)+'%" title="Cash '+money2(cash)+'"></div>';
+    if(pmed!=null)markers+='<div class="mk pay" style="left:'+pct(pmed)+'%" title="Hospital payer median '+money2(pmed)+'"></div>';
+    if(aMed!=null)markers+='<div class="mk aet" style="left:'+pct(aMed)+'%" title="Aetna '+money2(aMed)+'"></div>';
+    var rng=(aMn!=null&&aMx!=null&&aMn!==aMx)?(' &middot; '+money2(aMn)+'–'+money2(aMx)):'';
+    // payer table
+    var rows='';
+    for(var i=0;i<c.pr.length;i++){var p=c.pr[i];var pi=p[0],lo=p[1],md=p[2],hi=p[3],mi=p[4],nset=p[5],af=p[6];
+      rows+='<tr'+(af?' class="aetfam"':'')+'><td class="p">'+esc(PN[pi])+(af?'<span class="badge">Aetna subsidiary</span>':'')
+        +'</td><td><span class="mtag'+(isEst(mi)?' est':'')+'">'+esc(methShort(mi))+(isEst(mi)?' · est':'')+'</span></td>'
+        +'<td class="rng">'+(lo!==hi?money2(lo)+'–'+money2(hi):'&nbsp;')+'</td>'
+        +'<td class="r">'+money2(md)+'</td></tr>';}
+    det.innerHTML=
+      '<h2><span class="code">'+esc(c.code)+'</span></h2>'
+      +'<div class="dsub">'+esc(c.descr)+'</div>'
+      +'<div class="comp">'+esc(D.component)+' component &middot; facility vs facility</div>'
+      +'<div class="anchor"><div><div class="lab">'+esc(D.payer)+' pays</div><div class="big">'+moneyR(aMed)+'</div></div>'
+        +'<div><div class="lab">across</div><div class="rng">'+aN+' filed rate'+(aN>1?'s':'')+rng+'</div></div></div>'
+      +'<div class="spread"><div class="track">'+markers+'</div>'
+        +'<div class="cap"><span>$0</span><span>list '+moneyR(ceil)+'</span></div>'
+        +'<div class="spleg"><span><i style="background:var(--aetna)"></i>'+esc(D.payer)+' '+money2(aMed)+'</span>'
+        +(pmed!=null?'<span><i style="background:var(--hosp)"></i>hospital payer median '+money2(pmed)+'</span>':'')
+        +(cash!=null?'<span><i style="background:var(--gold)"></i>cash '+money2(cash)+'</span>':'')+'</div></div>'
+      +'<div class="book"><h3>Kapiolani&rsquo;s own book <span class="src">'+esc(D.hospital)+'</span></h3>'
+        +'<div class="kv">'
+          +'<div class="b"><div class="l">Gross (list)</div><div class="v">'+moneyR(gross)+'</div></div>'
+          +'<div class="b"><div class="l">Cash / self-pay</div><div class="v">'+moneyR(cash)+'</div></div>'
+          +'<div class="b"><div class="l">Payer rates</div><div class="v">'+moneyR(pmin)+'–'+moneyR(pmax)+'</div></div>'
+          +'<div class="b"><div class="l">Named payers</div><div class="v">'+npy+'</div></div>'
+        +'</div>'
+        +'<table class="ptab"><thead><tr><th>Payer</th><th>Methodology</th><th>Range</th><th>Rate</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +'</div>';
+  }
+  $('.search').addEventListener('input',function(e){renderList(e.target.value);});
+  renderList('');
+  if(D.codes.length){sel=D.codes[0];renderList('');renderDetail(D.codes[0]);}
+  $('.foot').innerHTML='<b>Provenance &mdash; both sources are byte-exact captures.</b> Hospital side: Kapiolani&rsquo;s '
+    +'CMS machine-readable standard-charges file, captured CFT &rarr; SHA-256 == source (tall CMS v3). '+esc(D.payer)
+    +' side: the payer&rsquo;s Transparency-in-Coverage MRF, captured and proven <code>serve == capture == source</code> '
+    +'(rate multiset, penny-exact). Join key: the hospital&rsquo;s published NPI <code>'+D.npi+'</code> &rarr; the payer&rsquo;s '
+    +'filing for that provider. Aligned by code &middot; facility component; facility and professional are never crossed. '
+    +'<br><b>Read the methodology.</b> A rate under &ldquo;% of charges&rdquo; is the hospital&rsquo;s <i>estimated</i> allowed '
+    +'dollar (gross &times; a percentage), not a fixed fee; fee-schedule and case-rate rates are firm. Rates are pooled across '
+    +'inpatient/outpatient settings per payer (min–max shown). No rate is claimed to be corroborated — this hospital does '
+    +'not name '+esc(D.payer)+'. Identification only; no affiliation with or endorsement by '+esc(D.payer)+' is implied.';
+}
+(function(){var d=document.querySelector('.detail');if(d)d.innerHTML='<div class="empty">Loading the audit&hellip;</div>';})();
+fetch(DATA_URL,{cache:'default'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(j){D=j;boot();}).catch(function(e){var d=document.querySelector('.detail');if(d)d.innerHTML='<div class="empty">Couldn’t load the audit data &mdash; '+String((e&&e.message)||e)+'</div>';});
+</script>
+</body>
+</html>
