@@ -70,6 +70,9 @@ input.q:focus{outline:none;border-color:var(--ac)}
 .pricepin b{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:6px 12px;border-radius:15px;background:#0c1017;border:1.5px solid var(--line2);white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.55);cursor:pointer;transition:transform .1s,background .1s;position:relative;transform:translate(-50%,-50%)}
 .pricepin b:hover,.pricepin b.on{background:var(--ac);color:#04120e!important;border-color:var(--ac)!important;z-index:1000;transform:translate(-50%,-50%) scale(1.12)}
 [data-theme=light] .pricepin b{background:#fff;box-shadow:0 2px 9px rgba(16,24,40,.22)}
+.pricepin b.bdot{padding:0;width:10px;height:10px;min-width:0;font-size:0;border-radius:50%;background:var(--ac);border:1.5px solid #04120e;box-shadow:0 1px 4px rgba(0,0,0,.55);opacity:.82}
+.pricepin b.bdot:hover,.pricepin b.bdot.on{background:#fff;color:inherit!important;opacity:1;border-color:var(--ac);z-index:1000;transform:translate(-50%,-50%) scale(1.6)}
+[data-theme=light] .pricepin b.bdot{border-color:#fff}
 /* cards */
 .sortbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .sortbar .t{font-size:12px;color:var(--tx3);font-weight:700}
@@ -154,7 +157,7 @@ function dealBadge(med,mid){if(!mid)return '';var pct=Math.round((1-med/mid)*100
   if(pct>=25)return '<span class="deal good">'+pct+'% below typical</span>';
   if(pct<=-40)return '<span class="deal hi">'+(-pct)+'% above</span>';return '';}
 // ---- state ---- (plan is a compact key: 'A' = all plans pooled, '0'/'1'... = network index)
-var state={code:null,plan:'A',tail:false,loc:null,ftype:null};
+var state={code:null,plan:'A',tail:false,loc:null,ftype:null,stAbbr:null};
 // ---- FULL-UNIVERSE lane: DuckDB-WASM over sharded parquet (any of the 16,690 codes; inline top set stays instant) ----
 var SHARD_BASE="https://keithkallison-ai.github.io/mera-az", CATALOG_URL="https://keithkallison-ai.github.io/mera-az/aetna_code_catalog.json", MANIFEST=[{"file": "aetna_codes_0.parquet", "code_lo": "0001F", "code_hi": "52281"}, {"file": "aetna_codes_1.parquet", "code_lo": "52282", "code_hi": "J2350"}, {"file": "aetna_codes_2.parquet", "code_lo": "J2351", "code_hi": "V5364"}], ZIP_URL="https://keithkallison-ai.github.io/mera-az/zip_centroids.json";
 var byNpiIdx={}; D.hospitals.forEach(function(h,i){byNpiIdx[h.npi]=i;});
@@ -205,39 +208,45 @@ function colorFor(t){ // t in [0,1] cheap->expensive
   var i=t<=.5?0:1, f=t<=.5?t/.5:(t-.5)/.5, a=stops[i], b=stops[i+1];
   return 'rgb('+Math.round(a[0]+(b[0]-a[0])*f)+','+Math.round(a[1]+(b[1]-a[1])*f)+','+Math.round(a[2]+(b[2]-a[2])*f)+')';
 }
-function drawMarkers(rows){ // NON-INTERACTIVE density dots (no popup/click -> no mousemove hit-testing over 6,012 markers)
+function drawMarkers(rows){ // NON-INTERACTIVE density dots (browse med==null -> faint teal; priced -> colored). No hit-testing.
   Object.keys(markers).forEach(function(k){map.removeLayer(markers[k]);}); markers={};
-  if(!rows){ D.hospitals.forEach(function(h){markers['a'+h.npi]=L.circleMarker([h.lat,h.lon],{renderer:cvs,radius:2.3,color:'#5eead4',weight:0,fillOpacity:.22,interactive:false}).addTo(map);}); return; }
   var lo=curLo||0,hi=curHi||1,span=(hi-lo)||1;
-  rows.forEach(function(r){var col=colorFor((r.med-lo)/span);
-    markers[r.h.npi]=L.circleMarker([r.h.lat,r.h.lon],{renderer:cvs,radius:4.5,color:'#0a0d13',weight:.5,fillColor:col,fillOpacity:.8,interactive:false}).addTo(map);});
+  rows.forEach(function(r){var priced=r.med!=null;var col=priced?colorFor((r.med-lo)/span):'#5eead4';
+    markers['d'+r.h.npi]=L.circleMarker([r.h.lat,r.h.lon],{renderer:cvs,radius:priced?4.5:2.6,color:'#0a0d13',weight:priced?.5:0,fillColor:col,fillOpacity:priced?.8:.32,interactive:false}).addTo(map);});
 }
-function fitAll(rows){var g=L.featureGroup(rows.map(function(r){return markers[r.h.npi];}));
-  try{map.fitBounds(g.getBounds().pad(.12),{maxZoom:11,animate:false});}catch(e){}}
+function fitAll(rows){if(!rows.length)return;var b=L.latLngBounds(rows.map(function(r){return [r.h.lat,r.h.lon];}));
+  try{map.fitBounds(b.pad(.12),{maxZoom:11,animate:false});}catch(e){}}
 function fitBB(bb){try{map.flyToBounds([[bb[0],bb[1]],[bb[2],bb[3]]],{maxZoom:12,padding:[30,30],duration:.6});}catch(e){}}
 // ---- Airbnb-style PRICE BUBBLES: a price pill on each in-view hospital ----
 var pills={}, PILLCAP=160;
 function pillLabel(c){var d=c/100;if(d>=10000)return '$'+Math.round(d/1000)+'k';if(d>=1000)return '$'+(d/1000).toFixed(1).replace(/\.0$/,'')+'k';return '$'+Math.round(d);}
-function drawPills(rows){ // rows = in-view, cheapest-first. DECLUTTER: greedily place non-overlapping pills (Airbnb).
+function drawPills(rows,browse){ // in-view. BROWSE=clickable name-dots (all shown); SHOP=price bubbles, declutter with OFFSET (coincident fan out, never hidden).
   Object.keys(pills).forEach(function(k){map.removeLayer(pills[k]);}); pills={};
-  var lo=curLo,hi=curHi,span=(hi-lo)||1,placed=[],n=0;
-  for(var i=0;i<rows.length&&n<PILLCAP;i++){var r=rows[i];
-    var pt=map.latLngToContainerPoint([r.h.lat,r.h.lon]);
-    if(pt.x<-60||pt.y<-30||pt.x>map.getSize().x+60||pt.y>map.getSize().y+30)continue; // off-canvas
-    var clash=false;for(var j=0;j<placed.length;j++){if(Math.abs(placed[j].x-pt.x)<46&&Math.abs(placed[j].y-pt.y)<24){clash=true;break;}}
-    if(clash)continue; placed.push(pt); n++;
-    var col=colorFor((r.med-lo)/span);
-    var m=L.marker([r.h.lat,r.h.lon],{icon:L.divIcon({className:'pricepin',iconSize:[1,1],iconAnchor:[0,0],
-      html:'<b style="color:'+col+';border-color:'+col+'66">'+pillLabel(r.med)+'</b>'}),zIndexOffset:300,riseOnHover:true});
-    m.on('click',function(np){return function(){highlight(np,true);};}(r.h.npi));
-    m.addTo(map); pills[r.h.npi]=m;
+  var lo=curLo,hi=curHi,span=(hi-lo)||1,W=map.getSize().x,H=map.getSize().y;
+  if(browse){var cap=450,nb=0;
+    for(var i=0;i<rows.length&&nb<cap;i++){var r=rows[i];var p0=map.latLngToContainerPoint([r.h.lat,r.h.lon]);
+      if(p0.x<-20||p0.y<-20||p0.x>W+20||p0.y>H+20)continue; nb++;
+      var mb=L.marker([r.h.lat,r.h.lon],{icon:L.divIcon({className:'pricepin',iconSize:[1,1],iconAnchor:[0,0],html:'<b class="bdot" title="'+esc(r.h.nm)+'"></b>'}),zIndexOffset:200});
+      mb.on('click',(function(np){return function(){highlight(np,true);};})(r.h.npi));mb.addTo(map);pills[r.h.npi]=mb;}
+    return;}
+  var placed=[],n2=0,OFF=[[0,0],[0,-34],[0,34],[58,0],[-58,0],[58,-34],[-58,-34],[58,34],[-58,34],[0,-68],[0,68],[92,0],[-92,0],[92,-34],[-92,-34]];
+  for(var i2=0;i2<rows.length&&n2<PILLCAP;i2++){var r2=rows[i2];var pp=map.latLngToContainerPoint([r2.h.lat,r2.h.lon]);
+    if(pp.x<-80||pp.y<-50||pp.x>W+80||pp.y>H+50)continue;
+    var pt=null;for(var o=0;o<OFF.length;o++){var cx=pp.x+OFF[o][0],cy=pp.y+OFF[o][1],clash=false;
+      for(var j=0;j<placed.length;j++){if(Math.abs(placed[j].x-cx)<56&&Math.abs(placed[j].y-cy)<30){clash=true;break;}}
+      if(!clash){pt={x:cx,y:cy};break;}}
+    if(!pt)continue;placed.push(pt);n2++;
+    var ll=(pt.x===pp.x&&pt.y===pp.y)?[r2.h.lat,r2.h.lon]:map.containerPointToLatLng([pt.x,pt.y]);
+    var col=colorFor((r2.med-lo)/span);
+    var m2=L.marker(ll,{icon:L.divIcon({className:'pricepin',iconSize:[1,1],iconAnchor:[0,0],html:'<b style="color:'+col+';border-color:'+col+'66">'+pillLabel(r2.med)+'</b>'}),zIndexOffset:300});
+    m2.on('click',(function(np){return function(){highlight(np,true);};})(r2.h.npi));m2.addTo(map);pills[r2.h.npi]=m2;
   }
 }
 function highlight(npi,fromMap){
   $$('.hcard').forEach(function(c){c.classList.toggle('hi',c.getAttribute('data-npi')==String(npi));});
   var card=$('.hcard[data-npi="'+npi+'"]'); if(card&&!fromMap)card.scrollIntoView({block:'nearest',behavior:'smooth'});
   // if this hospital's bubble was decluttered off the map, CREATE it now — a selected hospital always shows a bubble
-  if(!pills[npi]){var r=curRows.filter(function(x){return String(x.h.npi)===String(npi);})[0];
+  if(state.code&&!pills[npi]){var r=curRows.filter(function(x){return String(x.h.npi)===String(npi);})[0];
     if(r){var lo=curLo||0,hi=curHi||1,span=(hi-lo)||1,col=colorFor((r.med-lo)/span);
       var mk=L.marker([r.h.lat,r.h.lon],{icon:L.divIcon({className:'pricepin',iconSize:[1,1],iconAnchor:[0,0],
         html:'<b style="color:'+col+';border-color:'+col+'66">'+pillLabel(r.med)+'</b>'}),zIndexOffset:600});
@@ -291,7 +300,8 @@ var sortMode='price';
 var li=$('#loc'),lsg=$('#locsugg'),lHi=-1,_zips=null;
 function locMatches(v){v=v.trim().toLowerCase();if(!v)return D.places.slice(0,10);
   if(/^\d{3,5}$/.test(v))return [];
-  var out=[];for(var i=0;i<D.places.length&&out.length<20;i++){var pl=D.places[i];if((pl._l||(pl._l=pl.name.toLowerCase())).indexOf(v)>=0)out.push(pl);}return out;}
+  var out=[];for(var i=0;i<D.places.length&&out.length<20;i++){var pl=D.places[i];
+    if((pl._l||(pl._l=pl.name.toLowerCase())).indexOf(v)>=0||(pl.abbr&&pl.abbr.toLowerCase()===v))out.push(pl);}return out;}
 function showLocSugg(list,zipHint){lHi=-1;
   var html=list.map(function(p){return '<div class="sugg-it" data-loc="'+esc(p.name)+'"><span>'+esc(p.name)+'</span><span class="c">'+p.n+' hosp</span></div>';}).join('');
   if(zipHint)html='<div class="sugg-it" data-zip="'+esc(zipHint)+'"><span>ZIP '+esc(zipHint)+'</span><span class="c">go &rarr;</span></div>'+html;
@@ -309,54 +319,58 @@ lsg.addEventListener('click',function(e){var it=e.target.closest('.sugg-it');if(
   if(it.getAttribute('data-zip'))gotoZip(it.getAttribute('data-zip'));
   else{var nm=it.getAttribute('data-loc');var p=D.places.filter(function(x){return x.name===nm;})[0];if(p)chooseLoc(p);}});
 document.addEventListener('click',function(e){if(!e.target.closest('#locsugg')&&e.target!==li)lsg.classList.remove('open');});
-function chooseLoc(p){state.loc=p;li.value=p.name;lsg.classList.remove('open');$('#locclear').style.display='block';fitBB(p.bb);}
-function gotoZip(z){lsg.classList.remove('open');li.value=z;$('#locclear').style.display='block';
-  var go=function(){var c=_zips&&_zips[z];if(!c)return;state.loc={name:'ZIP '+z,bb:[c[0]-.18,c[1]-.22,c[0]+.18,c[1]+.22]};fitBB(state.loc.bb);};
+function chooseLoc(p){state.loc=p;state.stAbbr=p.abbr||null;li.value=p.name;lsg.classList.remove('open');$('#locclear').style.display='block';render();}
+function gotoZip(z){lsg.classList.remove('open');li.value=z;$('#locclear').style.display='block';state.stAbbr=null;
+  var go=function(){var c=_zips&&_zips[z];if(!c)return;state.loc={name:'ZIP '+z,bb:[c[0]-.18,c[1]-.22,c[0]+.18,c[1]+.22]};render();};
   if(_zips)go(); else fetch(ZIP_URL).then(function(r){return r.ok?r.json():{};}).then(function(j){_zips=j;go();}).catch(function(){});}
-$('#locclear').addEventListener('click',function(){state.loc=null;li.value='';this.style.display='none';if(state.code)fitAll(curRows);});
+$('#locclear').addEventListener('click',function(){state.loc=null;state.stAbbr=null;li.value='';this.style.display='none';render();});
 var curRows=[],curProc=null,curMid=0,curLo=0,curHi=0;
 function render(){
-  var lc=$('#listcol'),cnt=$('#cnt');
-  if(!state.code){
-    drawMarkers(null);
-    cnt.innerHTML='<b>'+D.hospitals.length.toLocaleString()+'</b> hospitals in Aetna&rsquo;s network nationwide &middot; pick a procedure to see prices';
-    lc.innerHTML='<div class="empty"><div class="big">Search a procedure to shop prices</div><div class="sm">Every dot is a hospital in Aetna&rsquo;s network. Choose a procedure and a plan, and each hospital shows what Aetna&rsquo;s own file says it pays &mdash; cheapest first.</div>'
-      +'<div class="pilllane">'+D.procedures.slice(0,8).map(function(p){return '<span class="pill" data-code="'+p.code+'">'+esc(p.label)+'</span>';}).join('')+'</div></div>';
-    $$('.pill').forEach(function(b){b.addEventListener('click',function(){choose(b.getAttribute('data-code'));});});
-    return;
-  }
-  // gather ALL priced hospitals for the code (compact flat [hidx,medc,mnc,mxc,n,...] in cents; hospitals by index).
-  var proc=catalog.filter(function(x){return x.code===state.code;})[0]||{code:state.code,label:state.code};
+  var proc=state.code?(catalog.filter(function(x){return x.code===state.code;})[0]||{code:state.code,label:state.code}):null;
   var rows;
-  if(state.tail){ rows=(tailCache[state.code]||[]).slice(); }
+  if(!state.code){ rows=D.hospitals.map(function(h){return {h:h,med:null};}); }   // BROWSE: all hospitals, no price
+  else if(state.tail){ rows=(tailCache[state.code]||[]).slice(); }
   else { var flat=(D.rates[state.code]||{})[state.plan]||[]; rows=[];
     for(var fi=0;fi<flat.length;fi+=5){var h=D.hospitals[flat[fi]];if(!h)continue;
       var netlab=state.plan==='A'?(h.nets&&h.nets.length?h.nets[0]:'Aetna'):D.networks[+state.plan].name;
       rows.push({h:h,med:flat[fi+1],mn:flat[fi+2],mx:flat[fi+3],n:flat[fi+4],net:netlab});}}
   if(state.ftype)rows=rows.filter(function(r){return r.h.type===state.ftype;});
+  if(state.stAbbr)rows=rows.filter(function(r){return r.h.st===state.stAbbr;});   // statewide search -> ONLY that state's hospitals
   curRows=rows; curProc=proc;
-  var allmed=rows.map(function(r){return r.med;}).sort(function(a,b){return a-b;});
-  curMid=allmed.length?allmed[Math.floor(allmed.length/2)]:0; curLo=allmed[0]||0; curHi=allmed[allmed.length-1]||0;
-  drawMarkers(rows.map(function(r){return {h:r.h,med:r.med};}));   // all priced hospitals on the map
-  if(state.loc){ fitBB(state.loc.bb); } else { fitAll(rows); }     // fit to active location, else nationwide
-  renderList();                                                    // list = viewport-filtered (moveend re-calls it)
+  if(state.code){var allmed=rows.map(function(r){return r.med;}).sort(function(a,b){return a-b;});
+    curMid=allmed.length?allmed[Math.floor(allmed.length/2)]:0; curLo=allmed[0]||0; curHi=allmed[allmed.length-1]||0;}
+  else{curMid=0;curLo=0;curHi=1;}
+  drawMarkers(rows.map(function(r){return {h:r.h,med:r.med};}));   // density dots (colored if priced, faint if browse)
+  if(state.loc){ fitBB(state.loc.bb); }                            // active city/state/ZIP -> fly there
+  else if(state.code){ fitAll(rows); }                             // procedure, no location -> fit priced hospitals nationwide
+  // else: nationwide browse (no procedure, no location) -> keep the continental-US default view; user pans or searches
+  renderList();
 }
 // renderList: cards for hospitals in the CURRENT map viewport, cheapest-first (Airbnb "search as I move the map")
 function renderList(){
-  if(!state.code)return;
-  var lc=$('#listcol'),cnt=$('#cnt'),proc=curProc,midM=curMid;
+  var lc=$('#listcol'),cnt=$('#cnt'),proc=curProc,midM=curMid,browse=!state.code;
   var bnds=map.getBounds();
   var inview=curRows.filter(function(r){return bnds.contains([r.h.lat,r.h.lon]);});
-  if(sortMode==='price')inview.sort(function(a,b){return a.med-b.med;});
+  if(!browse&&sortMode==='price')inview.sort(function(a,b){return a.med-b.med;});
   else inview.sort(function(a,b){return a.h.nm.localeCompare(b.h.nm);});
-  drawPills(inview);   // Airbnb price bubbles — drawPills declutters (non-overlapping, cheapest-first, capped)
+  drawPills(inview,browse);
+  var CAP=250, shown=inview.slice(0,CAP), lo=curLo, hi=curHi, span=(hi-lo)||1;
+  function wireCards(){$$('.hcard').forEach(function(c){var npi=c.getAttribute('data-npi');
+    c.addEventListener('mouseenter',function(){Object.keys(pills).forEach(function(k){var ic=pills[k]._icon,bb=ic&&ic.querySelector('b');if(bb)bb.classList.toggle('on',k===String(npi));});});
+    c.addEventListener('click',function(){highlight(npi,false);});});}
+  if(browse){ // BROWSE: hospitals without prices (Founder: see hospitals whether or not a procedure is picked)
+    cnt.innerHTML='<b>'+inview.length.toLocaleString()+'</b>'+(inview.length<curRows.length?' of '+curRows.length.toLocaleString():'')+' hospitals in Aetna&rsquo;s network '+(state.loc?'in <b>'+esc(state.loc.name)+'</b>':'nationwide')+' &middot; pick a procedure to see prices';
+    var bh='<div class="sortbar"><span class="t">'+inview.length.toLocaleString()+' hospitals</span><span style="margin-left:auto;font-size:11px;color:var(--tx3)">search a procedure for prices</span></div>';
+    if(!inview.length){lc.innerHTML=bh+'<div class="empty"><div class="big">No hospitals in view</div><div class="sm">Zoom out, or search a city, ZIP, or state.</div></div>';return;}
+    lc.innerHTML=bh+shown.map(function(r){return '<div class="hcard" data-npi="'+r.h.npi+'"><div class="body"><div class="nm">'+esc(r.h.nm)+'</div><div class="loc">'+esc(hloc(r.h))+'</div>'+(r.h.type?'<span class="ftype">'+esc(r.h.type)+'</span>':'')+'</div></div>';}).join('')+(inview.length>CAP?'<div class="count" style="text-align:center">showing '+CAP+' of '+inview.length.toLocaleString()+' &mdash; zoom in or pick a procedure</div>':'');
+    wireCards();return;
+  }
   var vmed=inview.map(function(r){return r.med;}).sort(function(a,b){return a-b;});
   cnt.innerHTML='<b>'+inview.length.toLocaleString()+'</b>'+(inview.length<curRows.length?' of '+curRows.length.toLocaleString():'')
     +' hospitals price <b>'+esc(proc.label)+'</b> ('+state.code+') '
     +(state.plan==='A'?'':'under <b>'+esc(D.networks[+state.plan].name)+'</b> ')
-    +(state.loc?'near <b>'+esc(state.loc.name)+'</b>':(inview.length<curRows.length?'in this area':'nationwide'))
+    +(state.loc?(state.stAbbr?'in <b>':'near <b>')+esc(state.loc.name)+'</b>':(inview.length<curRows.length?'in this area':'nationwide'))
     +(inview.length?' &middot; typical <b>'+money(vmed[Math.floor(vmed.length/2)])+'</b> &middot; '+money(vmed[0])+'&ndash;'+money(vmed[vmed.length-1]):'');
-  var CAP=250, shown=inview.slice(0,CAP), lo=curLo, hi=curHi, span=(hi-lo)||1;
   var head='<div class="sortbar"><span class="t">'+inview.length.toLocaleString()+' hospitals</span>'
     +'<div class="lens"><button data-s="price" class="'+(sortMode==='price'?'on':'')+'">Cheapest</button><button data-s="name" class="'+(sortMode==='name'?'on':'')+'">A&ndash;Z</button></div>'
     +'<div class="leg">cheap<div class="bar"></div>costly</div></div>';
@@ -369,12 +383,10 @@ function renderList(){
       +(r.mn!==r.mx?'<div class="r">'+money(r.mn)+'&ndash;'+money(r.mx)+'</div>':'<div class="r">'+r.n+' rate'+(r.n>1?'s':'')+'</div>')
       +'<div class="swatch" style="background:'+col+'"></div></div></div>';
   }).join('')+(inview.length>CAP?'<div class="count" style="text-align:center">showing cheapest '+CAP+' of '+inview.length.toLocaleString()+' in view</div>':'');
-  $$('.hcard').forEach(function(c){var npi=c.getAttribute('data-npi');
-    c.addEventListener('mouseenter',function(){Object.keys(pills).forEach(function(k){var ic=pills[k]._icon,bb=ic&&ic.querySelector('b');if(bb)bb.classList.toggle('on',k===String(npi));});});
-    c.addEventListener('click',function(){highlight(npi,false);});});
+  wireCards();
   $$('.sortbar .lens button').forEach(function(b){b.addEventListener('click',function(){sortMode=b.getAttribute('data-s');renderList();});});
 }
-var _mvT=null; map.on('moveend',function(){ if(!state.code)return; clearTimeout(_mvT); _mvT=setTimeout(renderList,140); });
+var _mvT=null; map.on('moveend',function(){ clearTimeout(_mvT); _mvT=setTimeout(renderList,140); });
 $('#foot').innerHTML='<b>'+esc(D.entity)+'</b> &middot; '+esc(D.entity_type)+' &middot; Transparency-in-Coverage in-network rates, file dated '+esc(D.updated)+' (v'+esc(D.version)+'). '
   +'Prices are Aetna&rsquo;s own published negotiated rates (institutional / facility component), captured penny-exact and proven <b>serve == capture == source</b> over all '+D.src_rows.toLocaleString()+' rate rows. '
   +'Hospitals located by NPPES; a hospital is shown when its NPI appears in Aetna&rsquo;s provider file and geocodes to a US rooftop. '
