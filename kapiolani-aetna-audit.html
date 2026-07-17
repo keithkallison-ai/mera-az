@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kapiolani Medical Center for Women &amp; Children × Aetna — data audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%23b07cd6%22/%3E%3Ctext x=%228%22 y=%2212%22 font-size=%229%22 text-anchor=%22middle%22 fill=%22%23fff%22%3E%E2%9A%91%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#07090d;--panel:#0f131a;--panel2:#141a23;--line:#20293566;--tx:#e9edf4;--tx2:#9aa6b7;--tx3:#5c6675;
+  --ac:#5eead4;--aetna:#b07cd6;--hosp:#5aa2e0;--gold:#fbbf24;--coral:#fb7185;--rowh:30px;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.45;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1340px;margin:0 auto;padding:24px 20px 30px;}
+.top{display:flex;align-items:center;gap:12px;margin:0 0 6px;}
+.brand{font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:#FF5A1F;letter-spacing:.3px;}
+.top .bc{color:var(--tx3);font-size:13px;}
+h1{font-family:'Playfair Display',serif;font-weight:700;font-size:27px;margin:6px 0 4px;}
+h1 .x{color:var(--tx3);font-weight:400;margin:0 11px;} h1 .pay{color:var(--aetna);}
+.thesis{color:var(--tx2);font-size:14px;max-width:940px;margin:2px 0 15px;} .thesis b{color:var(--tx);font-weight:600;}
+.stats{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 13px;align-items:stretch;}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:7px 13px;}
+.chip .n{font-size:19px;font-weight:700;font-family:'JetBrains Mono',monospace;} .chip .n.g{color:var(--ac);} .chip .n.f{color:var(--coral);}
+.chip .l{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;}
+.legend{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px;align-items:center;}
+.lchip{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:5px 11px 5px 9px;font-size:12px;cursor:pointer;user-select:none;transition:background .1s,border-color .1s;}
+.lchip:hover{background:var(--panel2);} .lchip.on{border-color:var(--tx);background:var(--panel2);}
+.lchip i{width:9px;height:9px;border-radius:50%;flex:0 0 auto;} .lchip .lc{font-family:'JetBrains Mono',monospace;color:var(--tx2);font-size:11px;}
+.lchip.viewtog{border-radius:8px;} .lchip.viewtog.on{border-color:var(--ac);color:var(--ac);}
+.walkbar{display:none;align-items:center;gap:10px;margin:0 0 10px;font-size:12.5px;color:var(--tx2);}
+.walkbar.on{display:flex;} .walkbar b{color:var(--tx);} .walkbar button{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:7px;padding:4px 10px;cursor:pointer;font-family:inherit;}
+.walkbar button:hover{border-color:var(--tx2);}
+.gridwrap{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
+@media(max-width:1000px){.gridwrap{grid-template-columns:1fr;}}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.sheet .tools{display:flex;gap:10px;padding:11px 13px;border-bottom:1px solid var(--line);background:var(--panel2);}
+.search{flex:1;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--tx);padding:9px 12px;font-size:13px;outline:none;font-family:inherit;}
+.search::placeholder{color:var(--tx2);} .search:focus{border-color:var(--aetna);}
+.ghead,.grow{display:grid;grid-template-columns:82px minmax(150px,1fr) 96px 92px 66px 82px 60px 66px 92px;align-items:center;}
+.ghead{position:sticky;top:0;z-index:3;background:var(--panel2);border-bottom:1px solid var(--line);font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);font-weight:600;}
+.ghead>div{padding:9px 9px;} .ghead>div.r{text-align:right;}
+.body{position:relative;height:70vh;overflow-y:auto;overflow-x:hidden;}
+.spacer{position:relative;width:100%;}
+.grow{position:absolute;left:0;right:0;height:var(--rowh);border-bottom:1px solid #161c26;cursor:pointer;font-size:12.5px;border-left:3px solid transparent;}
+.grow:hover{background:#151b25;} .grow.sel{background:#1b2432;}
+.grow.served{border-left-color:#1d3a2e;} .grow>div{padding:0 9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.grow .c{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--tx);}
+.grow .d{color:var(--tx2);} .grow .rt{font-family:'JetBrains Mono',monospace;text-align:right;font-weight:600;}
+.grow .rt.pct{color:var(--coral);} .grow .dim{color:var(--tx3);}
+.grow .fl{display:flex;gap:3px;align-items:center;}
+.grow .fl i{width:8px;height:8px;border-radius:2px;flex:0 0 auto;}
+.empty{padding:44px;text-align:center;color:var(--tx2);font-size:13px;}
+.side{position:sticky;top:12px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 18px 20px;min-height:200px;}
+.card .ph{color:var(--tx2);font-size:13px;text-align:center;padding:34px 6px;}
+.card h3{margin:0 0 2px;font-size:19px;font-family:'Playfair Display',serif;font-weight:700;}
+.card h3 .cc{font-family:'JetBrains Mono',monospace;color:var(--aetna);margin-right:9px;font-size:17px;}
+.card .cdesc{color:var(--tx2);font-size:13px;margin:0 0 12px;}
+.card .big{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;margin:2px 0 2px;}
+.card .big.pct{color:var(--coral);} .card .biglab{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;}
+.kvs{margin:14px 0 4px;border-top:1px solid var(--line);padding-top:12px;}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:4px 0;}
+.kv .k{color:var(--tx2);} .kv .v{font-family:'JetBrains Mono',monospace;color:var(--tx);text-align:right;}
+.verd{border-radius:8px;padding:9px 12px;font-size:12.5px;margin:12px 0 0;border:1px solid var(--line);}
+.verd.served{background:#12291f;border-color:#2c5a44;color:#9fe6c4;} .verd.served b{color:var(--ac);}
+.verd.excl{background:#241b12;border-color:#4a3820;color:#e6cfa8;} .verd.excl b{color:var(--gold);}
+.fev{margin:12px 0 0;} .fev .fi{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line);}
+.fev .fi i{width:10px;height:10px;border-radius:3px;flex:0 0 auto;margin-top:3px;}
+.fev .fi .ft{font-weight:600;font-size:12.5px;} .fev .fi .fd{font-size:11.5px;color:var(--tx2);line-height:1.5;}
+.foot{margin-top:20px;border-top:1px solid var(--line);padding-top:13px;font-size:11.5px;color:var(--tx2);line-height:1.7;max-width:1040px;}
+.foot b{color:var(--tx);font-weight:600;} .foot code{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span class="brand">Mera</span><span class="bc">Payer-MRF data audit &middot; the actual filed rows, flagged</span></div>
+  <h1><span class="hn"></span><span class="x">&times;</span><span class="pay"></span> <span style="font-family:Inter;font-weight:600;font-size:18px;color:var(--tx2)">&mdash; data audit</span></h1>
+  <p class="thesis">Every rate row <b>Aetna itself filed</b> for this provider, exactly as captured &mdash; not the
+    consumer view, the raw file. Each row is checked by an <b>Aetna-native flag battery</b> (percentage-typed,
+    derived, quality-flagged, zero/placeholder, modified, per-diem) &mdash; every flag a provable fact in
+    the row, never a magnitude guess. Green rows are what the shopping serve shows; flagged rows are set aside, with
+    the exact reason.</p>
+  <div class="stats"></div>
+  <div class="legend"></div>
+  <div class="walkbar"></div>
+  <div class="gridwrap">
+    <div class="sheet">
+      <div class="tools"><input class="search" type="text" placeholder="Search billing code or description&hellip;" aria-label="Search rows"></div>
+      <div class="ghead"><div>Code</div><div>Description</div><div class="r">Rate</div><div>Type</div><div>Class</div><div>Setting</div><div>POS</div><div>Mod</div><div>Flags</div></div>
+      <div class="body"><div class="spacer"></div></div>
+    </div>
+    <div class="side"><div class="card"><div class="ph">Select a row to see its fields and every flag&rsquo;s proof.</div></div></div>
+  </div>
+  <div class="foot"></div>
+</div>
+<script>
+var DATA_URL="https://keithkallison-ai.github.io/mera-az/kapiolani_audit_data.json", D=null;
+function boot(){
+  var $=function(s){return document.querySelector(s);};
+  function esc(s){var d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+  function money(c){return c==null?'—':'$'+Math.round(c/100).toLocaleString('en-US');}
+  function money2(c){return c==null?'—':'$'+(c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  var CODES=D.codes,TY=D.types,CL=D.classes,SE=D.settings,POS=D.pos,MOD=D.mods,FL=D.flags;
+  var FBYBIT={}; FL.forEach(function(f){FBYBIT[f.bit]=f;});
+  // row idx accessors: [codeIdx,rateCents,rateRaw,typeIdx,classIdx,setIdx,posIdx,modIdx,isDer,isPct,dq,mask,served]
+  var R=D.rows;
+  $('h1 .hn').textContent=D.hospital_short; $('h1 .pay').textContent=D.payer;
+  document.title=D.hospital+' × '+D.payer+' — data audit';
+  function chip(n,l,c){return '<div class="chip"><div class="n'+(c?' '+c:'')+'">'+esc(n)+'</div><div class="l">'+esc(l)+'</div></div>';}
+  $('.stats').innerHTML=chip(D.n_rows.toLocaleString(),'filed rate rows')
+    +chip(D.n_served.toLocaleString(),'served (institutional · unmodified · $)','g')
+    +chip(D.n_flagged.toLocaleString(),'flagged rows','f')
+    +chip(FL.length,'flag classes')+chip(CODES.length.toLocaleString(),'distinct codes');
+  // legend: view toggles + a walkable chip per flag class
+  var view='all', activeFlag=null;
+  var lg=$('.legend');
+  function paintLegend(){
+    var h='<span class="lchip viewtog'+(view==='all'?' on':'')+'" data-v="all">All rows</span>'
+      +'<span class="lchip viewtog'+(view==='served'?' on':'')+'" data-v="served"><i style="background:#1d7a4e"></i>Served</span>'
+      +'<span class="lchip viewtog'+(view==='flagged'?' on':'')+'" data-v="flagged">Flagged</span>';
+    FL.forEach(function(f){h+='<span class="lchip'+(activeFlag===f.bit?' on':'')+'" data-bit="'+f.bit+'"><i style="background:'+f.color+'"></i>'+esc(f.label)+' <span class="lc">'+f.count.toLocaleString()+'</span></span>';});
+    lg.innerHTML=h;
+  }
+  paintLegend();
+  // primary (paint) flag = first flag in legend order whose bit is set
+  function primFlag(mask){for(var i=0;i<FL.length;i++)if(mask&FL[i].bit)return FL[i];return null;}
+  // ---- filtering ----
+  var q='', filtered=R.map(function(_,i){return i;});
+  function applyFilter(){
+    q=($('.search').value||'').trim().toLowerCase();
+    filtered=[];
+    for(var i=0;i<R.length;i++){var r=R[i];
+      if(view==='served'&&!r[12])continue;
+      if(view==='flagged'&&!r[11])continue;
+      if(activeFlag!==null&&!(r[11]&activeFlag))continue;
+      if(q){var cd=CODES[r[0]];if((cd[0].toLowerCase().indexOf(q)<0)&&(cd[2].toLowerCase().indexOf(q)<0))continue;}
+      filtered.push(i);
+    }
+    updWalk(); render(true);
+  }
+  // ---- virtualized body ----
+  var body=$('.body'), spacer=$('.spacer'), ROWH=30, sel=-1, pool=[];
+  function render(reset){
+    var total=filtered.length; spacer.style.height=(total*ROWH)+'px';
+    if(reset){body.scrollTop=body.scrollTop; }
+    var st=body.scrollTop, vh=body.clientHeight;
+    var first=Math.max(0,Math.floor(st/ROWH)-6), last=Math.min(total,Math.ceil((st+vh)/ROWH)+6);
+    // clear + repaint the window (windowed set is small)
+    var frag=document.createDocumentFragment();
+    if(!total){spacer.innerHTML='<div class="empty">No rows match this filter.</div>';return;}
+    var html='';
+    for(var vi=first;vi<last;vi++){var ri=filtered[vi];var r=R[ri];var cd=CODES[r[0]];
+      var pf=primFlag(r[11]);var isPct=r[9];
+      var rate=isPct?('<span class="rt pct">'+esc(r[2])+'%</span>'):('<span class="rt'+(r[1]<=100?' dim':'')+'">'+money(r[1])+'</span>');
+      var dots='';var m=r[11];for(var k=0;k<FL.length;k++)if(m&FL[k].bit)dots+='<i style="background:'+FL[k].color+'" title="'+esc(FL[k].label)+'"></i>';
+      html+='<div class="grow'+(r[12]?' served':'')+(ri===sel?' sel':'')+'" data-ri="'+ri+'" style="top:'+(vi*ROWH)+'px;'+(pf?'border-left-color:'+pf.color:'')+'">'
+        +'<div class="c">'+esc(cd[0])+'</div><div class="d" title="'+esc(cd[2])+'">'+esc(cd[2])+'</div>'
+        +'<div>'+rate+'</div><div class="d">'+esc(TY[r[3]])+'</div><div class="d">'+esc(CL[r[4]])+'</div>'
+        +'<div class="d">'+esc(SE[r[5]]||'—')+'</div><div class="d">'+esc(POS[r[6]]||'—')+'</div>'
+        +'<div class="d">'+esc(MOD[r[7]]||'—')+'</div><div class="fl">'+dots+'</div></div>';
+    }
+    spacer.innerHTML=html;
+  }
+  body.addEventListener('scroll',function(){render(false);});
+  window.addEventListener('resize',function(){render(false);});
+  spacer.addEventListener('click',function(e){var row=e.target.closest('.grow');if(!row)return;sel=+row.getAttribute('data-ri');render(false);showCard(sel);});
+  // ---- evidence card ----
+  function showCard(ri){
+    var r=R[ri],cd=CODES[r[0]],isPct=r[9];
+    var big=isPct?('<div class="big pct">'+esc(r[2])+'%</div><div class="biglab">percentage-typed rate (not a dollar)</div>')
+      :('<div class="big">'+money2(r[1])+'</div><div class="biglab">'+esc(D.payer)+' negotiated rate</div>');
+    var kv='<div class="kvs">'
+      +row2('Billing code',cd[0]+' · '+cd[1])+row2('Negotiated type',TY[r[3]])+row2('Billing class',CL[r[4]])
+      +row2('Setting',SE[r[5]]||'—')+row2('Place of service',POS[r[6]]||'—')+row2('Modifier',MOD[r[7]]||'—')
+      +row2('is_derived',r[8]?'true':'false')+row2('is_percentage',r[9]?'true':'false')+row2('data_quality_flag',String(r[10]))
+      +'</div>';
+    var verd=r[12]?'<div class="verd served"><b>Served.</b> This row is in the shopping app: institutional component, no modifier, a real dollar.</div>'
+      :'<div class="verd excl"><b>Set aside.</b> The shopping serve excludes this row for the flagged reason'+(r[11]?'':' (non-institutional or modified)')+'.</div>';
+    var fev='';var m=r[11];
+    if(m){fev='<div class="fev">';for(var k=0;k<FL.length;k++){if(m&FL[k].bit){var f=FL[k];
+      fev+='<div class="fi"><i style="background:'+f.color+'"></i><div><div class="ft" style="color:'+f.color+'">'+esc(f.label)+'</div><div class="fd">'+esc(f.desc)+'</div></div></div>';}}fev+='</div>';}
+    $('.card').innerHTML='<h3><span class="cc">'+esc(cd[0])+'</span></h3><div class="cdesc">'+esc(cd[2])+'</div>'+big+kv+verd+fev;
+  }
+  function row2(k,v){return '<div class="kv"><span class="k">'+esc(k)+'</span><span class="v">'+esc(v)+'</span></div>';}
+  // ---- walk ----
+  var walkPos=-1;
+  function updWalk(){var wb=$('.walkbar');
+    if(activeFlag===null){wb.className='walkbar';wb.innerHTML='';return;}
+    var f=FBYBIT[activeFlag];wb.className='walkbar on';
+    wb.innerHTML='Walking <b>'+esc(f.label)+'</b> · <b>'+filtered.length.toLocaleString()+'</b> rows '
+      +'<button data-w="prev">&larr; Prev</button><button data-w="next">Next &rarr;</button>'
+      +'<button data-w="clear">Clear</button>';
+  }
+  function walk(dir){if(!filtered.length)return;walkPos=(walkPos+dir+filtered.length)%filtered.length;
+    var ri=filtered[walkPos];sel=ri;var vi=walkPos;body.scrollTop=Math.max(0,vi*ROWH-body.clientHeight/2);render(false);showCard(ri);}
+  document.addEventListener('click',function(e){
+    var vt=e.target.closest('.lchip.viewtog');if(vt){view=vt.getAttribute('data-v');activeFlag=null;walkPos=-1;paintLegend();applyFilter();return;}
+    var fc=e.target.closest('.lchip[data-bit]');if(fc){var bit=+fc.getAttribute('data-bit');activeFlag=(activeFlag===bit?null:bit);walkPos=-1;view=(activeFlag!==null?'all':view);paintLegend();applyFilter();return;}
+    var wb=e.target.closest('.walkbar button');if(wb){var w=wb.getAttribute('data-w');if(w==='next')walk(1);else if(w==='prev')walk(-1);else{activeFlag=null;walkPos=-1;paintLegend();applyFilter();}return;}
+  });
+  $('.search').addEventListener('input',applyFilter);
+  applyFilter();
+  $('.foot').innerHTML='<b>Provenance.</b> '+esc(D.capture_note)+'. Provider NPI <code>'+D.npi+'</code> → Aetna provider groups <code>'
+    +D.pgids.join('</code> <code>')+'</code>; every filed rate row for those groups is shown, unfiltered. '
+    +'<b>The flags are facts, not judgments</b> — each is a value present in the row (<code>is_percentage</code>, '
+    +'<code>is_derived</code>, <code>data_quality_flag</code>, a $0/sub-$1 value, a modifier, a per-diem type). '
+    +'<b>Served</b> marks the rows the shopping app shows — institutional '
+    +'component, no modifier, a real dollar — the same predicate, made visible. Aetna publishes no gross/cash/'
+    +'declared-min/max/median, so the hospital file&rsquo;s self-contradiction flags do not apply; this battery is '
+    +'Aetna-native. Identification only; no affiliation with or endorsement by '+esc(D.payer)+' is implied.';
+}
+(function(){var c=document.querySelector('.card');if(c)c.innerHTML='<div class="ph">Loading the filed rows&hellip;</div>';})();
+fetch(DATA_URL,{cache:'default'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(j){D=j;boot();}).catch(function(e){var c=document.querySelector('.card');if(c)c.innerHTML='<div class="ph">Couldn’t load the audit data — '+String((e&&e.message)||e)+'</div>';});
+</script>
+</body>
+</html>
