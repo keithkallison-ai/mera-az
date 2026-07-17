@@ -224,7 +224,7 @@ function drawPills(rows){ // rows = in-view, cheapest-first. DECLUTTER: greedily
   for(var i=0;i<rows.length&&n<PILLCAP;i++){var r=rows[i];
     var pt=map.latLngToContainerPoint([r.h.lat,r.h.lon]);
     if(pt.x<-60||pt.y<-30||pt.x>map.getSize().x+60||pt.y>map.getSize().y+30)continue; // off-canvas
-    var clash=false;for(var j=0;j<placed.length;j++){if(Math.abs(placed[j].x-pt.x)<60&&Math.abs(placed[j].y-pt.y)<28){clash=true;break;}}
+    var clash=false;for(var j=0;j<placed.length;j++){if(Math.abs(placed[j].x-pt.x)<46&&Math.abs(placed[j].y-pt.y)<24){clash=true;break;}}
     if(clash)continue; placed.push(pt); n++;
     var col=colorFor((r.med-lo)/span);
     var m=L.marker([r.h.lat,r.h.lon],{icon:L.divIcon({className:'pricepin',iconSize:[1,1],iconAnchor:[0,0],
@@ -236,6 +236,12 @@ function drawPills(rows){ // rows = in-view, cheapest-first. DECLUTTER: greedily
 function highlight(npi,fromMap){
   $$('.hcard').forEach(function(c){c.classList.toggle('hi',c.getAttribute('data-npi')==String(npi));});
   var card=$('.hcard[data-npi="'+npi+'"]'); if(card&&!fromMap)card.scrollIntoView({block:'nearest',behavior:'smooth'});
+  // if this hospital's bubble was decluttered off the map, CREATE it now — a selected hospital always shows a bubble
+  if(!pills[npi]){var r=curRows.filter(function(x){return String(x.h.npi)===String(npi);})[0];
+    if(r){var lo=curLo||0,hi=curHi||1,span=(hi-lo)||1,col=colorFor((r.med-lo)/span);
+      var mk=L.marker([r.h.lat,r.h.lon],{icon:L.divIcon({className:'pricepin',iconSize:[1,1],iconAnchor:[0,0],
+        html:'<b style="color:'+col+';border-color:'+col+'66">'+pillLabel(r.med)+'</b>'}),zIndexOffset:600});
+      mk.on('click',function(){highlight(npi,true);});mk.addTo(map);pills[npi]=mk;}}
   Object.keys(pills).forEach(function(k){var ic=pills[k]._icon,bb=ic&&ic.querySelector('b');if(bb)bb.classList.toggle('on',k==String(npi));});
 }
 // ---- plan dropdown ----
