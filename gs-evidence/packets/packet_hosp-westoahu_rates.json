@@ -1,0 +1,26 @@
+{
+ "artifact_kind": "rates",
+ "index": 11969,
+ "packet": "GS stranger packet \u2014 verify with gs_merkle_roots.py --verify (or any RFC 6962 implementation; leaf = SHA256(0x00||row_bytes), node = SHA256(0x01||l||r))",
+ "path_hex": [
+  "b537477f5a694f874f7c1ecf29fe11887a1c150bd949e22acde1a027bbd16ea2",
+  "72863d47554105107f24cc466ab320ded7d685a33652cb27c89c6255b0f0ba73",
+  "75b97b7fd778c1e31110ea711aaa85b86abe47eed310d7b798590a5addf79899",
+  "6983ce0e01aa2003c66d08e37a4f80da09017337618fabd0d4e9facfdf1a1ea3",
+  "7c0e16daad7c51775c134142f8258ec5056c95fd7d4e7a4c1efec5b09ef7451e",
+  "1618334cd41781ae4a9678bdc142daa061631ae14e6cc8d75f5aaf6a807eabb3",
+  "6f20b3d9c57ba282aa66ed0c08433f6ed08f4675a1b7505835ae2c9870888b31",
+  "f7f7cc2a43da07058e8a78eeaf87fad223bb1bf36d95ee4c6f2f1f2dca5a9e01",
+  "2db6738d5316e36935341429930ea07c1f08da2f760facb2eacda9a632d78b0f",
+  "ad1885bbb77eb830f44774f0221599414c43027ecbd793464e60d93c98e31ee9",
+  "774a57de89011323ce9ed22ca21710d122e5d1832a9b2ee4cae62c7dca9069c6",
+  "3ddadb209b36065951552311f6e9e3a8a1b01336894e650d39d0dc2ddeec3ae2",
+  "86c5236ab100ebaa9c393c87a1a4e8aee551065444d0c7dcc0af2a667c1aaa89",
+  "22cc1bc149ac03951a2ff811ca098212cddd3d1015a9b5209c2d0d15fc700ea6",
+  "dc99ec1fff0701b7167e01a5f77ddb0d5443e03ace25bdd83a046911652c7717"
+ ],
+ "root_sha256": "ca4e3ce2d6c05d6c9396a75e541ca700ddb1baa835090f4d55f4dc5ac9ee76f4",
+ "row_utf8": "{\"a\": \"src:540544ae1e87195b/rows[11969]\", \"rates\": [{\"pg\": [], \"payer\": \"AlohaCare\", \"plan\": \"Medicare\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Service item reimbursed under IPPS via MS-DRG; separate payment not applicable\"}]}, {\"pg\": [], \"payer\": \"First Health\", \"plan\": \"Commercial\", \"prices\": [{\"nt\": \"negotiated_percentage\", \"rate\": \"80\"}]}, {\"pg\": [], \"payer\": \"HMSA\", \"plan\": \"Medicare\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Service item reimbursed under IPPS via MS-DRG; separate payment not applicable\"}]}, {\"pg\": [], \"payer\": \"Hawaii Community Health Alliance\", \"plan\": \"Commercial\", \"prices\": [{\"nt\": \"negotiated_dollar\", \"rate\": \"4496\"}]}, {\"pg\": [], \"payer\": \"Hawaii Laborers\", \"plan\": \"Commercial\", \"prices\": [{\"nt\": \"negotiated_dollar\", \"rate\": \"5269\"}]}, {\"pg\": [], \"payer\": \"Hawaii Mainland Administrators\", \"plan\": \"Non Trust Local\", \"prices\": [{\"nt\": \"negotiated_dollar\", \"rate\": \"5135\"}]}, {\"pg\": [], \"payer\": \"Hawaii Mainland Administrators\", \"plan\": \"UFCW\", \"prices\": [{\"nt\": \"negotiated_dollar\", \"rate\": \"4496\"}]}, {\"pg\": [], \"payer\": \"Humana\", \"plan\": \"Commercial\", \"prices\": [{\"nt\": \"negotiated_percentage\", \"rate\": \"90\"}]}, {\"pg\": [], \"payer\": \"Kaiser\", \"plan\": \"Commercial\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Service item reimbursed under IPPS via MS-DRG; separate payment not applicable\"}]}, {\"pg\": [], \"payer\": \"Kaiser\", \"plan\": \"Medicare Advantage\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Service item reimbursed under IPPS via MS-DRG; separate payment not applicable\"}]}, {\"pg\": [], \"payer\": \"MDX Hawaii\", \"plan\": \"Commercial\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Stoploss First Dollar + Reimbursement Rate 90.00 + Fixed Amount 5060.00 + Fixed Amount 45000.00\"}]}, {\"pg\": [], \"payer\": \"Multiplan\", \"plan\": \"Commercial\", \"prices\": [{\"nt\": \"negotiated_percentage\", \"rate\": \"70\"}]}, {\"pg\": [], \"payer\": null, \"plan\": null, \"prices\": [{\"nt\": \"gross\", \"rate\": \"17.59\"}, {\"nt\": \"discounted_cash\", \"rate\": \"12.31\"}, {\"nt\": \"min\", \"rate\": \"4496\"}, {\"nt\": \"max\", \"rate\": \"5269\"}]}, {\"pg\": [], \"payer\": \"Ohana Care\", \"plan\": \"Medicare\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Service item reimbursed under IPPS via MS-DRG; separate payment not applicable\"}]}, {\"pg\": [], \"payer\": \"Seven Corners\", \"plan\": \"Commercial\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Service item reimbursed under IPPS via MS-DRG; separate payment not applicable\"}]}, {\"pg\": [], \"payer\": \"United Healthcare\", \"plan\": \"All Payer\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Stoploss First Dollar + Reimbursement Rate 80.00 + Basic Per Diem + Fixed Rate 5060.00 + Fixed Amount 45000.00\"}]}, {\"pg\": [], \"payer\": \"United Healthcare\", \"plan\": \"Medicare\", \"prices\": [{\"nt\": \"negotiated_algorithm\", \"rate\": \"Service item reimbursed under IPPS via MS-DRG; separate payment not applicable\"}]}]}",
+ "source": "hosp-westoahu",
+ "tree_size": 23938
+}

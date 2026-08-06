@@ -1,0 +1,26 @@
+{
+  "independent_non_author": true,
+  "provenance_mode": "claude_agent_clean_room",
+  "external_session_id": "351976a9-dae5-4d79-b9d5-982f68e6d897",
+  "public_repository": "https://github.com/keithkallison-ai/mera-az",
+  "public_commit": "5272c04a0a6d09329040f1892d8504983e1c1b78",
+  "inputs_permitted": [
+    "http://127.0.0.1:8821/api/manifest",
+    "http://127.0.0.1:8821/api/source/6077d84c95cc6091"
+  ],
+  "tripwire_import_attempts": [],
+  "tripwire_read_attempts": [],
+  "input_closure_held": true,
+  "source": "aetna-utah-pl5rp",
+  "folded_sha256": "6077d84c95cc6091fa6d9de582895c99c336d5f4a153ba3937d432473261d274",
+  "bytes_verified": 3464309234,
+  "wire_pin_sha256": "6077d84c95cc6091fa6d9de582895c99c336d5f4a153ba3937d432473261d274",
+  "equivalence_level": "L_byte, whole document, recovered from the wire alone under enforced closure",
+  "does_NOT_prove": [
+    "publisher fidelity — link 1 is a separate anchor",
+    "spec-sufficiency for reconstruction from typed surfaces — a spec-emit commission is the stronger form",
+    "anything about other sources"
+  ],
+  "utc": "2026-08-04T17:35:44.192145+00:00",
+  "implementation_sha256": "5c828df1ae191176c9c04e28abd69a1d4c9723c9c2741a70b9da68b27ad5a682"
+}

@@ -1,0 +1,29 @@
+{
+ "artifact_kind": "rates",
+ "index": 90154,
+ "packet": "GS stranger packet \u2014 verify with gs_merkle_roots.py --verify (or any RFC 6962 implementation; leaf = SHA256(0x00||row_bytes), node = SHA256(0x01||l||r))",
+ "path_hex": [
+  "bf75c16b1dff21749633b1b8adf9d969b627bb3b66a029194ca2cc39a01a9c49",
+  "96c97a9e2e05d4456ae7ae2c0ea548deca189fb0cd71d51e22005a79db7a66c5",
+  "bee2f18573517ce3325ee491e160a63bc1dad5dcfcc3e92d7849984539a310df",
+  "77ce6c133b1075e6cb9062558b104a94b36e4d599466e9dfddbb4800b70e911e",
+  "982643d6d4c6cd2b85a3f1b529209ff41fc531d1af1e09e434964834de3e1dc8",
+  "20761fa978fadd3381d11c63cbac15b9aeb9d1bbe59b325016131d6f58217f5f",
+  "3cdf3d9047e4c33424ed76166ca984ef8238c2a6c852261ca11d11e6d6bbbc86",
+  "f2c105a85aecc4f136fcec4cbef1b55391d63fe11617a7ada1a0125de20f2350",
+  "e6ba7ffcfcb977a3b7269c4e855a3f11dc2269df152c19bc77fe20defae280a4",
+  "1b85ff5f9c435ee587abc020d9c7f8e163358bf32924939ebb5311f3930bb730",
+  "5684c908001417b8ccef66061ccd7873de63dbe730805b2751d7e7458dc1ad46",
+  "ed7643293d0c13a018514f98c4aee183d64d52ad30fe37c2adf72d9353c59ef9",
+  "16b7656249d657aefa2f0d56846e02c8b8fa30d001be998a1f00231b34615d74",
+  "cc42aab25c7fd2f14cd1747fd1729113623f19bfca7a51bb9b45e3d8e297aa1b",
+  "fbec67817249abd2f619773910a87b757a558190c1d577f375f307eced015574",
+  "451755adfd62ec6d654b31d607fd892480f65997d5e8ee442a327d30e3ccf2ca",
+  "bd996302cf9a9d7d243d5f1c1d13c18129e4df811cd845253207d0507b67d7c2",
+  "abef6a9eaf9b35623124d95c401b5ade18a6bfbb0f639b502fed776952ace891"
+ ],
+ "root_sha256": "b8d6be6decd9273ff0047a937871e41cd21b2ba65651659f9c35ed838c180d2d",
+ "row_utf8": "{\"a\": \"src:a5dcc222164480a7/in_network[90154]\", \"rates\": [{\"pg\": [\"7090001\"], \"prices\": [{\"nt\": \"negotiated\", \"rate\": \"1.09\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"5290001\"], \"prices\": [{\"nt\": \"negotiated\", \"rate\": \"1.13\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}]}",
+ "source": "knew-ma01",
+ "tree_size": 180308
+}

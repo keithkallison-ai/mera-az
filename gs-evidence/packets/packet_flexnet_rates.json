@@ -1,0 +1,27 @@
+{
+ "artifact_kind": "rates",
+ "index": 16644,
+ "packet": "GS stranger packet \u2014 verify with gs_merkle_roots.py --verify (or any RFC 6962 implementation; leaf = SHA256(0x00||row_bytes), node = SHA256(0x01||l||r))",
+ "path_hex": [
+  "c72fd4d7f6e8bd43ecb914b6100c81fd1a0d6d2e75746e024468ce398d2e0348",
+  "71fde4363a0794630cf15ee6562a352c37ea7aa2c12179ae2539bcefc1a79e9f",
+  "6b7360217171e569718142c4c77b71a0c18d1c9430df6c6c0d468fc432edc8f9",
+  "caf76740707ae0b2273599fa2e4caa974a9c16dbbdecabd8119caa4780396f3d",
+  "bdc73589b6b803cce9a56cf8f19df0d179616c6772f224b476e95c0fb1d517cd",
+  "9e1649ef825d7e17972d7232b809b350ca3c863474fcc2aef98ffc4b05df7c38",
+  "9da8f469a70ec482ca09a40643ee5818e6a950036244969ddbd0807681e4e2a6",
+  "1db8cc02fd92f51581ee536624d8581396d4c6d471817348803d7a9251b693a7",
+  "94255e7a736f1fc8e105276ccdf882f0ec2ae406df6bf0f9252d1071a222fb69",
+  "f796c2b3c18b8347d0170444b833498672b4dbdc8723737020d75458e46a00a6",
+  "eceec4d4a2751e91879f97753c64546363dba959df874e3c3b8c3b4ffa90a621",
+  "03b59b790f918d3bd8fa39fd11239d860423bdf1c65fc6d66348f9f79b67e963",
+  "269180014a30334f579bae7e68e18ff709398f16b22216e850e8e12b6277b71c",
+  "6fd4c569c966e505b0456f679a003ff2074afa031574b561b17d1bdb0e7c23fd",
+  "4b27f29bb51446f8952da88dac71e2952411d2c33c5b0bc4b9ba254e119116a0",
+  "194e08b9a75c458a45bf2b0f9fd2ebb26897ea3d4d232c95b54962d9472ac4db"
+ ],
+ "root_sha256": "4220ae72617cec28a6683be7e5c6f3e901f5fb790aa8ef5b72284ae3eee1895e",
+ "row_utf8": "{\"a\": \"src:b77581a8b19aafd0/in_network[16644]\", \"rates\": [{\"pg\": [\"1063446\", \"1063449\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"179.91\", \"exp\": \"9999-12-31\", \"bc\": \"institutional\", \"se\": \"outpatient\", \"sc\": 0, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1063354\", \"1063665\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"127.14\", \"exp\": \"9999-12-31\", \"bc\": \"institutional\", \"se\": \"outpatient\", \"sc\": 0, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1063658\", \"1063660\", \"1063661\", \"1063662\", \"1063663\", \"1063664\", \"1063668\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"178.00\", \"exp\": \"9999-12-31\", \"bc\": \"institutional\", \"se\": \"outpatient\", \"sc\": 0, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1063327\", \"1063331\", \"1063335\", \"1063344\", \"1063348\", \"1063349\", \"1063350\", \"1063351\", \"1063352\", \"1063353\", \"1063679\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"127.14\", \"exp\": \"9999-12-31\", \"bc\": \"professional\", \"se\": \"outpatient\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1063666\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"194.52\", \"exp\": \"9999-12-31\", \"bc\": \"institutional\", \"se\": \"outpatient\", \"sc\": 0, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1063548\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"300.05\", \"exp\": \"9999-12-31\", \"bc\": \"institutional\", \"se\": \"outpatient\", \"sc\": 0, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1063582\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"149.93\", \"exp\": \"9999-12-31\", \"bc\": \"institutional\", \"se\": \"outpatient\", \"sc\": 0, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1063630\", \"1063631\", \"1063659\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"254.28\", \"exp\": \"9999-12-31\", \"bc\": \"institutional\", \"se\": \"outpatient\", \"sc\": 0, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1063672\"], \"prices\": [{\"nt\": \"fee schedule\", \"rate\": \"190.71\", \"exp\": \"9999-12-31\", \"bc\": \"institutional\", \"se\": \"outpatient\", \"sc\": 0, \"mod\": 0, \"ai\": 0}]}]}",
+ "source": "flexnet",
+ "tree_size": 33289
+}

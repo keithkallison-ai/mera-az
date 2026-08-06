@@ -1,0 +1,27 @@
+{
+ "artifact_kind": "partition",
+ "index": 28324,
+ "packet": "GS stranger packet \u2014 verify with gs_merkle_roots.py --verify (or any RFC 6962 implementation; leaf = SHA256(0x00||row_bytes), node = SHA256(0x01||l||r))",
+ "path_hex": [
+  "d1ec863bf4b03a3a99eb63ad06eecba261a8130c38456bf8d646cf9b19991ee2",
+  "414eaf8088485facc521aefd61e26072bbb12cc7594e9716aaf88690499eccdc",
+  "7780221cad305f3352845f6f268d76ffbde9ba0d16282ae79f001f00c43681a9",
+  "6f20f57db9829d667d6ed4c4996a475a299203956cf8ea5cde7e2d7778b68049",
+  "b29d209601999c1ab6bf7e68c528660e7347cae5400aa818b2b7712b7842fef5",
+  "265a75a708b9062cdd57b1cb3088020718cb2f16a03bccc0c05bc32cd00e382b",
+  "ffcadfdf48dce78e4b3994a45b37dedf6c322f1934659504caedfabf02bc5447",
+  "bd582ef99a84d0d1f2ee6b5bcbdc8c65274deb81259e95b8be165f3bb414bc6e",
+  "dc1d29da0140cbd5882668092fd79d5aaf81d0879f2b1a377115176414fa7322",
+  "38b5c1dda4a2d16e873f497a9130c6a1f6a67c072fd01d3f4ce32d24d6fadfb0",
+  "cd6c681b9c2ca9f7ca9b154f95aa6e2bc4de8bb0165f1d0e62b57015e38c6852",
+  "63c70b79a4c3cd596c1f3bf4d920566538d8f1a65bb3443f0547d13a624be5a7",
+  "52662643f3b359d19a1e458a02fd38baa183aaeaabfd6b7b4a8deabee99db2f6",
+  "b9b435e27dc8b602ea41f96ef2f2c00608fa310a404763624e4674d870423023",
+  "d9525f16c1f5ae3451c4200db6b8047d7cdfb2201a1822d92dd63a396fd3f262",
+  "ef2c6467b6df8b9f3e716e9a59e325a9b58764d1d6beed4846e2823ea7de3588"
+ ],
+ "root_sha256": "527d7a3cb03e795bfd8cdc7dc2432fffe0fc47d12e5984258e1435fa89dd94c6",
+ "row_utf8": "{\"a\": \"src:a10e38cf0cbb46f2/glue[14162]\", \"k\": \"glue\", \"s\": 909830755, \"e\": 909830756, \"h\": \"d03502c43d74a30b936740a9517dc4ea2b2ad7168caa0a774cefe793ce0b33e7\"}",
+ "source": "aetna-iowa-pl2am",
+ "tree_size": 56649
+}

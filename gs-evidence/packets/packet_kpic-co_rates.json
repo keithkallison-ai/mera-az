@@ -1,0 +1,27 @@
+{
+ "artifact_kind": "rates",
+ "index": 30307,
+ "packet": "GS stranger packet \u2014 verify with gs_merkle_roots.py --verify (or any RFC 6962 implementation; leaf = SHA256(0x00||row_bytes), node = SHA256(0x01||l||r))",
+ "path_hex": [
+  "fdbe366056fae03f1383da44ba50208eabfa5ba763f3fc8c93807f8556fd1f52",
+  "c84f6b20ae6f3fa5164fa6647a2d58d32406dd9150b6edec884b3c6a4ddf4225",
+  "3eeb670f69ac369c7e989eab6b213cdc9fb65781f139a0a80b0ffdbc02320284",
+  "74ea8de2a422282e9fb24b89ef219816c0327d4a5e6afb25310c75523e7d6ebb",
+  "cb3a040fa42f15ca381aa56bb61fd6331ecbe29d8e61dfc6b7a2dd7c12fadea5",
+  "9a06509e640a0d02e504f7b619070b14ace87cc0c44d2ec49971a90972d2a297",
+  "941e8648403c0317d07e6c900fb48931b79b0615b30b008feb2fd0d4d1fa282b",
+  "5a8513d9fea48254d5a44889ac556b4e0f66ea4d9ba64221effff22f38e0bbb1",
+  "c008d9d5cc8e1a372d6731cfab0def69abf2e15b662037f6c4691e69c43a2e67",
+  "312f03398727b7c169e84803a2b97e0e49fa69490009c992ad69546547cc31a8",
+  "895a35e48dd787e6fce725caea1789ff52f22e70cffe80e7dad4e346863ce957",
+  "49971f29046a654e581595ad3db9a87c8d539413b3500c45d52bdaf7f70108fe",
+  "52dd81639c541f639c7e7240e3a1f9399ebc460c511b2c45a3f4e3a7ec56ab04",
+  "993d8628cd62e031053caf5ef3b7e038d19cf6b31a76f52fd0381ba9de1f0060",
+  "7f48251069713e090f67a8e5273b1718d217c56b14c260577674a53dc8ede409",
+  "3eaebf799ed62fbd6633fc7c627efe1166c5c458bc6a8cf31ae3a403227486e8"
+ ],
+ "root_sha256": "b2f31a758c180f6ceefd13030b50d7ccf70459754064ef78c2abe0a8a970f67a",
+ "row_utf8": "{\"a\": \"src:b697ff34c3c806ed/in_network[30307]\", \"rates\": [{\"pg\": [\"330001\"], \"prices\": [{\"nt\": \"percentage\", \"rate\": \"100\", \"exp\": \"2027-02-28\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"290001\"], \"prices\": [{\"nt\": \"percentage\", \"rate\": \"100\", \"exp\": \"9999-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}]}",
+ "source": "kpic-co",
+ "tree_size": 60614
+}

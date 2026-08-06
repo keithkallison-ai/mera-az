@@ -1,0 +1,82 @@
+{
+ "does_NOT_prove": [
+  "publisher fidelity \u2014 link-1 outside-fact lives in the census receipt",
+  "non-authorship \u2014 this client is ours; the commissions own that"
+ ],
+ "elapsed_s": 3.6,
+ "equivalence_level": "L_byte, whole document, over HTTP",
+ "measured": 1984604128,
+ "rate_MB_s": 545.6,
+ "recovered_sha256": "a10e38cf0cbb46f2d5f2864aace25f2d082932b3314ebc028376cc04d5a875a6",
+ "source": "aetna-iowa-pl2am",
+ "tag16": "a10e38cf0cbb46f2",
+ "tool_sha256": "242986b254e825c750b3c5e578484c6fa6e62ffc6991857119e59a6e284eebe5",
+ "total": 1984604128,
+ "tripwire_trips": [],
+ "unit": "source bytes recovered from the wire under enforced closure (no-oracle client: every local open tripwired, pins from the wire manifest alone)",
+ "utc": "2026-08-04T03:30:12.105356+00:00",
+ "verdict": "GREEN",
+ "wire_manifest_pins": [
+  [
+   "aetna-iowa-pl2am",
+   "a10e38cf0cbb46f2d5f2864aace25f2d082932b3314ebc028376cc04d5a875a6",
+   1984604128
+  ],
+  [
+   "aetna-utah-pl5rp",
+   "6077d84c95cc6091fa6d9de582895c99c336d5f4a153ba3937d432473261d274",
+   3464309234
+  ],
+  [
+   "cigna-oap-2026-08",
+   "f83cc31c7d4dbe54df59298752b8c0a40a3d4308b0a13cf0b685cd84b0793194",
+   34485313805
+  ],
+  [
+   "flexnet",
+   "b77581a8b19aafd0b7b8edbec6032b4173691cf33c187d2a3af817423b8384ea",
+   349944850
+  ],
+  [
+   "hosp-westoahu",
+   "540544ae1e87195bb2713b4b72790e76e0e310ceb7eda58b5e1062ecdcd95ae3",
+   92764431
+  ],
+  [
+   "k-nc",
+   "51a05ad12b5150c90aebb85fbea3c38e18efc7e62b2801107a79779a7303a0d0",
+   6422422279
+  ],
+  [
+   "kfhp-co",
+   "ae2d185a5b6cbd910e79ca06c5d94706333cea6d3cfbaec9ed82dd9c69b4b5d9",
+   2605947377
+  ],
+  [
+   "knew-co20",
+   "78fb2ea0cb1e6d525b7251e5b599127a706e3500231354d3ae0a974fde048746",
+   2603370793
+  ],
+  [
+   "knew-ga01",
+   "fcfe42bb22f56b3307dfb061473251577dd1e3fef38a5047f76fab0fb9ce86a1",
+   1542432175
+  ],
+  [
+   "knew-hi01",
+   "68297e6f4f9f055fa1449ce0a4ad9712736e4f9ef2b0d3d758067c5a9310472a",
+   10369531547
+  ],
+  [
+   "knew-ma01",
+   "a5dcc222164480a76f12c523aae3fddb3d9466789362145137caa1648965f991",
+   5741677706
+  ],
+  [
+   "kpic-co",
+   "b697ff34c3c806eda96a2363aeb55787b9f8b9d80a7d386ecc162de3984e71e1",
+   384622330
+  ]
+ ],
+ "wire_pin_sha256": "a10e38cf0cbb46f2d5f2864aace25f2d082932b3314ebc028376cc04d5a875a6"
+}

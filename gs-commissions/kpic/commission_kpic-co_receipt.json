@@ -1,0 +1,26 @@
+{
+ "independent_non_author": true,
+ "provenance_mode": "claude_agent_clean_room",
+ "external_session_id": "c1fd02cc-f497-49f4-9885-000e6660331a",
+ "public_repository": "https://github.com/keithkallison-ai/mera-az",
+ "public_commit": "effa210db82ca5983f5fcec7fc40215f53e85af4",
+ "inputs_permitted": [
+  "http://127.0.0.1:8812/v1/kpic-co/* (HTTP GET only)",
+  "C:\\Users\\keith\\Payer\\Outposts\\Kaiser\\serve_lossless\\emitter_contract.json (read-only)",
+  "C:\\Users\\keith\\Payer\\Outposts\\Kaiser\\serve_lossless\\emitter_vectors.json (read-only)"
+ ],
+ "tripwire_import_attempts": [],
+ "tripwire_read_attempts": [],
+ "input_closure_held": true,
+ "source": "kpic-co",
+ "folded_sha256": "b697ff34c3c806eda96a2363aeb55787b9f8b9d80a7d386ecc162de3984e71e1",
+ "bytes_verified": 384622330,
+ "vectors_passed": "9/9",
+ "equivalence_level": "L_byte over the whole member, rebuilt from typed serve surfaces per the published contract",
+ "does_NOT_prove": [
+  "publisher fidelity — that is link 1, a separate anchor",
+  "anything about sources other than kpic-co"
+ ],
+ "utc": "2026-08-04T17:59:40Z",
+ "implementation_sha256": "212265cd1ae87c68835f20810fd9a9f4460487d69da474a5add9b7463d76a9d8"
+}

@@ -1,0 +1,304 @@
+{
+ "claims": {
+  "authority_rule": "the LIVE gates win over every value here \u2014 re-derive, never quote",
+  "s3_source_independence": {
+   "all_green": true,
+   "passed": 66,
+   "total": 66
+  },
+  "s4_federation": {
+   "all_green": true,
+   "mode": "heavy (U1+U2+U3+U4+U5)",
+   "passed": 114,
+   "total": 114
+  }
+ },
+ "does_NOT_prove": [
+  "publisher fidelity (link 1) \u2014 the pins are OUR manifest pins",
+  "non-authorship \u2014 OPEN, stated above",
+  "that any serve exists or is faithful \u2014 a serve is an implementation"
+ ],
+ "epoch_rule": "this body carries NO self-written clock; the epoch instant IS what the RFC 3161 token asserts about sha256(this file) \u2014 a third party's clock, not ours",
+ "equivalence_level": "a BINDING, not a fidelity level: sha256 identities of sources, artifacts and tools, plus claims whose authorities are the live gates",
+ "federation": {
+  "bytes_total": 70046940655,
+  "facts_total": 2957367,
+  "kind": "TAGGED DISJOINT UNION \u2014 an address space, not a merged document",
+  "partitions_pinned_in": "cd0_federation.json (identity_bindings below pin it, and it pins both partition files by sha256)",
+  "rows_total": 5890808
+ },
+ "floor_summary": "12/12 sources MET \u2014 non-authorship OPEN on both; the useful rail may not be declared GREEN",
+ "forbidden_claims": [
+  "presenting the epoch token as proof of FIDELITY \u2014 it stamps existence-in-time of a digest and says nothing about what the digest covers",
+  "rounding the floor up \u2014 non-authorship is OPEN on both sources and this manifest says so",
+  "presenting the two sources under one combined content root"
+ ],
+ "identity_bindings": {
+  "cd0_federation.json": "8f210924b7d6872c30e3b1e894103cc03d5655b723fb4d30ef6c089dec201260",
+  "cd0_manifest.json": "83dc9e2d4a905c3068699069e386261fe10ffd84ff0fa591762b5d9c463b958c",
+  "gs_sources.json": "5cced93889b37f8f639f96b7bda940a42b6b7771b6cf753170ecfd55458f4382"
+ },
+ "identity_law": "per \u00a70.0 \u2014 identity keys on the SOURCE DOCUMENTS (their own sha256), never on any serve; a serve is an implementation",
+ "release": "CD-0/CD-1 GLOBAL SERVE \u2014 EPOCH 2 release manifest (AETNA UTAH ADMITTED)",
+ "serve_bindings": {
+  "closure_law": "S1 \u2014 the SECOND closure: the serve process, its page, its served artifacts, and the canonical dictionary. The serve's startup fence verifies ALL of these against this section and REFUSES on drift; editing any of them ROTATES THE EPOCH. Kept separate from tool_bindings so what a hash covers stays a deliberate choice.",
+  "dictionary": {
+   "authority": "THE canonical code->NL crosswalk (Founder ruling 2026-08-01) + its SEARCH SHADOW (every published alternate name; display = the elected face); additive overlay law (wire.py): audit text stays the source's verbatim",
+   "path": "Outposts/Hospital/code_dictionary/code_dictionary.csv.gz",
+   "search_path": "Outposts/Hospital/code_dictionary/code_dictionary_search.csv.gz",
+   "search_sha256": "eda07f319bb93d2560b3b61492ac29e5e25ef68c9f42b1657ba5fe777336af44",
+   "sha256": "eb6ffb45d0418ecf7a13e7f1f344a3a364b8c27f78ef5971bb717d9c264ce654"
+  },
+  "performer": {
+   "authority": "\u2463 PERFORMED pinned signal (CMS MUP by-Provider-and-Service, data year 2024; Founder order 2026-08-02): Stage 1 DECORATION-ONLY \u2014 a typed performed state on every map pin, no filtering; absence is not non-performance",
+   "path": "Outposts/Union/data/cms_verified_performers.parquet",
+   "sha256": "a13da19123ba1ec0009028d3822cfe4709e03ee892695c5c540c139d89661dbe"
+  },
+  "serve_artifacts": {
+   "gs_discovery_index.json": "2f4e307d408a5257a0ca7d38bdf7c19c7c7d57cf2e1443821c640e1244b81801",
+   "gs_exec_sidecars.json": "aec971fd0b6d0f7d60d742a1d5a54132809347848764a150d2a8668aebd21328",
+   "gs_geo_index.json": "4d0c59d182c329e0f67b1a627eadada05790b533fec90fd72980f42c163e7fd2",
+   "gs_performer_map.json": "a238b7a262c6f2c85413966d1b73e8d90f41c8b31232ce4fe150edc8ef77970d",
+   "gs_performer_pin.json": "0ec3c299b56c468ca06ec6acc2ff995ed90d94cc9547dae61b9d89248c75d515"
+  },
+  "serve_tools": {
+   "gs_compare_page.html": "968d745f2fd4a225659766de1841ec101fb243610a1c6cfd90b51af20bef9890",
+   "gs_exec.py": "2f8983997c99514abf2b28942065316d793f42d5edd359c3134ea4f1fa191124",
+   "gs_lang.py": "06c997d0a181a1170670effc130a93e3460f8acafb9b8a1d5fe524336c39d8c6",
+   "gs_query.py": "bd20b7a4ca921c0c56c32d8f361fe761ee2de2a62bd493fbbe3bd48c5329c5fc",
+   "gs_screen.html": "c262989b3f9972ed84e94618acf3a622701611007e37fe9dd4c4cfc668ae9524",
+   "gs_screen_serve.py": "e727f6840ddb0f42885295bbafb95e2f2317ca96280706a0780e1bed3e5c5bce"
+  }
+ },
+ "sources": [
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 384622330,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 384622330,
+    "unit": "source bytes independently REBUILT FROM TYPED SERVE SURFACES by a commissioned clean-room session (spec-only emitter, vectors passed, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "kpic-co",
+   "member_bytes": 384622330,
+   "member_sha256": "b697ff34c3c806eda96a2363aeb55787b9f8b9d80a7d386ecc162de3984e71e1",
+   "root_semantics": "BYTE-FIDELITY \u2014 the ROOT node's slice_sha256 IS member_sha256, so the document-level claim and any subtree claim are the same test at a different grain",
+   "tag": "src:b697ff34c3c806ed"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 349944850,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 349944850,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "flexnet",
+   "member_bytes": 349944850,
+   "member_sha256": "b77581a8b19aafd0b7b8edbec6032b4173691cf33c187d2a3af817423b8384ea",
+   "root_semantics": "MEMBERSHIP \u2014 RFC 6962 MTH over SERVED ROWS across surfaces, leaf = JCS(RFC 8785) over {surface, seq, row}. This is Side B: it binds a row to a release and asserts NOTHING about byte-fidelity to the publisher",
+   "tag": "src:b77581a8b19aafd0"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 3464309234,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 3464309234,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "aetna-utah-pl5rp",
+   "member_bytes": 3464309234,
+   "member_sha256": "6077d84c95cc6091fa6d9de582895c99c336d5f4a153ba3937d432473261d274",
+   "root_semantics": "DUAL, RECORDED SEPARATELY \u2014 (a) BYTE-FIDELITY: the document's own sha256 (member_sha256), no-oracle-recovered whole over the wire; (b) MEMBERSHIP: an RFC 6962 MTH over 22,578,224 re-serialized facts[] leaves (fact_root_sha256). Side A and Side B for ONE source; never one column, with each other or with any other source's roots",
+   "tag": "src:6077d84c95cc6091"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 1984604128,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 1984604128,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "aetna-iowa-pl2am",
+   "member_bytes": 1984604128,
+   "member_sha256": "a10e38cf0cbb46f2d5f2864aace25f2d082932b3314ebc028376cc04d5a875a6",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded/regenerated stream sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:a10e38cf0cbb46f2"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 92764431,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 92764431,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "hosp-westoahu",
+   "member_bytes": 92764431,
+   "member_sha256": "540544ae1e87195bb2713b4b72790e76e0e310ceb7eda58b5e1062ecdcd95ae3",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded/regenerated stream sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:540544ae1e87195b"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 1542432175,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 1542432175,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "knew-ga01",
+   "member_bytes": 1542432175,
+   "member_sha256": "fcfe42bb22f56b3307dfb061473251577dd1e3fef38a5047f76fab0fb9ce86a1",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded member sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:fcfe42bb22f56b33"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 2605947377,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 2605947377,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "kfhp-co",
+   "member_bytes": 2605947377,
+   "member_sha256": "ae2d185a5b6cbd910e79ca06c5d94706333cea6d3cfbaec9ed82dd9c69b4b5d9",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded member sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:ae2d185a5b6cbd91"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 2603370793,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 2603370793,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "knew-co20",
+   "member_bytes": 2603370793,
+   "member_sha256": "78fb2ea0cb1e6d525b7251e5b599127a706e3500231354d3ae0a974fde048746",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded member sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:78fb2ea0cb1e6d52"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 10369531547,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 10369531547,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "knew-hi01",
+   "member_bytes": 10369531547,
+   "member_sha256": "68297e6f4f9f055fa1449ce0a4ad9712736e4f9ef2b0d3d758067c5a9310472a",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded member sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:68297e6f4f9f055f"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 5741677706,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 5741677706,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "knew-ma01",
+   "member_bytes": 5741677706,
+   "member_sha256": "a5dcc222164480a76f12c523aae3fddb3d9466789362145137caa1648965f991",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded member sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:a5dcc222164480a7"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 6422422279,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 6422422279,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "k-nc",
+   "member_bytes": 6422422279,
+   "member_sha256": "51a05ad12b5150c90aebb85fbea3c38e18efc7e62b2801107a79779a7303a0d0",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded member sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:51a05ad12b5150c9"
+  },
+  {
+   "floor_status": {
+    "floor_met": true,
+    "fraction": 1.0,
+    "full_file": true,
+    "input_closed": true,
+    "measured": 34485313805,
+    "non_author": true,
+    "non_authorship": "OPEN \u2014 commissioned (nonauthor_commission.md); a SEPARATE session must execute; publication awaits Founder word",
+    "total": 34485313805,
+    "unit": "source bytes RECOVERED FROM THE WIRE by a commissioned clean-room session (no-oracle stream, enforced input closure, non-author, public commit in-receipt)"
+   },
+   "id": "cigna-oap-2026-08",
+   "member_bytes": 34485313805,
+   "member_sha256": "f83cc31c7d4dbe54df59298752b8c0a40a3d4308b0a13cf0b685cd84b0793194",
+   "root_semantics": "BYTE-FIDELITY \u2014 the document pin is the decoded stream sha256; the document-level claim and any span claim are the same test at a different grain",
+   "tag": "src:f83cc31c7d4dbe54"
+  }
+ ],
+ "succession": "EPOCH 2 succeeds EPOCH 1, predecessor manifest sha256 = dacdd2afb6489673c0a99041deeb4f2079c2d6550c761cb9b88662b7c86b7089 (two founding sources, floor 0/2). This epoch admits aetna-utah-pl5rp (CD-1, Founder order 2026-07-30) \u2014 the E2 succession law fired BY DESIGN on the manifest change and THIS is the new epoch it demanded. Root identity for fixed documents; the source SET is what grew",
+ "tool_bindings": {
+  "cd0_manifest_gate.py": "76556ae6fcd8fad8047e6f6ece63381f2b32544332bf1d3c567a5c1419a6be18",
+  "convergence_gate.py": "35cf2afc87b009b337948c16a1211222ac56f3a06332d8d82950443e11ac3568",
+  "gs_federation_build.py": "545f219f4cef8665762bfb123e4511566479f0a9eac87b714998957a9c7fad75",
+  "gs_federation_gate.py": "5f5d5aa05bbb91bcfa3a0a643c655f6916341dd8d0592138910815d877204252",
+  "gs_performer_gate.py": "9234aebe70cac73bc451f979b05c458be067008ec5428d7b09e35abc1b4053dd",
+  "gs_performer_pin.py": "a7e3dd755ba9e65b40f3ee5c3db8cab2d3eb82d1710f63ecebc129e5905e4cc1",
+  "gs_registry.py": "ddc5fbfa0e61585ff93e8ff06b2be01bbd2771939ec0cab8a6be92e0178d5adc",
+  "gs_release_manifest.py": "7c2b53291f5526288e6b6343238c770de6864e8fd88bbcbb7526992e40738e6d",
+  "gs_source_independence_gate.py": "1f178f4ebc905899481cda91aa4546d251fe5141bcef36916dd2b5a72b0ceb37",
+  "representation_floor_gate.py": "a5be410c5a1d287409f4b9036007ed17b86ca2e3fdefda05b3da143c4bf8f3fa"
+ }
+}

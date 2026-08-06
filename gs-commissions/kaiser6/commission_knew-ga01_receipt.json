@@ -1,0 +1,26 @@
+{
+  "independent_non_author": true,
+  "provenance_mode": "claude_agent_clean_room",
+  "external_session_id": "82a6ac98-38c8-49f2-ba17-59ca275ca341",
+  "public_repository": "https://github.com/keithkallison-ai/mera-az",
+  "public_commit": "a8dc1801635454c2645b24a6ae05192f0260c6fe",
+  "inputs_permitted": [
+    "http://127.0.0.1:8821/api/manifest",
+    "http://127.0.0.1:8821/api/source/fcfe42bb22f56b33"
+  ],
+  "tripwire_import_attempts": [],
+  "tripwire_read_attempts": [],
+  "input_closure_held": true,
+  "source": "knew-ga01",
+  "folded_sha256": "fcfe42bb22f56b3307dfb061473251577dd1e3fef38a5047f76fab0fb9ce86a1",
+  "bytes_verified": 1542432175,
+  "wire_pin_sha256": "fcfe42bb22f56b3307dfb061473251577dd1e3fef38a5047f76fab0fb9ce86a1",
+  "equivalence_level": "L_byte, whole document, recovered from the wire alone under enforced closure",
+  "does_NOT_prove": [
+    "publisher fidelity — link 1 is a separate anchor",
+    "spec-sufficiency for reconstruction from typed surfaces — a spec-emit commission is the stronger form",
+    "anything about other sources"
+  ],
+  "utc": "2026-08-04T17:37:47.094890+00:00",
+  "implementation_sha256": "6be6b1fc680cbcd7da187f5542c01491e0cfb0115f9502584c99132f3c159e46"
+}

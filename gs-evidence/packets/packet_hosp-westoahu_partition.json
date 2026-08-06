@@ -1,0 +1,26 @@
+{
+ "artifact_kind": "partition",
+ "index": 11969,
+ "packet": "GS stranger packet \u2014 verify with gs_merkle_roots.py --verify (or any RFC 6962 implementation; leaf = SHA256(0x00||row_bytes), node = SHA256(0x01||l||r))",
+ "path_hex": [
+  "44a703342bea549c8d2b6f87ef689ac14042d06d6d28ef81e2d6ab7d661159c2",
+  "68037bd1d114e52efe3aff974b54375b40a54a2ad178fda4c7ec1cea73d37424",
+  "f0f60d592fac5da0bca059e36a7429ec46c540cb9805098da37db23fe784d53a",
+  "e1c6a19586cb644381c488b9d8c18471ad7c01a8d6fdd3fe3149850912c5209f",
+  "25116ddc340b479e95906818311d225ffecf47e6048e2c55a7d6698f248a1ff2",
+  "9254e76b241c340058fbcf5d7fd0b8eab704a745ad34033fecfd0d7bc75bd721",
+  "3303ed73947f6951d2ce54d3567013ef2c1eba5ee93b634eeefeffa52fc4c610",
+  "95e349d3d0ef38caa1953d28dc89bedcd177f4c0da3c3236758ea9890eaeee7e",
+  "c8bc86756a8b6cbc1c4f1bac8f7ced134db291b55c36eef6433c5ce6d20e825e",
+  "6849d4a1123b854d4357aeb8dff068662391cba897b69d76bdc3e5d7435034a6",
+  "5165553e23f92ecb0a45a09caff4aa288112f6f99bb9dc3c0d08f4c379a27329",
+  "64888c362832bf1c98455327e1a03b5fac802c44ca1acf281f83f4db6b0d94a4",
+  "fd43c14babc61d5d6c14172e7d9f708dcc51d3ac8aa2594614e9c56b8cfcac6b",
+  "5b077de6cb87e4456c9d2d341fdc1e25912ae9e9e75bc21ef87be8d3198e37e9",
+  "eea893890bbb43fc77a1cd73b3d971126e3e76b706d2c0fc774fb8800cb30324"
+ ],
+ "root_sha256": "18544c98d9f2699ecc433e3f06ea912dbdb92243663915a4d8e307c1e9b2479b",
+ "row_utf8": "{\"a\": \"src:540544ae1e87195b/rows[11968]\", \"k\": \"fact\", \"s\": 46892898, \"e\": 46897112, \"h\": \"5aff03071e18a7087128aa54c2f22f91a1e12e5e2702110eac06659b4c932499\"}",
+ "source": "hosp-westoahu",
+ "tree_size": 23939
+}

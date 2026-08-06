@@ -1,0 +1,24 @@
+{
+ "does_NOT_prove": [
+  "completeness of what the publisher chose to publish",
+  "anything past the next publisher rotation"
+ ],
+ "elapsed_s": 4.0,
+ "equivalence_level": "L_byte, whole document, publisher HTTPS GET",
+ "etag_tail_encodes_length": true,
+ "headers": {
+  "content-length": "92764431",
+  "etag": "\"69e6b7b9-587790f\"",
+  "last-modified": "Mon, 20 Apr 2026 23:33:13 GMT"
+ },
+ "kind": "live_refetch_match",
+ "live_sha256": "540544ae1e87195bb2713b4b72790e76e0e310ceb7eda58b5e1062ecdcd95ae3",
+ "measured": 92764431,
+ "member_pin_sha256": "540544ae1e87195bb2713b4b72790e76e0e310ceb7eda58b5e1062ecdcd95ae3",
+ "source": "hosp-westoahu",
+ "tool_sha256": "2522e9f0b4baad786b3a482b9ff5c3a38e73e69bd1c6f5c70c59464a30be8218",
+ "total": 92764431,
+ "url": "https://www.queens.org/wp-content/uploads/990073524_queens-medical-center-west-oahu_standardcharges-4.csv",
+ "utc": "2026-08-04T03:36:56.364668+00:00",
+ "verdict": "GREEN"
+}

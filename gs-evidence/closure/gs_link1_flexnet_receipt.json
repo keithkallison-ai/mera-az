@@ -1,0 +1,24 @@
+{
+ "computed_crc32": "0x7686c36a",
+ "decompressed_sha256": "b77581a8b19aafd0b7b8edbec6032b4173691cf33c187d2a3af817423b8384ea",
+ "does_NOT_prove": [
+  "CRC32 is collision-weak \u2014 corruption/truncation evidence, not an adversarial publisher",
+  "the rotated July URL cannot be re-fetched"
+ ],
+ "equivalence_level": "L_byte via the publisher-authored gzip trailer (CRC32+ISIZE) over the whole decompressed document",
+ "gz_bytes": 21400220,
+ "gz_path": "C:/Temp/cigna_t19_live/2026-07-01_cigna-health-life-insurance-company_cigna-one-health-hmo-flexnet_in-network-rates.json.gz",
+ "gz_sha256": "1c70a80918a79daa037ea04caf67cd02c2b3ba37d93d822b715eb2dc254e15f6",
+ "isize": 349944850,
+ "kind": "embedded_gzip_trailer",
+ "measured": 349944850,
+ "member_pin_sha256": "b77581a8b19aafd0b7b8edbec6032b4173691cf33c187d2a3af817423b8384ea",
+ "publisher_content_length_recorded": 21400220,
+ "publisher_etag_recorded": "\"117fdcefc70c0eb35a3b4ae965f46b76-5\"",
+ "publisher_trailer_crc32": "0x7686c36a",
+ "source": "flexnet",
+ "tool_sha256": "2522e9f0b4baad786b3a482b9ff5c3a38e73e69bd1c6f5c70c59464a30be8218",
+ "total": 349944850,
+ "utc": "2026-08-04T03:36:57.665812+00:00",
+ "verdict": "GREEN"
+}

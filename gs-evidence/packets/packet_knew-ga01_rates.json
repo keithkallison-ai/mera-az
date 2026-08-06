@@ -1,0 +1,29 @@
+{
+ "artifact_kind": "rates",
+ "index": 84271,
+ "packet": "GS stranger packet \u2014 verify with gs_merkle_roots.py --verify (or any RFC 6962 implementation; leaf = SHA256(0x00||row_bytes), node = SHA256(0x01||l||r))",
+ "path_hex": [
+  "7430cc68917d9f7af35ae91a1fe0670997140283f9d5ddeb66fad418e4821f9a",
+  "b46efc8c79f0413bb406330b572582bdeeaa1282a1d1db2efae6e1e3f48ccb5b",
+  "818cd7d82c2b2f2b0aaf5e1ecf8f90f4f12bb8793767fc6755382deb2a206b23",
+  "598d577b7f056900e06ebef34108ddf5878f706b41325e3128133afbdc55ead2",
+  "975eeabf575036bcc7c2f9141eed2cad6cd9b0724f8d6f0e7574eec8055313f3",
+  "b7bf00ef3a7f5c619917afb51dc29982ba6b5696f296107768a62ca1304e5ede",
+  "c6b1171798a3f01ee8adbf6451c5bcb8f2bc83db2025ef416e4c9b6c34cf3ec6",
+  "0a00341e51ea7c79075a354d3a8c1b91f24045668c8f2f482b2876f0f7e5ff4d",
+  "088da9ad7ff77f8ebcb0ec3bb60144fb96b6cc126f1976148a4363e6c87901b5",
+  "9eebada0e735a648c44a8306447e08f838d07c5ba92fe65b9403ca79ed8144a1",
+  "a25f81420d43f5e94a1167b13d2ced1d9d2e77a325998c0664e89b434894a23a",
+  "156efd6e4b0ebaa2ae0edfce748da04669c38a8d28903a919a870ed573f9e520",
+  "360d215afd3ccc40c44d9e54f705adb9fae4744ec835f236fc6c2f3c27cb092c",
+  "db2e4dd529c7d563a1da04a0bb412fddd81ee160cb3cdd91bbeab9453c359ce1",
+  "141d25ff79ce1661bc97be61f65c94ad079f781a03c5d84c57c87a6bad50cf88",
+  "b48b9306e1670122f2cea48627eecda11a1a429003abbbe5222c35547eb2bd4b",
+  "00ba9287b1c8b432a955ffdb1fce69e72f560cf2523809942e52ec1f76e95f6a",
+  "7a18be343470350f5968bd1244788d9d17b1883146211613f65f10aa6f76ec7b"
+ ],
+ "root_sha256": "ade219213199a6d5b7c9bfa94d49e63edfa97d724abea9d0ec409b5a331ef00b",
+ "row_utf8": "{\"a\": \"src:fcfe42bb22f56b33/in_network[84271]\", \"rates\": [{\"pg\": [\"410001\"], \"prices\": [{\"nt\": \"negotiated\", \"rate\": \"0.02\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}]}",
+ "source": "knew-ga01",
+ "tree_size": 168543
+}

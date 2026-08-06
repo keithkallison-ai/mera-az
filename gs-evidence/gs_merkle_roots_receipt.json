@@ -1,0 +1,213 @@
+{
+ "all_green": true,
+ "build_seconds": 74.1,
+ "does_NOT_prove": [
+  "publisher fidelity \u2014 link-1 census owns that",
+  "serve losslessness \u2014 WIRE-12 owns that",
+  "non-repudiation \u2014 the roots are unsigned; signing is a separate deliberate step",
+  "anything about rows NOT in these two artifacts"
+ ],
+ "equivalence_level": "MEMBERSHIP under SHA-256 (RFC 6962) per (source \u00d7 artifact); roots are UNSIGNED",
+ "leaf_law": "leaf = raw jsonl line bytes (CR/LF stripped), 0x00-prefixed; interior 0x01-prefixed (RFC 6962 \u00a72.1)",
+ "n_trees": 24,
+ "passed": 24,
+ "receipt": "GlobalServe S5/U3 per-source RFC 6962 roots (Side B: membership machinery; NEVER a combined root)",
+ "source_set_sha": "cbfd5db0132213a1b6e6fd6587012ac22bb4d5ca97a88efea284e652e273e4b6",
+ "tool_sha256": "034514f21c283359f3538f0078efd378209ba7b704a5abac632a1ce27d58888b",
+ "total": 24,
+ "trees": {
+  "aetna-iowa-pl2am": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/aetna-iowa-pl2am_partition.jsonl",
+    "artifact_sha256": "c8b8b3f3da359dba5dd5bab21a8114377f872d04488b91b6ac2b4e120f53f33e",
+    "root_sha256": "527d7a3cb03e795bfd8cdc7dc2432fffe0fc47d12e5984258e1435fa89dd94c6",
+    "seconds": 0.1,
+    "tree_size": 56649
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/aetna-iowa-pl2am_rates.jsonl",
+    "artifact_sha256": "350efa3ab36ecfab6405741fa0710726f97d4e37f4df47c0e52d38c99ddec5ec",
+    "root_sha256": "c83b52dddc1bd3ce36ccdeb85889b9c829377b307efedaeffd43cdee9642d249",
+    "seconds": 1.9,
+    "tree_size": 26205
+   }
+  },
+  "aetna-utah-pl5rp": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/aetna-utah-pl5rp_partition.jsonl",
+    "artifact_sha256": "f8cf1ea3a80c2faf7273b967897f2acf839d9cd5a60e5cd0a66cd698e0d8645a",
+    "root_sha256": "22496c92ef03ab6d4ded3c527440b08763049cde9cd659a1d7fd96f6739cd3d6",
+    "seconds": 0.1,
+    "tree_size": 59701
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/aetna-utah-pl5rp_rates.jsonl",
+    "artifact_sha256": "107befc0fced15cdfae9525679c988b22cced7108ab5c7426a1a6b3124fd9cba",
+    "root_sha256": "d1b9b2c31a213f9145efcb5008dc80a216ec5f81326d72480501d7bcec2c6b93",
+    "seconds": 4.0,
+    "tree_size": 27493
+   }
+  },
+  "cigna-oap-2026-08": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/cigna-oap-2026-08_partition.jsonl",
+    "artifact_sha256": "d46d98013f68691eb3343099f15b7df4bd075ce7e23aa50f750886e956cee183",
+    "root_sha256": "92abe5e0fb1ad18ec2ae17000c66c4c63fed5cee1e34009651ec9f1efe2dddce",
+    "seconds": 5.5,
+    "tree_size": 3712509
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/cigna-oap-2026-08_rates.jsonl",
+    "artifact_sha256": "7b2f84a0c5ef68fe5c60e17328e8a75ea6a3c799aa96659cd51ae4513eaa067f",
+    "root_sha256": "5809eb083ff2277a5c07e77f2448a067d14a2903c20a16f51a0af8e655e0f1a0",
+    "seconds": 46.2,
+    "tree_size": 1789642
+   }
+  },
+  "flexnet": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/flexnet_partition.jsonl",
+    "artifact_sha256": "a5a47dcd5671961f97610540d0a7ac0ccbd82b9ceff530c0a27d26ff0990e24c",
+    "root_sha256": "1a261e37be438a7df2a892b1abe6b675e91b69d4aaf4199628964f7e0e0bfa93",
+    "seconds": 0.1,
+    "tree_size": 91667
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/flexnet_rates.jsonl",
+    "artifact_sha256": "80f8ed734ddd91672d0a3a9effbc9623437829f661dc6326d82fc8895764be80",
+    "root_sha256": "4220ae72617cec28a6683be7e5c6f3e901f5fb790aa8ef5b72284ae3eee1895e",
+    "seconds": 0.4,
+    "tree_size": 33289
+   }
+  },
+  "hosp-westoahu": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/hosp-westoahu_partition.jsonl",
+    "artifact_sha256": "2183d4784b7ff2f8e1a83c4661548ce471ffd6958040a0c1cd9f906b353add03",
+    "root_sha256": "18544c98d9f2699ecc433e3f06ea912dbdb92243663915a4d8e307c1e9b2479b",
+    "seconds": 0.0,
+    "tree_size": 23939
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/hosp-westoahu_rates.jsonl",
+    "artifact_sha256": "91f85abdf4e68aec9c9b37795750c6bf34f648790567803aab584e9e29a49a63",
+    "root_sha256": "ca4e3ce2d6c05d6c9396a75e541ca700ddb1baa835090f4d55f4dc5ac9ee76f4",
+    "seconds": 0.1,
+    "tree_size": 23938
+   }
+  },
+  "k-nc": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/k-nc_partition.jsonl",
+    "artifact_sha256": "4bdfbb7b3607593924b0ec9c30690966f7e7cdf6b1a58bc880638f7d5067209c",
+    "root_sha256": "99a3a31f6366eaa6f468731bc4b5228b5e162a6438d281584a57d57fa76e2985",
+    "seconds": 0.3,
+    "tree_size": 182241
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/k-nc_rates.jsonl",
+    "artifact_sha256": "e60203782574bba233c7ac222859003d14cf81d0099a1b1422a12137bb383092",
+    "root_sha256": "ad961f270266073acbc7ab734a8d9c79893424863b6b0e2928beb8b99430665f",
+    "seconds": 3.6,
+    "tree_size": 87211
+   }
+  },
+  "kfhp-co": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/kfhp-co_partition.jsonl",
+    "artifact_sha256": "c198f8f8e827e440000306c1c2b5f5db5e18074b8a98ae2e713a418f507d90ad",
+    "root_sha256": "ac9123c058163e8e5812eab1b1bec4fcbb0c74002efdb2e1c1cf519b3b978fe6",
+    "seconds": 0.3,
+    "tree_size": 236603
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/kfhp-co_rates.jsonl",
+    "artifact_sha256": "41230b2edabcc48c2d039c296508376d0788ac8dcd4573964c1813dd53122a79",
+    "root_sha256": "8f17f8b45e00d69b2c10c0e848d7817d103d1d0eb47a4f0ab0e8a6fd6f55c910",
+    "seconds": 2.0,
+    "tree_size": 117425
+   }
+  },
+  "knew-co20": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/knew-co20_partition.jsonl",
+    "artifact_sha256": "b1bea1860b5120d7a3a367b2ecef1797f076c93af001547736b408868b267a55",
+    "root_sha256": "3e4353da4db260bef4de071cfbe2e68d0380cb48763aefc595e415e6e55fbd63",
+    "seconds": 0.4,
+    "tree_size": 236603
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/knew-co20_rates.jsonl",
+    "artifact_sha256": "d3a4d233fc5f40be2f70d8f0729e58ff1ea9f2ca4902a9c410bda44e67d968e5",
+    "root_sha256": "72211d186b512558d168e23772bbdf6fd8b28f59a429b7a573292a3471a3edee",
+    "seconds": 2.0,
+    "tree_size": 117425
+   }
+  },
+  "knew-ga01": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/knew-ga01_partition.jsonl",
+    "artifact_sha256": "8b9af395ccde4662980b28b15b4278d53aa05e46d156b91107e462c3559bb338",
+    "root_sha256": "1d863402ff08a39f4826d9016b7917afc10de6ef7920d2d1af4e09da4067e049",
+    "seconds": 0.5,
+    "tree_size": 337923
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/knew-ga01_rates.jsonl",
+    "artifact_sha256": "a07f7f2fb7f3315c56e93ed89fd06f932054b0562b59e6925dea7ba00808e67f",
+    "root_sha256": "ade219213199a6d5b7c9bfa94d49e63edfa97d724abea9d0ec409b5a331ef00b",
+    "seconds": 1.3,
+    "tree_size": 168543
+   }
+  },
+  "knew-hi01": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/knew-hi01_partition.jsonl",
+    "artifact_sha256": "3e303d9414f317f6c82f4e759a3d5760c7b8075ab33078be917058f127b5f942",
+    "root_sha256": "b87f64001c7762228912cb5b23f93d0fedb25b947bc8adfbd178e26361e0ad14",
+    "seconds": 0.7,
+    "tree_size": 468573
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/knew-hi01_rates.jsonl",
+    "artifact_sha256": "f77e8caf0d73d5fa8963036a27bc8be764966f23992de9ffd86472149d39381a",
+    "root_sha256": "3e805ab4d8410dc46a1e1cc8142419263798157914e33941ea32349b4a4b3580",
+    "seconds": 1.4,
+    "tree_size": 233145
+   }
+  },
+  "knew-ma01": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/knew-ma01_partition.jsonl",
+    "artifact_sha256": "0725a4137f2ccd089e4de3cc5e5655c8582889cb98c9ea010ed0ed41fb2485a5",
+    "root_sha256": "c34a1108aedf5c8b7aef2a279b2ce17d332e72fb492c9a7d8cb164c0c1a1daf8",
+    "seconds": 0.5,
+    "tree_size": 363171
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/knew-ma01_rates.jsonl",
+    "artifact_sha256": "bb6dcb56a81792fbc06e3c281c07a0c0659e167fa7dae0e38cbba509abecfbe8",
+    "root_sha256": "b8d6be6decd9273ff0047a937871e41cd21b2ba65651659f9c35ed838c180d2d",
+    "seconds": 2.1,
+    "tree_size": 180308
+   }
+  },
+  "kpic-co": {
+   "partition": {
+    "artifact": "C:/Temp/gs_federation/kpic-co_partition.jsonl",
+    "artifact_sha256": "0b271664531cdd34f3d523a21081c288ee5646d2ce54618f9d201e97cb9afe33",
+    "root_sha256": "c0d75fe7e8c1905fb3649a7d4f454f24c71ae8453411aff486203a74f99aff5a",
+    "seconds": 0.2,
+    "tree_size": 121229
+   },
+   "rates": {
+    "artifact": "C:/Temp/gs_rates/kpic-co_rates.jsonl",
+    "artifact_sha256": "e248b1b8c0886c6e55aa3ba95350a3c4a3c1668100b61562d96d8a5f910fa4ae",
+    "root_sha256": "b2f31a758c180f6ceefd13030b50d7ccf70459754064ef78c2abe0a8a970f67a",
+    "seconds": 0.4,
+    "tree_size": 60614
+   }
+  }
+ },
+ "utc": "2026-08-04T18:14:47.923946+00:00"
+}

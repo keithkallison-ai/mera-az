@@ -1,0 +1,87 @@
+{
+  "commission": "kaiser6 six-source wire recovery (clean room)",
+  "external_session_id": "82a6ac98-38c8-49f2-ba17-59ca275ca341",
+  "serve": "http://127.0.0.1:8821",
+  "required_ids": [
+    "kfhp-co",
+    "knew-co20",
+    "knew-ga01",
+    "knew-hi01",
+    "knew-ma01",
+    "k-nc"
+  ],
+  "results": [
+    {
+      "source": "kfhp-co",
+      "tag16": "ae2d185a5b6cbd91",
+      "green": true,
+      "folded_sha256": "ae2d185a5b6cbd910e79ca06c5d94706333cea6d3cfbaec9ed82dd9c69b4b5d9",
+      "bytes_verified": 2605947377,
+      "wire_pin_sha256": "ae2d185a5b6cbd910e79ca06c5d94706333cea6d3cfbaec9ed82dd9c69b4b5d9",
+      "seconds": 6.2,
+      "receipt": "C:/Temp/gs_commission_kaiser6\\commission_kfhp-co_receipt.json",
+      "failure": null
+    },
+    {
+      "source": "knew-co20",
+      "tag16": "78fb2ea0cb1e6d52",
+      "green": true,
+      "folded_sha256": "78fb2ea0cb1e6d525b7251e5b599127a706e3500231354d3ae0a974fde048746",
+      "bytes_verified": 2603370793,
+      "wire_pin_sha256": "78fb2ea0cb1e6d525b7251e5b599127a706e3500231354d3ae0a974fde048746",
+      "seconds": 6.3,
+      "receipt": "C:/Temp/gs_commission_kaiser6\\commission_knew-co20_receipt.json",
+      "failure": null
+    },
+    {
+      "source": "knew-ga01",
+      "tag16": "fcfe42bb22f56b33",
+      "green": true,
+      "folded_sha256": "fcfe42bb22f56b3307dfb061473251577dd1e3fef38a5047f76fab0fb9ce86a1",
+      "bytes_verified": 1542432175,
+      "wire_pin_sha256": "fcfe42bb22f56b3307dfb061473251577dd1e3fef38a5047f76fab0fb9ce86a1",
+      "seconds": 3.6,
+      "receipt": "C:/Temp/gs_commission_kaiser6\\commission_knew-ga01_receipt.json",
+      "failure": null
+    },
+    {
+      "source": "knew-hi01",
+      "tag16": "68297e6f4f9f055f",
+      "green": true,
+      "folded_sha256": "68297e6f4f9f055fa1449ce0a4ad9712736e4f9ef2b0d3d758067c5a9310472a",
+      "bytes_verified": 10369531547,
+      "wire_pin_sha256": "68297e6f4f9f055fa1449ce0a4ad9712736e4f9ef2b0d3d758067c5a9310472a",
+      "seconds": 29.1,
+      "receipt": "C:/Temp/gs_commission_kaiser6\\commission_knew-hi01_receipt.json",
+      "failure": null
+    },
+    {
+      "source": "knew-ma01",
+      "tag16": "a5dcc222164480a7",
+      "green": true,
+      "folded_sha256": "a5dcc222164480a76f12c523aae3fddb3d9466789362145137caa1648965f991",
+      "bytes_verified": 5741677706,
+      "wire_pin_sha256": "a5dcc222164480a76f12c523aae3fddb3d9466789362145137caa1648965f991",
+      "seconds": 15.0,
+      "receipt": "C:/Temp/gs_commission_kaiser6\\commission_knew-ma01_receipt.json",
+      "failure": null
+    },
+    {
+      "source": "k-nc",
+      "tag16": "51a05ad12b5150c9",
+      "green": true,
+      "folded_sha256": "51a05ad12b5150c90aebb85fbea3c38e18efc7e62b2801107a79779a7303a0d0",
+      "bytes_verified": 6422422279,
+      "wire_pin_sha256": "51a05ad12b5150c90aebb85fbea3c38e18efc7e62b2801107a79779a7303a0d0",
+      "seconds": 20.3,
+      "receipt": "C:/Temp/gs_commission_kaiser6\\commission_k-nc_receipt.json",
+      "failure": null
+    }
+  ],
+  "tripwire_import_attempts": [],
+  "tripwire_read_attempts": [],
+  "input_closure_held": true,
+  "all_green": true,
+  "implementation_sha256": "6be6b1fc680cbcd7da187f5542c01491e0cfb0115f9502584c99132f3c159e46",
+  "utc": "2026-08-04T17:37:47.097821+00:00"
+}

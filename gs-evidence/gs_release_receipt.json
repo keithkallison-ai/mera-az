@@ -1,0 +1,60 @@
+{
+ "all_green": true,
+ "checks": [
+  {
+   "detail": "a1d6f0f863d1736b",
+   "name": "E1 sha256(manifest file) == the digest sidecar",
+   "ok": true
+  },
+  {
+   "detail": "16,719 B",
+   "name": "E2 rebuilding the body from CURRENT inputs reproduces the file byte-identically (any drift in inputs/tools \u21d2 REFUSE \u21d2 a NEW epoch is required)",
+   "ok": true
+  },
+  {
+   "detail": "all match",
+   "name": "E3s every SERVE-closure binding re-hashes green (S1: a serve edit rotates the epoch)",
+   "ok": true
+  },
+  {
+   "detail": "all match",
+   "name": "E3 every identity + tool binding re-hashes green",
+   "ok": true
+  },
+  {
+   "detail": "12/12 MET (live)",
+   "name": "E4 floor claims == a LIVE representation_floor_gate run; non-authorship stated OPEN; nothing rounded up",
+   "ok": true
+  },
+  {
+   "detail": "",
+   "name": "E5 NO self-written clock anywhere in the body (the epoch instant is the TSA's)",
+   "ok": true
+  },
+  {
+   "detail": "",
+   "name": "E6 rebuilding the RFC 3161 query reproduces the stored .tsq byte-identically (the query binds THIS manifest)",
+   "ok": true
+  },
+  {
+   "detail": "s3 66/66 \u00b7 s4 114/114",
+   "name": "E7 S3/S4 claims match the CURRENT receipts",
+   "ok": true
+  }
+ ],
+ "does_NOT_prove": [
+  "fidelity \u2014 a timestamp over a manifest of wrong claims verifies perfectly; fidelity lives in the per-source receipts the claims restate",
+  "non-authorship \u2014 OPEN on both sources, stated in the manifest itself"
+ ],
+ "equivalence_level": "BINDING (sha256 identities) + EXISTENCE-IN-TIME once witnessed; neither is a fidelity level",
+ "gate": "gs_release_manifest.py",
+ "manifest_sha256": "a1d6f0f863d1736be691819a274f986c6c6bf84b8d9568716c273b908d1def61",
+ "mode": "GATE (E1..E7, local)",
+ "passed": 8,
+ "receipt": "GlobalServe S5 gs_release_manifest \u2014 EPOCH 1 binding + RFC 3161 witness",
+ "submitted": true,
+ "tool": "gs_release_manifest.py",
+ "tool_sha256": "7c2b53291f5526288e6b6343238c770de6864e8fd88bbcbb7526992e40738e6d",
+ "total": 8,
+ "utc": "2026-08-04T18:18:42.791876+00:00"
+}

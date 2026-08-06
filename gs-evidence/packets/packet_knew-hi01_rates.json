@@ -1,0 +1,29 @@
+{
+ "artifact_kind": "rates",
+ "index": 116572,
+ "packet": "GS stranger packet \u2014 verify with gs_merkle_roots.py --verify (or any RFC 6962 implementation; leaf = SHA256(0x00||row_bytes), node = SHA256(0x01||l||r))",
+ "path_hex": [
+  "78cac5e04d2d6dac99c7429f161efe96532b938e2affb6aa9f5637312cdd3fbb",
+  "33b93bff7bffa6de1748db592e28af9cf1bba2c114d752f20a0557a8f09b7d01",
+  "0b1ce8ccae9442f37786d95ec971626a6ca545681d556a826d3d88a85e2f5a9f",
+  "2cd63b40ae4eac20a6e1210de98922924a7992c6fb90ee520210387b323706ea",
+  "63a7376c245139ac00b398a5ad6a415fe253f49dba6fe1a3ab1185e5f6f64291",
+  "18319cd612cc3e28cc67ae4060955b464093bdb049e4338c57012a43b9641095",
+  "1324273370035152af285f99464eca6a158fcd9e4319794d5caec088533875e6",
+  "fb72f7c24caa90c169b45bc491884578219e3d3bc7102a2162b11cb2b438769b",
+  "9e08417391b9955b728833b29821664e231069366dcb51ede8cb7ec387717698",
+  "a59bc301cf065f9151320a8c848a8040586cec5029deea2a0df1ab8afa9f7987",
+  "e6481606a6f35a9128fde73a1754b88545ea8f6dda998fd39cf9a1ce4876fd67",
+  "52e4480c2e6b5ce9dea697c3bd65d9b48d5ac6004319369c33353bc33a57194a",
+  "61758d2bfb569f0bdb58062a4807d4933a224e45ffa8ffa97279ecc760a47ddd",
+  "a6389c308bf8446ac056f5a352d02ac26ecd98cb639a0775467ee26fd65b3c3d",
+  "84faed5d60266a44048c1855a3c82160dbd62af2b778d1e7ed78109902ea14e5",
+  "47f19a177afa811c7301fe6e6211fb6f29f103812f58fa4aabebbd0396bdfd7a",
+  "a4096dbdc6f0ac6d165a5bc852e9cca4ff4a0b74eeb59bb6f09c1a2f808b4bc0",
+  "95a94144c0d81b8a2542ddd7d88df96d29c6efe0ec1a941bcd92693d6231c7f7"
+ ],
+ "root_sha256": "3e805ab4d8410dc46a1e1cc8142419263798157914e33941ea32349b4a4b3580",
+ "row_utf8": "{\"a\": \"src:68297e6f4f9f055f/in_network[116572]\", \"rates\": [{\"pg\": [\"2010001\", \"2040001\", \"3450001\", \"4670001\"], \"prices\": [{\"nt\": \"derived\", \"rate\": \"1718.36\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 13, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"3450001\", \"4670001\"], \"prices\": [{\"nt\": \"derived\", \"rate\": \"1718.36\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"outpatient\", \"sc\": 39, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"2010001\", \"2040001\"], \"prices\": [{\"nt\": \"derived\", \"rate\": \"1718.36\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"outpatient\", \"sc\": 39, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"2750002\"], \"prices\": [{\"nt\": \"derived\", \"rate\": \"4353.00\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 51, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"2750003\"], \"prices\": [{\"nt\": \"derived\", \"rate\": \"4353.00\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"2640001\"], \"prices\": [{\"nt\": \"derived\", \"rate\": \"77.00\", \"exp\": \"9999-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"2750002\"], \"prices\": [{\"nt\": \"percentage\", \"rate\": \"100\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"outpatient\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"3360001\"], \"prices\": [{\"nt\": \"percentage\", \"rate\": \"100\", \"exp\": \"2026-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}, {\"pg\": [\"1660001\", \"4650001\"], \"prices\": [{\"nt\": \"percentage\", \"rate\": \"100\", \"exp\": \"9999-12-31\", \"bc\": \"both\", \"se\": \"both\", \"sc\": 1, \"mod\": 0, \"ai\": 0}]}]}",
+ "source": "knew-hi01",
+ "tree_size": 233145
+}

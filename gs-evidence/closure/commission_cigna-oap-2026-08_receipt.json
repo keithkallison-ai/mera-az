@@ -1,0 +1,26 @@
+{
+  "independent_non_author": true,
+  "provenance_mode": "claude_agent_clean_room",
+  "external_session_id": "faeb59f0-0b5b-4e98-8f05-18bd230e4813",
+  "public_repository": "https://github.com/keithkallison-ai/mera-az",
+  "public_commit": "04fe3c3a04307cecb74084155bce6ee7a5d69729",
+  "inputs_permitted": [
+    "http://127.0.0.1:8821/api/manifest",
+    "http://127.0.0.1:8821/api/source/<tag16>"
+  ],
+  "tripwire_import_attempts": [],
+  "tripwire_read_attempts": [],
+  "input_closure_held": true,
+  "source": "cigna-oap-2026-08",
+  "folded_sha256": "f83cc31c7d4dbe54df59298752b8c0a40a3d4308b0a13cf0b685cd84b0793194",
+  "bytes_verified": 34485313805,
+  "wire_pin_sha256": "f83cc31c7d4dbe54df59298752b8c0a40a3d4308b0a13cf0b685cd84b0793194",
+  "equivalence_level": "L_byte, whole document, recovered from the wire alone under enforced closure",
+  "does_NOT_prove": [
+    "publisher fidelity — link 1 is a separate anchor",
+    "spec-sufficiency for reconstruction from typed surfaces — a spec-emit commission is the stronger form",
+    "anything about other sources"
+  ],
+  "utc": "2026-08-04T17:33:13.651057+00:00",
+  "implementation_sha256": "a347986b0ee20c8fa7f7ebfbd2734d4ae543c8f2f3818ad1e1ddc4e177d6ceab"
+}
